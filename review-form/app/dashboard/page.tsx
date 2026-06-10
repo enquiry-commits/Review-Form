@@ -9,6 +9,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('self-review');
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -26,8 +27,8 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-      <div className="text-slate-600">Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+      <div style={{color: '#64748b'}}>Loading...</div>
     </div>;
   }
 
@@ -35,161 +36,242 @@ export default function Dashboard() {
     return null;
   }
 
-  const menuItems = [
-    {
-      id: 'self-review',
-      label: 'Self Review',
-      icon: '📋',
-      description: 'Complete your performance review',
-      color: 'from-blue-500 to-blue-600',
-    },
-    {
-      id: 'leader-review',
-      label: 'Leader Review',
-      icon: '👥',
-      description: 'Evaluate your team members',
-      color: 'from-purple-500 to-purple-600',
-    },
-    {
-      id: 'admin-dashboard',
-      label: 'Admin Dashboard',
-      icon: '📊',
-      description: 'View all submissions & analytics',
-      color: 'from-slate-700 to-slate-800',
-    },
+  const tabs = [
+    { id: 'self-review', label: 'Employee Self Review', allowed: true },
+    { id: 'leader-review', label: 'Leader Review', allowed: hasAccess(user.role, 'leader-review') },
+    { id: 'admin-dashboard', label: 'Admin Dashboard', allowed: hasAccess(user.role, 'admin-dashboard') },
   ];
 
-  const roleLabels = {
-    admin: '🔑 Administrator',
-    leader: '👨‍💼 Department Leader',
-    employee: '👤 Employee',
-  };
-
-  const roleDescriptions = {
-    admin: 'Full access to all features and data',
-    leader: 'Can review team members and submit self-review',
-    employee: 'Can submit your own performance review',
-  };
+  const visibleTabs = tabs.filter(t => t.allowed);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200">
-      {/* Header */}
-      <div className="bg-white/95 backdrop-blur-lg border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img
-              src="/tassure-logo.png"
-              alt="Tassure"
-              className="h-10 w-auto"
-            />
+    <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh'}}>
+      {/* Navbar */}
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderBottom: '1px solid rgba(30, 58, 95, 0.08)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          padding: '0 32px',
+          height: '70px'
+        }}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+            <img src="/tassure-logo.png" alt="Tassure" style={{height: '45px', width: 'auto'}} />
             <div>
-              <h1 className="text-lg font-bold text-slate-900">Review System</h1>
-              <p className="text-xs text-slate-500">Performance Evaluation Platform</p>
+              <div style={{fontSize: '18px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
+              <div style={{fontSize: '12px', color: '#64748b'}}>Performance Evaluation Platform</div>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#1e3a5f',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+            onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)'}}
+            onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
           >
             Logout
           </button>
         </div>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex',
+          gap: 0,
+          borderBottom: '2px solid transparent',
+          marginLeft: '60px',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          padding: '0 32px'
+        }}>
+          {visibleTabs.map(tab => (
+            <div
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: '16px 20px',
+                cursor: 'pointer',
+                borderBottom: activeTab === tab.id ? '3px solid #7eb8d4' : '3px solid transparent',
+                fontWeight: 600,
+                color: activeTab === tab.id ? '#1e3a5f' : '#64748b',
+                fontSize: '13px',
+                letterSpacing: '0.5px',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== tab.id) {
+                  e.currentTarget.style.color = '#1e3a5f';
+                  e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== tab.id) {
+                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              {tab.label}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* User Info Card */}
-        <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/80 p-8 mb-12 shadow-lg">
-          <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-200">
+      {/* Content */}
+      <div style={{padding: '48px 32px', maxWidth: '1100px', margin: '0 auto'}}>
+        {/* User Card */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '24px',
+          padding: '48px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8)',
+          border: '1px solid rgba(30, 58, 95, 0.06)',
+          marginBottom: '48px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: '32px',
+            borderBottom: '1px solid rgba(30, 58, 95, 0.08)'
+          }}>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-1">{user.name}</h2>
-              <p className="text-slate-600">{user.email}</p>
+              <div style={{fontSize: '28px', fontWeight: '800', color: '#0f172a', marginBottom: '8px'}}>{user.name}</div>
+              <div style={{color: '#64748b', fontSize: '15px'}}>{user.email}</div>
               {user.department && (
-                <p className="text-sm text-slate-500 mt-1">{user.department}</p>
+                <div style={{fontSize: '13px', color: '#94a3b8', marginTop: '8px'}}>{user.department}</div>
               )}
             </div>
-            <div className="text-right">
-              <div className="text-2xl mb-2">{roleLabels[user.role].split(' ')[0]}</div>
-              <p className="font-semibold text-slate-900">{roleLabels[user.role]}</p>
-              <p className="text-xs text-slate-600 mt-1">{roleDescriptions[user.role]}</p>
+            <div style={{textAlign: 'right'}}>
+              <div style={{fontSize: '18px', marginBottom: '8px'}}>
+                {user.role === 'admin' ? '🔑' : user.role === 'leader' ? '👨‍💼' : '👤'}
+              </div>
+              <div style={{fontWeight: '600', color: '#1e3a5f', fontSize: '15px'}}>
+                {user.role === 'admin' ? 'Administrator' : user.role === 'leader' ? 'Department Leader' : 'Employee'}
+              </div>
+              <div style={{fontSize: '12px', color: '#64748b', marginTop: '6px'}}>
+                {user.role === 'admin' ? 'Full access to all features' : user.role === 'leader' ? 'Review & self-assessment' : 'Self-assessment only'}
+              </div>
             </div>
           </div>
 
-          {/* Role Badge */}
-          <div className="flex gap-2 flex-wrap">
-            {user.role === 'admin' && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg">
-                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                <span className="text-xs font-semibold text-red-700">FULL ACCESS</span>
-              </span>
-            )}
-            {user.role === 'leader' && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-lg">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                <span className="text-xs font-semibold text-purple-700">LIMITED ACCESS</span>
-              </span>
-            )}
-            {user.role === 'employee' && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                <span className="text-xs font-semibold text-blue-700">BASIC ACCESS</span>
-              </span>
-            )}
+          <div style={{display: 'flex', gap: '12px', marginTop: '16px'}}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              background: user.role === 'admin' ? 'linear-gradient(135deg, #1e3a5f, #162d4a)' :
+                         user.role === 'leader' ? 'linear-gradient(135deg, #7eb8d4, #6ba3c5)' :
+                         'rgba(30, 58, 95, 0.1)',
+              color: user.role === 'admin' || user.role === 'leader' ? 'white' : '#1e3a5f',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: '800',
+              letterSpacing: '0.4px',
+              boxShadow: user.role === 'admin' ? '0 4px 12px rgba(30, 58, 95, 0.25)' :
+                        user.role === 'leader' ? '0 4px 12px rgba(126, 184, 212, 0.25)' : 'none'
+            }}>
+              <span style={{width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor'}}></span>
+              {user.role === 'admin' ? 'FULL ACCESS' : user.role === 'leader' ? 'LIMITED ACCESS' : 'BASIC ACCESS'}
+            </span>
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div>
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Available Functions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {menuItems.map((item) => {
-              const hasPermission = hasAccess(user.role, item.id);
-
-              if (!hasPermission) {
-                return (
-                  <div
-                    key={item.id}
-                    className="relative group rounded-2xl overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300 p-px opacity-50 cursor-not-allowed"
-                  >
-                    <div className="bg-white/50 rounded-2xl p-8 flex flex-col items-center justify-center h-full text-center">
-                      <div className="text-4xl mb-4 opacity-50">{item.icon}</div>
-                      <h4 className="font-bold text-slate-400 mb-2">{item.label}</h4>
-                      <p className="text-xs text-slate-400 mb-4">{item.description}</p>
-                      <div className="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
-                        ⛔ Restricted
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.id}
-                  href={`/dashboard/${item.id}`}
-                  className="relative group rounded-2xl overflow-hidden bg-gradient-to-br p-px hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-                >
-                  <div className={`bg-gradient-to-br ${item.color} rounded-2xl p-8 flex flex-col items-center justify-center h-full text-center text-white relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>
-                    {/* 背景光晕 */}
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
-
-                    <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
-                    <h4 className="font-bold text-lg mb-2 relative z-10">{item.label}</h4>
-                    <p className="text-sm opacity-90 relative z-10">{item.description}</p>
-                    <div className="mt-4 text-xs font-semibold opacity-75 relative z-10">→ Open</div>
-                  </div>
-                </Link>
-              );
-            })}
+        {/* Tab Content */}
+        {activeTab === 'self-review' && (
+          <div style={{textAlign: 'center'}}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '24px',
+              padding: '48px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(30, 58, 95, 0.06)'
+            }}>
+              <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '16px'}}>Employee Self Review</div>
+              <p style={{color: '#64748b', marginBottom: '32px'}}>Complete your honest evaluation of your performance this period</p>
+              <Link href="/dashboard/self-review" style={{
+                display: 'inline-block',
+                padding: '13px 32px',
+                background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
+                color: 'white',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                fontWeight: '700',
+                fontSize: '14px',
+                boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
+                transition: 'all 0.3s'
+              }}>
+                Open Form →
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Info Box */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <p className="text-sm text-blue-900">
-            <span className="font-semibold">ℹ️ Note:</span> Your access level is <span className="font-bold">{roleLabels[user.role]}</span>. You can only access features available for your role. Contact your administrator if you believe this is incorrect.
-          </p>
-        </div>
+        {activeTab === 'leader-review' && (
+          <div style={{textAlign: 'center'}}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '24px',
+              padding: '48px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(30, 58, 95, 0.06)'
+            }}>
+              <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '16px'}}>Leader Performance Review</div>
+              <p style={{color: '#64748b', marginBottom: '32px'}}>Evaluate your team members' performance this period</p>
+              <button style={{
+                padding: '13px 32px',
+                background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: '700',
+                fontSize: '14px',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(126, 184, 212, 0.3)',
+                transition: 'all 0.3s'
+              }}>
+                Open Form →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'admin-dashboard' && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '24px',
+            padding: '48px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
+            border: '1px solid rgba(30, 58, 95, 0.06)'
+          }}>
+            <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px'}}>Admin Dashboard</div>
+            <p style={{color: '#64748b', marginBottom: '32px'}}>Monitor all submissions and system activity</p>
+            <div style={{color: '#94a3b8', padding: '32px', background: 'rgba(30, 58, 95, 0.05)', borderRadius: '12px'}}>
+              Dashboard content coming soon...
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

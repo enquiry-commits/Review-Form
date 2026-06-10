@@ -9,17 +9,6 @@ export default function SelfReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    department: '',
-    name: '',
-    period: '',
-    clientComplaints: 0,
-    clientComplaintsComment: '',
-    clientAttrition: 0,
-    clientAttritionComment: '',
-    minorDelays: 0,
-    minorDelaysComment: '',
-  });
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -27,22 +16,9 @@ export default function SelfReviewForm() {
       router.push('/');
       return;
     }
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
-    setFormData((prev) => ({
-      ...prev,
-      name: parsedUser.name,
-      department: parsedUser.department || '',
-    }));
+    setUser(JSON.parse(userData));
     setLoading(false);
   }, [router]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Form submitted successfully!');
-    // 这里后续会集成 Supabase
-    console.log('Form data:', formData);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -50,8 +26,8 @@ export default function SelfReviewForm() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-      <div className="text-slate-600">Loading...</div>
+    return <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+      <div style={{color: '#64748b'}}>Loading...</div>
     </div>;
   }
 
@@ -60,25 +36,56 @@ export default function SelfReviewForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200">
+    <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh'}}>
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-lg border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <img
-                src="/tassure-logo.png"
-                alt="Tassure"
-                className="h-10 w-auto"
-              />
-              <span className="font-semibold text-slate-900 hidden sm:inline">Review System</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">{user.name}</span>
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderBottom: '1px solid rgba(30, 58, 95, 0.08)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          maxWidth: '1100px',
+          margin: '0 auto',
+          padding: '0 32px',
+          height: '70px'
+        }}>
+          <Link href="/dashboard" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            textDecoration: 'none',
+            opacity: 1,
+            transition: 'opacity 0.3s'
+          }}
+          onMouseEnter={(e) => {e.currentTarget.style.opacity = '0.8'}}
+          onMouseLeave={(e) => {e.currentTarget.style.opacity = '1'}}
+          >
+            <img src="/tassure-logo.png" alt="Tassure" style={{height: '32px', width: 'auto'}} />
+            <div style={{fontSize: '14px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
+          </Link>
+          <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+            <span style={{fontSize: '14px', color: '#64748b'}}>{user.name}</span>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              style={{
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1e3a5f',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                borderRadius: '10px'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)'}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
             >
               Logout
             </button>
@@ -87,137 +94,196 @@ export default function SelfReviewForm() {
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-8">
+      <div style={{padding: '48px 32px', maxWidth: '1100px', margin: '0 auto'}}>
+        <Link href="/dashboard" style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: '#7eb8d4',
+          textDecoration: 'none',
+          fontWeight: '600',
+          marginBottom: '32px',
+          fontSize: '14px'
+        }}>
           ← Back to Dashboard
         </Link>
 
-        <div className="bg-white/95 backdrop-blur-lg rounded-2xl border border-white/80 p-12 shadow-xl">
-          <div className="text-center mb-12 pb-8 border-b border-slate-200">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">📋 Employee Self Review</h1>
-            <p className="text-slate-600">Please complete your honest evaluation of your performance this period</p>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '24px',
+          padding: '48px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
+          border: '1px solid rgba(30, 58, 95, 0.06)'
+        }}>
+          {/* Form Header */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '48px',
+            paddingBottom: '32px',
+            borderBottom: '1px solid rgba(30, 58, 95, 0.08)'
+          }}>
+            <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>Employee Self Review</h1>
+            <p style={{color: '#64748b', fontSize: '15px', lineHeight: '1.6'}}>Please complete your honest evaluation of your performance this period</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-12">
-            {/* Basic Info */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg font-bold text-sm">1</span>
-                <h2 className="text-lg font-bold text-slate-900">Basic Information</h2>
+          {/* Form Section 1: Basic Info */}
+          <div style={{marginBottom: '40px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '32px'}}>
+              <div>
+                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Department</label>
+                <select style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  color: '#1a1a2e',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }}>
+                  <option>-- Select Department --</option>
+                  <option>{user.department}</option>
+                </select>
               </div>
-
-              <div className="grid grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Department</label>
-                  <input
-                    type="text"
-                    value={formData.department}
-                    disabled
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-100 text-slate-600 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    disabled
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-slate-100 text-slate-600 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Review Period</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. June 2026"
-                    value={formData.period}
-                    onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
-                  />
-                </div>
+              <div>
+                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Your Name</label>
+                <input type="text" value={user.name} readOnly style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  color: '#1a1a2e',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  fontFamily: 'inherit'
+                }} />
+              </div>
+              <div>
+                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Review Period</label>
+                <input type="text" placeholder="e.g. June 2026" style={{
+                  width: '100%',
+                  padding: '13px 16px',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  color: '#1a1a2e',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  fontFamily: 'inherit',
+                  transition: 'all 0.3s'
+                }} />
               </div>
             </div>
+          </div>
 
-            {/* Client Stability */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-lg font-bold text-sm">2</span>
-                <h2 className="text-lg font-bold text-slate-900">📊 Client Stability</h2>
-              </div>
-
-              <div className="space-y-4">
-                {/* Client Complaints */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="font-semibold text-slate-900">Client Complaints / Issues</p>
-                      <p className="text-sm text-slate-600 mt-1">Were there any client complaints, issues, or controllable churn this period?</p>
+          {/* Form Section 2: Client KPIs */}
+          <div style={{marginBottom: '40px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
+                color: 'white',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '800',
+                letterSpacing: '0.4px',
+                boxShadow: '0 4px 12px rgba(126, 184, 212, 0.25)'
+              }}>CLIENT</span>
+              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Client Stability & Relationships</span>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
+              {['Client Complaints / Issues', 'Client Attrition'].map((name, idx) => (
+                <div key={idx} style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '20px',
+                  transition: 'all 0.3s'
+                }}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '20px'}}>
+                    <div style={{flex: 1}}>
+                      <div style={{fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{name}</div>
+                      <div style={{fontSize: '13px', color: '#64748b', lineHeight: '1.6'}}>Please provide relevant information for this metric</div>
                     </div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.clientComplaints}
-                      onChange={(e) => setFormData({ ...formData, clientComplaints: parseInt(e.target.value) })}
-                      className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-center font-semibold text-blue-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Your Comment</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Explain any issues..."
-                      value={formData.clientComplaintsComment}
-                      onChange={(e) => setFormData({ ...formData, clientComplaintsComment: e.target.value })}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:border-blue-500 transition-all"
-                    ></textarea>
-                  </div>
-                </div>
-
-                {/* Client Attrition */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="font-semibold text-slate-900">Client Attrition</p>
-                      <p className="text-sm text-slate-600 mt-1">Was there client loss due to lack of follow-up or unresolved issues?</p>
+                    <div style={{display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
+                      <div>
+                        <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block'}}>Count</label>
+                        <input type="number" min="0" defaultValue="0" style={{
+                          width: '100px',
+                          padding: '10px 12px',
+                          border: '1.5px solid #e2e8f0',
+                          borderRadius: '10px',
+                          fontSize: '14px',
+                          textAlign: 'center',
+                          fontWeight: '700',
+                          color: '#1e3a5f',
+                          background: '#f8fafc'
+                        }} />
+                      </div>
                     </div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.clientAttrition}
-                      onChange={(e) => setFormData({ ...formData, clientAttrition: parseInt(e.target.value) })}
-                      className="w-24 px-3 py-2 border border-slate-300 rounded-lg text-center font-semibold text-blue-600"
-                    />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-2">Your Comment</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Provide context..."
-                      value={formData.clientAttritionComment}
-                      onChange={(e) => setFormData({ ...formData, clientAttritionComment: e.target.value })}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl bg-white focus:outline-none focus:border-blue-500 transition-all"
-                    ></textarea>
+                  <div style={{marginTop: '12px'}}>
+                    <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Your Comment</label>
+                    <textarea placeholder="Explain any issues..." style={{
+                      width: '100%',
+                      minHeight: '70px',
+                      padding: '11px 14px',
+                      border: '1.5px solid #e2e8f0',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontFamily: 'inherit',
+                      resize: 'vertical'
+                    }} />
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* Buttons */}
-            <div className="flex justify-end gap-4 pt-8 border-t border-slate-200">
-              <button
-                type="reset"
-                className="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors"
-              >
-                Clear Form
-              </button>
-              <button
-                type="submit"
-                className="px-8 py-3 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-              >
-                Submit Self Review
-              </button>
-            </div>
-          </form>
+          {/* Form Actions */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '12px',
+            marginTop: '48px',
+            paddingTop: '32px',
+            borderTop: '1px solid rgba(30, 58, 95, 0.08)'
+          }}>
+            <button style={{
+              padding: '13px 32px',
+              background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+              color: '#334155',
+              border: '1.5px solid #cbd5e1',
+              borderRadius: '12px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              fontSize: '14px',
+              letterSpacing: '0.3px',
+              transition: 'all 0.3s'
+            }}>
+              Clear Form
+            </button>
+            <button style={{
+              padding: '13px 32px',
+              background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              fontSize: '14px',
+              letterSpacing: '0.3px',
+              boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
+              transition: 'all 0.3s'
+            }}>
+              Submit Self Review
+            </button>
+          </div>
         </div>
       </div>
     </div>
