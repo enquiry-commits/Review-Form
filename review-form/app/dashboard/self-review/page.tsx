@@ -67,7 +67,7 @@ export default function SelfReviewForm() {
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img
-                src="file:///C:/Users/vincent/Desktop/TASSURE IN.png"
+                src="/tassure-logo.png"
                 alt="Tassure"
                 className="h-10 w-auto"
               />
