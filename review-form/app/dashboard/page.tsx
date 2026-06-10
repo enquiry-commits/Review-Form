@@ -135,21 +135,10 @@ export default function Dashboard() {
 
       {/* Content */}
       <div style={{padding: '48px 32px', maxWidth: '1100px', margin: '0 auto'}}>
-        {/* Welcome Card */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '24px',
-          padding: '48px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8)',
-          border: '1px solid rgba(30, 58, 95, 0.06)',
-          marginBottom: '48px'
-        }}>
-          <div style={{marginBottom: '24px'}}>
-            <div style={{fontSize: '18px', color: '#64748b', marginBottom: '16px'}}>Welcome back,</div>
-            <div style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '12px'}}>{user.name}</div>
-            <div style={{color: '#64748b', fontSize: '14px'}}>{user.email}</div>
-          </div>
+        {/* Welcome Message */}
+        <div style={{marginBottom: '32px'}}>
+          <div style={{fontSize: '16px', color: '#64748b', marginBottom: '8px'}}>Welcome back,</div>
+          <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a'}}>{user.name}</h1>
         </div>
 
         {/* Tab Content */}
