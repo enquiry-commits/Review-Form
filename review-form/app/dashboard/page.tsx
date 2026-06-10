@@ -149,9 +149,6 @@ export default function Dashboard() {
             <div style={{fontSize: '18px', color: '#64748b', marginBottom: '16px'}}>Welcome back,</div>
             <div style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '12px'}}>{user.name}</div>
             <div style={{color: '#64748b', fontSize: '14px'}}>{user.email}</div>
-            {user.department && (
-              <div style={{fontSize: '13px', color: '#94a3b8', marginTop: '8px'}}>{user.department}</div>
-            )}
           </div>
         </div>
 
