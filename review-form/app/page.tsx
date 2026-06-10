@@ -1,24 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authenticate } from '@/lib/auth';
 
-export default function Login() {
-  const router = useRouter();
+const SAVED_EMAIL_KEY = 'tassure_login_email';
+
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const saved = localStorage.getItem(SAVED_EMAIL_KEY);
+    if (saved) setEmail(saved);
+  }, []);
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
 
     try {
       const user = await authenticate(email, password);
       if (user) {
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
         localStorage.setItem('user', JSON.stringify(user));
         router.push('/dashboard');
       } else {
@@ -29,145 +37,71 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#f5f5f5',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
-    }}>
-      <div style={{width: '100%', maxWidth: '380px', padding: '20px'}}>
-        {/* Card */}
-        <div style={{
-          background: 'white',
-          borderRadius: '8px',
-          padding: '48px 40px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-        }}>
-          {/* Header */}
-          <div style={{textAlign: 'center', marginBottom: '40px'}}>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: '600',
-              color: '#000',
-              marginBottom: '8px'
-            }}>Sign In</h1>
-            <p style={{
-              fontSize: '14px',
-              color: '#666'
-            }}>Tassure Review System</p>
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      {/* 容器：最大宽度 448px (max-w-sm = 24rem) */}
+      <div className="w-full max-w-sm">
+        {/* 标题区：底部间距 32px (mb-8 = 2rem) */}
+        <div className="text-center mb-8">
+          {/* 标题：字体大小 24px (text-2xl)，粗体，颜色深灰 */}
+          <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
+          {/* 副标题：字体大小 14px (text-sm)，颜色浅灰，上方间距 4px */}
+          <p className="text-sm text-gray-500 mt-1">Tassure Review System</p>
+        </div>
+
+        {/* 表单：白色背景，圆角 16px，阴影，边框 1px，内边距 32px (p-8 = 2rem)，元素间距 20px (space-y-5) */}
+        <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-5">
+          {/* Email 输入框组 */}
+          <div>
+            {/* Label：字体大小 14px，粗体，颜色灰色，下方间距 4px */}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            {/* 输入框：宽度 100%，边框 1px，圆角 8px，内边距 左右 16px (px-4)，上下 10px (py-2.5)，字体 14px */}
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              placeholder="vincent@tassure.com"
+              disabled={loading}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+            />
           </div>
 
-          {/* Error */}
+          {/* Password 输入框组（同上） */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              placeholder="••••••"
+              disabled={loading}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50"
+            />
+          </div>
+
+          {/* 错误提示：红色背景，边框，圆角 8px，内边距 16px 上下，字体 14px */}
           {error && (
-            <div style={{
-              marginBottom: '20px',
-              padding: '12px',
-              background: '#fee',
-              border: '1px solid #fcc',
-              borderRadius: '4px',
-              fontSize: '13px',
-              color: '#c33'
-            }}>
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
               {error}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleLogin}>
-            {/* Email */}
-            <div style={{marginBottom: '20px'}}>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '500',
-                color: '#333',
-                marginBottom: '8px'
-              }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vincent@tassure.com"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                  transition: 'border-color 0.2s'
-                }}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Password */}
-            <div style={{marginBottom: '32px'}}>
-              <label style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: '500',
-                color: '#333',
-                marginBottom: '8px'
-              }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  boxSizing: 'border-box',
-                  transition: 'border-color 0.2s'
-                }}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: '#0052cc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.6 : 1,
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) e.currentTarget.style.background = '#0052cc';
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) e.currentTarget.style.background = '#0052cc';
-              }}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        </div>
+          {/* 提交按钮：宽度 100%，内边距上下 12px (py-3 = 0.75rem)，圆角 8px，字体 14px */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-3 rounded-lg transition-colors text-sm"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }
