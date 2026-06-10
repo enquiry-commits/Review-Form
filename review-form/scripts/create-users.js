@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Supabase 配置
 const SUPABASE_URL = 'https://eoautxgdxjjphponmaua.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvYXV0eGdkeGpqcGhwb25tYXVhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA3MDcxMCwiZXhwIjoyMDk2NjQ2NzEwfQ.XHk3pURUSZG-r8uyuyvXCi3SbgnwaHWqx6S4VMtHaLQ';
+const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvYXV0eGdkeGpqcGhwb25tYXVhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA3MDcxMCwiZXhwIjoyMDk2NjQ2NzEwfQ.XHk7pURUSZG-r8uyuyvXCi3SbgnwaHWqx6S4VMtHaLQ';
 
 // 用户列表
 const USERS = [
