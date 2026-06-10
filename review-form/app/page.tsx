@@ -37,64 +37,56 @@ export default function Login() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)',
-      padding: '32px'
+      background: '#f5f5f5',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
     }}>
-      <div style={{width: '100%', maxWidth: '420px'}}>
+      <div style={{width: '100%', maxWidth: '380px', padding: '20px'}}>
+        {/* Card */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '24px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
-          padding: '56px 48px'
+          background: 'white',
+          borderRadius: '8px',
+          padding: '48px 40px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
         }}>
-          {/* Logo */}
-          <div style={{display: 'flex', justifyContent: 'center', marginBottom: '36px'}}>
-            <img
-              src="/tassure-logo.png"
-              alt="Tassure"
-              style={{height: '48px', width: 'auto'}}
-            />
-          </div>
-
-          {/* Title */}
-          <div style={{textAlign: 'center', marginBottom: '48px'}}>
+          {/* Header */}
+          <div style={{textAlign: 'center', marginBottom: '40px'}}>
             <h1 style={{
-              fontSize: '32px',
-              fontWeight: '800',
-              color: '#0f172a',
-              marginBottom: '12px',
-              letterSpacing: '-0.5px'
-            }}>Review System</h1>
-            <p style={{color: '#64748b', fontSize: '15px', lineHeight: '1.6'}}>Performance Evaluation Platform</p>
+              fontSize: '28px',
+              fontWeight: '600',
+              color: '#000',
+              marginBottom: '8px'
+            }}>Sign In</h1>
+            <p style={{
+              fontSize: '14px',
+              color: '#666'
+            }}>Tassure Review System</p>
           </div>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
             <div style={{
-              marginBottom: '24px',
-              padding: '14px 16px',
-              background: '#fee2e2',
-              border: '1.5px solid #fecaca',
-              borderRadius: '12px'
+              marginBottom: '20px',
+              padding: '12px',
+              background: '#fee',
+              border: '1px solid #fcc',
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: '#c33'
             }}>
-              <p style={{fontSize: '14px', color: '#991b1b'}}>{error}</p>
+              {error}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-            {/* Email Field */}
-            <div>
+          <form onSubmit={handleLogin}>
+            {/* Email */}
+            <div style={{marginBottom: '20px'}}>
               <label style={{
                 display: 'block',
-                fontSize: '12px',
-                color: '#334155',
-                fontWeight: '700',
-                marginBottom: '12px',
-                letterSpacing: '0.4px',
-                textTransform: 'uppercase'
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#333',
+                marginBottom: '8px'
               }}>
                 Email
               </label>
@@ -102,33 +94,29 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                placeholder="vincent@tassure.com"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '12px',
+                  padding: '10px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
                   fontSize: '14px',
-                  color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
                   fontFamily: 'inherit',
-                  transition: 'all 0.3s',
-                  cursor: loading ? 'not-allowed' : 'text'
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s'
                 }}
                 disabled={loading}
               />
             </div>
 
-            {/* Password Field */}
-            <div>
+            {/* Password */}
+            <div style={{marginBottom: '32px'}}>
               <label style={{
                 display: 'block',
-                fontSize: '12px',
-                color: '#334155',
-                fontWeight: '700',
-                marginBottom: '12px',
-                letterSpacing: '0.4px',
-                textTransform: 'uppercase'
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#333',
+                marginBottom: '8px'
               }}>
                 Password
               </label>
@@ -136,68 +124,49 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="••••••"
                 style={{
                   width: '100%',
-                  padding: '14px 16px',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '12px',
+                  padding: '10px 12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
                   fontSize: '14px',
-                  color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
                   fontFamily: 'inherit',
-                  transition: 'all 0.3s',
-                  cursor: loading ? 'not-allowed' : 'text'
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s'
                 }}
                 disabled={loading}
               />
             </div>
 
-            {/* Sign In Button */}
+            {/* Button */}
             <button
               type="submit"
               disabled={loading}
               style={{
-                padding: '14px 32px',
-                background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
+                width: '100%',
+                padding: '12px',
+                background: '#0052cc',
                 color: 'white',
                 border: 'none',
-                borderRadius: '12px',
-                fontWeight: '700',
-                fontSize: '15px',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontWeight: '500',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
-                transition: 'all 0.3s',
-                marginTop: '12px',
-                opacity: loading ? 0.6 : 1
+                opacity: loading ? 0.6 : 1,
+                transition: 'background 0.2s'
               }}
               onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(30, 58, 95, 0.4)';
-                }
+                if (!loading) e.currentTarget.style.background = '#0052cc';
               }}
               onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.3)';
-                }
+                if (!loading) e.currentTarget.style.background = '#0052cc';
               }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>
-
-        {/* Footer */}
-        <p style={{
-          textAlign: 'center',
-          color: '#64748b',
-          fontSize: '12px',
-          marginTop: '32px'
-        }}>
-          © 2026 Tassure. All rights reserved.
-        </p>
       </div>
     </div>
   );
