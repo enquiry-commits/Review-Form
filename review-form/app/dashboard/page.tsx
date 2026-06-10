@@ -135,7 +135,7 @@ export default function Dashboard() {
 
       {/* Content */}
       <div style={{padding: '48px 32px', maxWidth: '1100px', margin: '0 auto'}}>
-        {/* User Card */}
+        {/* Welcome Card */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
@@ -145,53 +145,13 @@ export default function Dashboard() {
           border: '1px solid rgba(30, 58, 95, 0.06)',
           marginBottom: '48px'
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingBottom: '32px',
-            borderBottom: '1px solid rgba(30, 58, 95, 0.08)'
-          }}>
-            <div>
-              <div style={{fontSize: '28px', fontWeight: '800', color: '#0f172a', marginBottom: '8px'}}>{user.name}</div>
-              <div style={{color: '#64748b', fontSize: '15px'}}>{user.email}</div>
-              {user.department && (
-                <div style={{fontSize: '13px', color: '#94a3b8', marginTop: '8px'}}>{user.department}</div>
-              )}
-            </div>
-            <div style={{textAlign: 'right'}}>
-              <div style={{fontSize: '18px', marginBottom: '8px'}}>
-                {user.role === 'admin' ? '🔑' : user.role === 'leader' ? '👨‍💼' : '👤'}
-              </div>
-              <div style={{fontWeight: '600', color: '#1e3a5f', fontSize: '15px'}}>
-                {user.role === 'admin' ? 'Administrator' : user.role === 'leader' ? 'Department Leader' : 'Employee'}
-              </div>
-              <div style={{fontSize: '12px', color: '#64748b', marginTop: '6px'}}>
-                {user.role === 'admin' ? 'Full access to all features' : user.role === 'leader' ? 'Review & self-assessment' : 'Self-assessment only'}
-              </div>
-            </div>
-          </div>
-
-          <div style={{display: 'flex', gap: '12px', marginTop: '16px'}}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              background: user.role === 'admin' ? 'linear-gradient(135deg, #1e3a5f, #162d4a)' :
-                         user.role === 'leader' ? 'linear-gradient(135deg, #7eb8d4, #6ba3c5)' :
-                         'rgba(30, 58, 95, 0.1)',
-              color: user.role === 'admin' || user.role === 'leader' ? 'white' : '#1e3a5f',
-              borderRadius: '8px',
-              fontSize: '11px',
-              fontWeight: '800',
-              letterSpacing: '0.4px',
-              boxShadow: user.role === 'admin' ? '0 4px 12px rgba(30, 58, 95, 0.25)' :
-                        user.role === 'leader' ? '0 4px 12px rgba(126, 184, 212, 0.25)' : 'none'
-            }}>
-              <span style={{width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor'}}></span>
-              {user.role === 'admin' ? 'FULL ACCESS' : user.role === 'leader' ? 'LIMITED ACCESS' : 'BASIC ACCESS'}
-            </span>
+          <div style={{marginBottom: '24px'}}>
+            <div style={{fontSize: '18px', color: '#64748b', marginBottom: '16px'}}>Welcome back,</div>
+            <div style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '12px'}}>{user.name}</div>
+            <div style={{color: '#64748b', fontSize: '14px'}}>{user.email}</div>
+            {user.department && (
+              <div style={{fontSize: '13px', color: '#94a3b8', marginTop: '8px'}}>{user.department}</div>
+            )}
           </div>
         </div>
 
