@@ -1,41 +1,42 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { authenticate } from '@/lib/auth';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { authenticate } from '@/lib/auth'
 
-const SAVED_EMAIL_KEY = 'tassure_login_email';
+const SAVED_EMAIL_KEY = 'tassure_login_email'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   useEffect(() => {
-    const saved = localStorage.getItem(SAVED_EMAIL_KEY);
-    if (saved) setEmail(saved);
-  }, []);
+    const saved = localStorage.getItem(SAVED_EMAIL_KEY)
+    if (saved) setEmail(saved)
+  }, [])
+
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     try {
-      const user = await authenticate(email, password);
+      const user = await authenticate(email, password)
       if (user) {
-        localStorage.setItem(SAVED_EMAIL_KEY, email);
-        localStorage.setItem('user', JSON.stringify(user));
-        router.push('/dashboard');
+        localStorage.setItem(SAVED_EMAIL_KEY, email)
+        localStorage.setItem('user', JSON.stringify(user))
+        router.push('/dashboard')
       } else {
-        setError('Invalid email or password');
+        setError('Invalid email or password')
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('Login failed. Please try again.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -103,5 +104,5 @@ export default function LoginPage() {
         </form>
       </div>
     </main>
-  );
+  )
 }
