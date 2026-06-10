@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import Link from 'next/link';
 
-export default function SelfReviewForm() {
+export default function LeaderReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState<{id: number; name: string}[]>([{id: 1, name: ''}]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -25,15 +26,13 @@ export default function SelfReviewForm() {
     router.push('/');
   };
 
-  if (loading) {
-    return <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
-      <div style={{color: '#64748b'}}>Loading...</div>
-    </div>;
-  }
+  const addEmployee = () => {
+    setEmployees([...employees, {id: Date.now(), name: ''}]);
+  };
 
-  if (!user) {
-    return null;
-  }
+  const removeEmployee = (id: number) => {
+    setEmployees(employees.filter(e => e.id !== id));
+  };
 
   const KPIItem = ({ name, question }: { name: string; question: string }) => (
     <div style={{
@@ -77,8 +76,8 @@ export default function SelfReviewForm() {
         </div>
       </div>
       <div style={{marginTop: '12px'}}>
-        <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Your Comment</label>
-        <textarea placeholder="Explain any issues that occurred..." style={{
+        <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Your Assessment</label>
+        <textarea placeholder="Provide your feedback..." style={{
           width: '100%',
           minHeight: '70px',
           padding: '11px 14px',
@@ -91,6 +90,16 @@ export default function SelfReviewForm() {
       </div>
     </div>
   );
+
+  if (loading) {
+    return <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+      <div style={{color: '#64748b'}}>Loading...</div>
+    </div>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh'}}>
@@ -175,13 +184,13 @@ export default function SelfReviewForm() {
             paddingBottom: '32px',
             borderBottom: '1px solid rgba(30, 58, 95, 0.08)'
           }}>
-            <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>Employee Self Review</h1>
-            <p style={{color: '#64748b', fontSize: '15px', lineHeight: '1.6'}}>Please complete your honest evaluation of your performance this period</p>
+            <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>Leader Performance Review</h1>
+            <p style={{color: '#64748b', fontSize: '15px', lineHeight: '1.6'}}>Evaluate your team members' performance this period</p>
           </div>
 
           {/* Basic Info Section */}
           <div style={{marginBottom: '40px'}}>
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px'}}>
               <div>
                 <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Department</label>
                 <select style={{
@@ -201,8 +210,8 @@ export default function SelfReviewForm() {
                 </select>
               </div>
               <div>
-                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Your Name</label>
-                <input type="text" value={user.name} readOnly style={{
+                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Review Period</label>
+                <input type="text" placeholder="e.g. June 2026" style={{
                   width: '100%',
                   padding: '13px 16px',
                   border: '1.5px solid #e2e8f0',
@@ -213,24 +222,10 @@ export default function SelfReviewForm() {
                   fontFamily: 'inherit'
                 }} />
               </div>
-              <div>
-                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Review Period</label>
-                <input type="text" placeholder="e.g. June 2026" style={{
-                  width: '100%',
-                  padding: '13px 16px',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                  fontFamily: 'inherit',
-                  transition: 'all 0.3s'
-                }} />
-              </div>
             </div>
           </div>
 
-          {/* Client Section */}
+          {/* Team Evaluation Section */}
           <div style={{marginBottom: '40px'}}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
@@ -245,113 +240,94 @@ export default function SelfReviewForm() {
                 fontWeight: '800',
                 letterSpacing: '0.4px',
                 boxShadow: '0 4px 12px rgba(126, 184, 212, 0.25)'
-              }}>CLIENT</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Client Stability & Relationships</span>
+              }}>TEAM EVALUATION</span>
+              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Rate Your Team Members</span>
             </div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-              <KPIItem
-                name="Client Complaints / Issues"
-                question="Were there any client complaints, issues, or controllable churn this period?"
-              />
-              <KPIItem
-                name="Client Attrition"
-                question="Was there client loss due to lack of follow-up or unresolved issues?"
-              />
-            </div>
-          </div>
 
-          {/* Efficiency Section */}
-          <div style={{marginBottom: '40px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                color: 'white',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '800',
-                letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(249, 115, 22, 0.25)'
-              }}>EFFICIENCY</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Task Execution & Timeliness</span>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '12px'}}>
+              {employees.map((emp) => (
+                <div key={emp.id} style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '18px',
+                }}>
+                  <div style={{display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center'}}>
+                    <select style={{
+                      flex: 1,
+                      padding: '10px 12px',
+                      border: '1.5px solid #e2e8f0',
+                      borderRadius: '10px',
+                      fontSize: '13px',
+                      fontFamily: 'inherit',
+                      cursor: 'pointer'
+                    }}>
+                      <option>-- Select Employee --</option>
+                      <option>Jenny Lai</option>
+                      <option>Chin Kah Ye</option>
+                      <option>Ang Shi Ming</option>
+                    </select>
+                    <button
+                      onClick={() => removeEmployee(emp.id)}
+                      style={{
+                        padding: '8px 14px',
+                        background: '#fee2e2',
+                        color: '#991b1b',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        transition: 'all 0.3s'
+                      }}
+                      onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}}
+                      onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
+                    <KPIItem
+                      name="Client Complaints / Issues"
+                      question="Were there any client complaints or issues reported?"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-              <KPIItem
-                name="Chased / Minor Delays"
-                question="Were there instances where you were reminded about deadlines?"
-              />
-              <KPIItem
-                name="Serious Delays"
-                question="Were there any serious delays that impacted client satisfaction?"
-              />
-            </div>
-          </div>
 
-          {/* Quality Section */}
-          <div style={{marginBottom: '40px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
-              <span style={{
-                display: 'inline-flex',
+            <button
+              onClick={addEmployee}
+              style={{
+                display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-                color: 'white',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '800',
-                letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.25)'
-              }}>QUALITY</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Work Quality & Accuracy</span>
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-              <KPIItem
-                name="Minor Errors"
-                question="Were there any minor mistakes or errors in your work?"
-              />
-              <KPIItem
-                name="Serious Errors"
-                question="Were there critical errors that required rework?"
-              />
-            </div>
-          </div>
-
-          {/* Communication Section */}
-          <div style={{marginBottom: '40px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                color: 'white',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '800',
-                letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)'
-              }}>COLLABORATION</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Communication & Teamwork</span>
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-              <KPIItem
-                name="Communication Issues"
-                question="Were there any communication breakdowns or miscommunication?"
-              />
-              <KPIItem
-                name="Team Impact"
-                question="Did your actions negatively impact team productivity?"
-              />
-              <KPIItem
-                name="Learning & Application"
-                question="Did you apply feedback and continue to improve?"
-              />
-            </div>
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '14px 16px',
+                border: '2px dashed #cbd5e1',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #f0f4f8, #eaf0f7)',
+                color: '#1e3a5f',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                marginTop: '12px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#1e3a5f';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #eaf0f7, #d9e2ec)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 58, 95, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #f0f4f8, #eaf0f7)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              + Add Another Team Member
+            </button>
           </div>
 
           {/* Form Actions */}
@@ -374,16 +350,7 @@ export default function SelfReviewForm() {
               fontSize: '14px',
               letterSpacing: '0.3px',
               transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #e2e8f0, #cbd5e1)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #f1f5f9, #e2e8f0)';
-              e.currentTarget.style.transform = 'none';
-            }}
-            >
+            }}>
               Clear Form
             </button>
             <button style={{
@@ -398,17 +365,8 @@ export default function SelfReviewForm() {
               letterSpacing: '0.3px',
               boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
               transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px rgba(30, 58, 95, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'none';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.3)';
-            }}
-            >
-              Submit Self Review
+            }}>
+              Submit Reviews
             </button>
           </div>
         </div>

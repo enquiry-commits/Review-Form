@@ -238,20 +238,20 @@ export default function Dashboard() {
             }}>
               <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '16px'}}>Leader Performance Review</div>
               <p style={{color: '#64748b', marginBottom: '32px'}}>Evaluate your team members' performance this period</p>
-              <button style={{
+              <Link href="/dashboard/leader-review" style={{
+                display: 'inline-block',
                 padding: '13px 32px',
                 background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
                 color: 'white',
-                border: 'none',
                 borderRadius: '12px',
+                textDecoration: 'none',
                 fontWeight: '700',
                 fontSize: '14px',
-                cursor: 'pointer',
                 boxShadow: '0 8px 24px rgba(126, 184, 212, 0.3)',
                 transition: 'all 0.3s'
               }}>
                 Open Form →
-              </button>
+              </Link>
             </div>
           </div>
         )}
@@ -267,9 +267,20 @@ export default function Dashboard() {
           }}>
             <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px'}}>Admin Dashboard</div>
             <p style={{color: '#64748b', marginBottom: '32px'}}>Monitor all submissions and system activity</p>
-            <div style={{color: '#94a3b8', padding: '32px', background: 'rgba(30, 58, 95, 0.05)', borderRadius: '12px'}}>
-              Dashboard content coming soon...
-            </div>
+            <Link href="/dashboard/admin-dashboard" style={{
+              display: 'inline-block',
+              padding: '13px 32px',
+              background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
+              color: 'white',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
+              transition: 'all 0.3s'
+            }}>
+              Go to Dashboard →
+            </Link>
           </div>
         )}
       </div>
