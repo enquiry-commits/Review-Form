@@ -238,24 +238,24 @@ export default function SelfReviewForm() {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 14px',
-                background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
+                background: '#7eb8d4',
                 color: 'white',
                 borderRadius: '8px',
                 fontSize: '11px',
                 fontWeight: '800',
                 letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(126, 184, 212, 0.25)'
-              }}>CLIENT</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Client Stability & Relationships</span>
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>Client</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Client Stability / 客户稳定性</span>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
               <KPIItem
-                name="Client Complaints / Issues"
-                question="Were there any client complaints, issues, or controllable churn this period?"
+                name="Client Complaints / Issues 客户抱怨／异常"
+                question="Were there any client complaints, issues or controllable churn? / 有没有客户抱怨、异常和可控流失？"
               />
               <KPIItem
-                name="Client Attrition"
-                question="Was there client loss due to lack of follow-up or unresolved issues?"
+                name="Client Attrition / 客户流失"
+                question="Was there client loss due to lack of follow-up or unresolved issues? / 因为没有及时跟进和解决问题，导致客户流失？"
               />
             </div>
           </div>
@@ -268,24 +268,24 @@ export default function SelfReviewForm() {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 14px',
-                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                background: '#7eb8d4',
                 color: 'white',
                 borderRadius: '8px',
                 fontSize: '11px',
                 fontWeight: '800',
                 letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(249, 115, 22, 0.25)'
-              }}>EFFICIENCY</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Task Execution & Timeliness</span>
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>Efficiency</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Task Efficiency & Execution / 任务执行力</span>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
               <KPIItem
-                name="Chased / Minor Delays"
-                question="Were there instances where you were reminded about deadlines?"
+                name="Chased / Minor Delays / 被催、一般延误"
+                question="Was the employee chased by clients or management? / 有没有被催、被客户或被管理？"
               />
               <KPIItem
-                name="Serious Delays"
-                question="Were there any serious delays that impacted client satisfaction?"
+                name="Serious Delays / 严重延误"
+                question="Were there delays that affected client arrangements or led to cancellations? / 有没有延误影响客户安排，甚至导致客户取消服务？"
               />
             </div>
           </div>
@@ -298,29 +298,29 @@ export default function SelfReviewForm() {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 14px',
-                background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                background: '#7eb8d4',
                 color: 'white',
                 borderRadius: '8px',
                 fontSize: '11px',
                 fontWeight: '800',
                 letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(6, 182, 212, 0.25)'
-              }}>QUALITY</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Work Quality & Accuracy</span>
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>Quality</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Work Quality & Risk Control / 工作质量与风险管理</span>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
               <KPIItem
-                name="Minor Errors"
-                question="Were there any minor mistakes or errors in your work?"
+                name="Minor Errors / 轻微错误"
+                question="Were there any mistakes made? / 有没有出错？"
               />
               <KPIItem
-                name="Serious Errors"
-                question="Were there critical errors that required rework?"
+                name="Serious Errors / Penalty Risk / 严重错误／罚款风险"
+                question="Were there any filing issues, penalty risks or client impact? / 是否有申报、罚款和客户影响风险？"
               />
             </div>
           </div>
 
-          {/* Communication Section */}
+          {/* Coordination Section */}
           <div style={{marginBottom: '40px'}}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
@@ -328,29 +328,108 @@ export default function SelfReviewForm() {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 14px',
-                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                background: '#7eb8d4',
                 color: 'white',
                 borderRadius: '8px',
                 fontSize: '11px',
                 fontWeight: '800',
                 letterSpacing: '0.4px',
-                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.25)'
-              }}>COLLABORATION</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '-0.3px'}}>Communication & Teamwork</span>
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>Coordination</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Internal Coordination & Communication / 内部协作与沟通</span>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
               <KPIItem
-                name="Communication Issues"
-                question="Were there any communication breakdowns or miscommunication?"
+                name="Communication / Handover Issues / 沟通／交接问题"
+                question="Was collaboration with colleagues smooth? / 和员工和同事协作顺不顺？"
               />
               <KPIItem
-                name="Team Impact"
-                question="Did your actions negatively impact team productivity?"
+                name="Team Impact / 影响团队"
+                question="Were there any communication or handover problems? / 有没有沟通和交接问题？"
               />
+            </div>
+          </div>
+
+          {/* Development Section */}
+          <div style={{marginBottom: '40px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: '#7eb8d4',
+                color: 'white',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '800',
+                letterSpacing: '0.4px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>Development</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Capability & Growth / 能力与能力提升</span>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
               <KPIItem
-                name="Learning & Application"
-                question="Did you apply feedback and continue to improve?"
+                name="Learning & Application / 学习并应用"
+                question="Has new knowledge been applied to work? / 学到的东西有没有在工作里正用？"
               />
+            </div>
+          </div>
+
+          {/* Positive Items Section */}
+          <div style={{marginBottom: '40px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: '#10b981',
+                color: 'white',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '800',
+                letterSpacing: '0.4px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}>★ Positive</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px'}}>Positive Items / 正面项目记录</span>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Written Client Compliment / 客户书面表扬</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client proactively sent email/message with explicit praise (not routine thanks) / 客户主动发email/message有明确表扬，非常规感谢</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Client Requested Same Staff / 客户点名继续服务</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client explicitly requested the same employee or gave special recognition / 客户明确要求继续由该员工负责，有特别认可</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Prevented Major Risk / Penalty / 避免重大风险／罚款</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Identified issues outside scope and prevented significant losses / 超职责范围发现问题并避免重大损失</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Recovered Client / 挽回客户</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Successfully retained a client at risk of leaving / 已有流失风险客户被成功挽回</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Resolved Legacy / Complex Issues / 解决遗留／复杂问题</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Took over and resolved problems not caused by themselves / 接手非本人造成的问题并成功处理</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Additional Business Opportunity / 额外业务机会</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Referral / upsell / cross-sell (outside sales role) / 转介业务</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
+              <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Special Contribution / 特别贡献</p>
+                <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Contribution clearly beyond job scope, requires manager explanation / 有明显超出岗位职责的贡献，需主管说明</p>
+                <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+              </div>
             </div>
           </div>
 
