@@ -37,7 +37,7 @@ export default function Login() {
         <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/80 p-8">
           <div className="flex justify-center mb-8">
             <img
-              src="file:///C:/Users/vincent/Desktop/TASSURE IN.png"
+              src="/tassure-logo.png"
               alt="Tassure"
               className="h-16 w-auto"
             />
@@ -92,30 +92,6 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="relative mt-8 mb-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-slate-500 text-xs uppercase tracking-wide font-semibold">Demo Credentials</span>
-            </div>
-          </div>
-
-          <div className="space-y-3 text-xs text-slate-600">
-            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-              <p className="font-semibold text-slate-900 mb-1">👤 Admin (Full Access)</p>
-              <p>cindyzhang@tassure.com</p>
-            </div>
-            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-              <p className="font-semibold text-slate-900 mb-1">👨‍💼 Leader (Review Forms)</p>
-              <p>hoechyi@tassure.com</p>
-            </div>
-            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-              <p className="font-semibold text-slate-900 mb-1">👤 Employee (Self Review)</p>
-              <p>jennylai@tassure.com</p>
-            </div>
-            <p className="text-center text-slate-500 mt-2">Password: <span className="font-mono font-bold">123456</span></p>
-          </div>
         </div>
 
         <p className="text-center text-slate-600 text-xs mt-6">
