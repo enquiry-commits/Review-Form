@@ -26,6 +26,16 @@ export default function Dashboard() {
     router.push('/');
   };
 
+  const handleTabClick = (tabId: string) => {
+    if (tabId === 'self-review') {
+      router.push('/dashboard/self-review');
+    } else if (tabId === 'leader-review') {
+      router.push('/dashboard/leader-review');
+    } else if (tabId === 'admin-dashboard') {
+      router.push('/dashboard/admin-dashboard');
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
       <div style={{color: '#64748b'}}>Loading...</div>
@@ -70,7 +80,11 @@ export default function Dashboard() {
               <div style={{fontSize: '18px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
             </div>
           </div>
-          <button
+          <div style={{display: 'flex', alignItems: 'center', gap: '24px'}}>
+            <div style={{fontSize: '14px', color: '#64748b'}}>
+              Welcome back, <span style={{fontWeight: '700', color: '#1e3a5f'}}>{user?.name}</span>
+            </div>
+            <button
             onClick={handleLogout}
             style={{
               padding: '8px 16px',
@@ -86,7 +100,8 @@ export default function Dashboard() {
             onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
           >
             Logout
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -102,7 +117,7 @@ export default function Dashboard() {
           {visibleTabs.map(tab => (
             <div
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               style={{
                 padding: '16px 20px',
                 cursor: 'pointer',
@@ -132,103 +147,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Content */}
-      <div style={{padding: '48px 32px', maxWidth: '1100px', margin: '0 auto'}}>
-        {/* Welcome Message */}
-        <div style={{marginBottom: '32px'}}>
-          <div style={{fontSize: '16px', color: '#64748b', marginBottom: '8px'}}>Welcome back,</div>
-          <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a'}}>{user.name}</h1>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'self-review' && (
-          <div style={{textAlign: 'center'}}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '24px',
-              padding: '48px',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-              border: '1px solid rgba(30, 58, 95, 0.06)'
-            }}>
-              <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '16px'}}>Employee Self Review</div>
-              <p style={{color: '#64748b', marginBottom: '32px'}}>Complete your honest evaluation of your performance this period</p>
-              <Link href="/dashboard/self-review" style={{
-                display: 'inline-block',
-                padding: '13px 32px',
-                background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
-                color: 'white',
-                borderRadius: '12px',
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '14px',
-                boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
-                transition: 'all 0.3s'
-              }}>
-                Open Form →
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'leader-review' && (
-          <div style={{textAlign: 'center'}}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '24px',
-              padding: '48px',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-              border: '1px solid rgba(30, 58, 95, 0.06)'
-            }}>
-              <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '16px'}}>Leader Performance Review</div>
-              <p style={{color: '#64748b', marginBottom: '32px'}}>Evaluate your team members' performance this period</p>
-              <Link href="/dashboard/leader-review" style={{
-                display: 'inline-block',
-                padding: '13px 32px',
-                background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
-                color: 'white',
-                borderRadius: '12px',
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '14px',
-                boxShadow: '0 8px 24px rgba(126, 184, 212, 0.3)',
-                transition: 'all 0.3s'
-              }}>
-                Open Form →
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'admin-dashboard' && (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '24px',
-            padding: '48px',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-            border: '1px solid rgba(30, 58, 95, 0.06)'
-          }}>
-            <div style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px'}}>Admin Dashboard</div>
-            <p style={{color: '#64748b', marginBottom: '32px'}}>Monitor all submissions and system activity</p>
-            <Link href="/dashboard/admin-dashboard" style={{
-              display: 'inline-block',
-              padding: '13px 32px',
-              background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
-              color: 'white',
-              borderRadius: '12px',
-              textDecoration: 'none',
-              fontWeight: '700',
-              fontSize: '14px',
-              boxShadow: '0 8px 24px rgba(30, 58, 95, 0.3)',
-              transition: 'all 0.3s'
-            }}>
-              Go to Dashboard →
-            </Link>
-          </div>
-        )}
-      </div>
+      {/* Content - Redirect on first load */}
     </div>
   );
 }
