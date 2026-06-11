@@ -137,7 +137,7 @@ export default function AdminDashboard() {
     }
 
     // 准备导出数据
-    let finalData = dataToExport.map(row => ({
+    let finalData: any[] = dataToExport.map(row => ({
       '员工名字': row.employee_name,
       '邮箱': row.employee_email,
       '部门': row.department,
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
     // 根据导出类型处理数据
     if (exportType === 'summary') {
       const summary = summarizeData(dataToExport, selectedKPIs);
-      finalData = [summary as any];
+      finalData = [summary];
     } else if (exportType === 'grouped') {
       const grouped = groupByDepartment(dataToExport);
       finalData = Object.entries(grouped).map(([dept, items]) => ({
