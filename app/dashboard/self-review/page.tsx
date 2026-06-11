@@ -9,7 +9,6 @@ import { supabase } from '@/lib/supabase';
 export default function SelfReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
@@ -28,8 +27,7 @@ export default function SelfReviewForm() {
       return;
     }
     setUser(JSON.parse(userData));
-    setLoading(false);
-  }, [router]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -84,12 +82,6 @@ export default function SelfReviewForm() {
       alert('提交失败，请重试');
     }
   };
-
-  if (loading) {
-    return <div style={{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
-      <div style={{color: '#64748b'}}>Loading...</div>
-    </div>;
-  }
 
   if (!user) {
     return null;
