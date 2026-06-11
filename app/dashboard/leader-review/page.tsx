@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
+import { getCurrentReviewMonth } from '@/lib/reviewHelpers';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -213,7 +214,7 @@ export default function LeaderReviewForm() {
               </div>
               <div>
                 <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Review Period / 评审周期 *</label>
-                <input type="text" placeholder="e.g. April 2026" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
+                <input type="text" value={getCurrentReviewMonth()} disabled style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
               </div>
             </div>
           </div>
