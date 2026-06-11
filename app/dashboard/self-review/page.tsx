@@ -10,15 +10,6 @@ export default function SelfReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
-  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
-
-  const departmentEmployees: {[key: string]: string[]} = {
-    'CORPORATE SECRETARIAL': ['Alice Johnson', 'Bob Smith', 'Carol White'],
-    'ACCOUNTING': ['David Lee', 'Eve Martinez', 'Frank Chen'],
-    'TAX': ['Grace Park', 'Henry Wong', 'Iris Zhang'],
-    'PAYROLL': ['Jack Ryan', 'Kathy Brown']
-  };
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -289,46 +280,33 @@ export default function SelfReviewForm() {
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
               <div>
                 <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Department</label>
-                <select value={selectedDepartment} onChange={(e) => {
-                  setSelectedDepartment(e.target.value);
-                  setSelectedEmployee('');
-                }} style={{
+                <input type="text" value={user.department || ''} disabled style={{
                   width: '100%',
                   padding: '13px 16px',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
                   fontSize: '14px',
                   color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  background: '#f0f4f8',
                   fontFamily: 'inherit',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s'
-                }}>
-                  <option value="">-- Select Department --</option>
-                  {Object.keys(departmentEmployees).map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
+                  cursor: 'not-allowed',
+                  opacity: 0.6
+                }} />
               </div>
               <div>
                 <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Your Name</label>
-                <select value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} style={{
+                <input type="text" value={user.name || ''} disabled style={{
                   width: '100%',
                   padding: '13px 16px',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
                   fontSize: '14px',
                   color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  background: '#f0f4f8',
                   fontFamily: 'inherit',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s'
-                }}>
-                  <option value="">-- Select Employee --</option>
-                  {selectedDepartment && departmentEmployees[selectedDepartment]?.map(emp => (
-                    <option key={emp} value={emp}>{emp}</option>
-                  ))}
-                </select>
+                  cursor: 'not-allowed',
+                  opacity: 0.6
+                }} />
               </div>
               <div>
                 <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Review Period</label>

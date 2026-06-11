@@ -158,12 +158,7 @@ export default function LeaderReviewForm() {
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
               <div>
                 <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Department / 部门 *</label>
-                <select style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', fontFamily: 'inherit', cursor: 'pointer'}}>
-                  <option>-- Select Department --</option>
-                  <option>CORPORATE SECRETARIAL</option>
-                  <option>ACCOUNTING</option>
-                  <option>TAX</option>
-                </select>
+                <input type="text" value={user.department || ''} disabled style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f0f4f8', fontFamily: 'inherit', cursor: 'not-allowed', opacity: 0.6}} />
               </div>
               <div>
                 <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Review Period / 评审周期 *</label>
@@ -171,8 +166,27 @@ export default function LeaderReviewForm() {
               </div>
               <div>
                 <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Your Name / 你的名字 *</label>
-                <input type="text" placeholder="e.g. John Smith" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
+                <input type="text" value={user.name || ''} disabled style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f0f4f8', fontFamily: 'inherit', cursor: 'not-allowed', opacity: 0.6}} />
               </div>
+            </div>
+
+            {/* Select Employee Section */}
+            <div style={{marginTop: '24px', paddingTop: '24px', borderTop: '1.5px solid #e2e8f0'}}>
+              <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Select Employee / 选择员工 *</label>
+              <select style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', fontFamily: 'inherit', cursor: 'pointer'}}>
+                <option>-- Select Employee --</option>
+                <option>Jenny Lai</option>
+                <option>Chin Kah Ye</option>
+                <option>Ang Shi Ming</option>
+                <option>Tey Shemin</option>
+                <option>Tan Min Quan</option>
+                <option>Tee Yu Heng</option>
+                <option>Vernice Chai</option>
+                <option>Chee Wei En</option>
+                <option>Quinnie Tan</option>
+                <option>Victoria Yap</option>
+                <option>Chelsea Ang</option>
+              </select>
             </div>
           </div>
 
