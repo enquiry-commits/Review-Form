@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function LeaderReviewSuccess() {
   const router = useRouter();
@@ -66,7 +65,7 @@ export default function LeaderReviewSuccess() {
           </p>
 
           {/* Back Button */}
-          <Link href="/dashboard" style={{
+          <a href="/dashboard" style={{
             display: 'inline-block',
             padding: '13px 40px',
             background: '#1e3a5f',
@@ -76,13 +75,14 @@ export default function LeaderReviewSuccess() {
             fontWeight: '700',
             fontSize: '14px',
             letterSpacing: '0.3px',
-            transition: 'all 0.3s'
+            transition: 'all 0.3s',
+            cursor: 'pointer'
           }}
           onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.3)'}}
           onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'}}
           >
             ← Back to Form / 返回表单
-          </Link>
+          </a>
 
           {/* Footer */}
           <div style={{marginTop: '48px', fontSize: '12px', color: '#cbd5e1', letterSpacing: '0.5px', fontWeight: '700'}}>
