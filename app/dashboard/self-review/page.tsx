@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import Link from 'next/link';
-
 import { supabase } from '@/lib/supabase';
+
 export default function SelfReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);

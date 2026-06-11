@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import Link from 'next/link';
-
 import { supabase } from '@/lib/supabase';
+
 export default function LeaderReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -53,70 +53,6 @@ export default function LeaderReviewForm() {
 
   const removeEmployee = (index: number) => {
     setSelectedEmployees(selectedEmployees.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async () => {
-    if (!user || selectedEmployees.length === 0) {
-      alert('请先选择要评价的员工');
-      return;
-    }
-
-    try {
-      const month = new Date().toISOString().slice(0, 7);
-
-      for (const employeeId of selectedEmployees) {
-        const formData: any = {};
-        const employeeName = allEmployees.find((_, idx) => idx === allEmployees.indexOf(employeeId)) || employeeId;
-
-        kpiCategories.forEach(cat => {
-          cat.items.forEach(item => {
-            const key = item.kpi.replace(/[\s\/]/g, '_').toLowerCase();
-            const countEl = document.getElementById(`count_${key}`);
-            const commentEl = document.getElementById(`comment_${key}`);
-            if (countEl || commentEl) {
-              formData[key] = {
-                count: parseInt((countEl as HTMLInputElement)?.value) || 0,
-                comment: (commentEl as HTMLTextAreaElement)?.value || '',
-                files: fileLinks[key] || []
-              };
-            }
-          });
-        });
-
-        positiveItems.forEach((item, idx) => {
-          const key = `positive_${idx}`;
-          const checkbox = document.getElementById(key) as HTMLInputElement;
-          const comment = document.getElementById(`comment_${key}`) as HTMLTextAreaElement;
-          if (checkbox?.checked) {
-            formData[key] = {
-              checked: true,
-              comment: comment?.value || '',
-              label: item.label
-            };
-          }
-        });
-
-        const { error } = await supabase.from('leader_review_submissions').insert([{
-          reviewed_employee_id: employeeId,
-          reviewed_employee_name: employeeName,
-          reviewer_id: user.id,
-          reviewer_name: user.name,
-          department: user.department,
-          review_period: month,
-          form_data: formData,
-          submitted_at: new Date().toISOString(),
-          is_locked: true
-        }]);
-
-        if (error) throw error;
-      }
-
-      alert(`已成功提交 ${selectedEmployees.length} 位员工的评价！`);
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('提交失败:', error);
-      alert('提交失败，请重试');
-    }
   };
 
   if (!user) {
@@ -394,7 +330,7 @@ export default function LeaderReviewForm() {
             <button style={{padding: '13px 32px', background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', color: '#334155', border: '1.5px solid #cbd5e1', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', letterSpacing: '0.3px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-1px)'}} onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'}}>
               Clear / 清除
             </button>
-            <button onClick={handleSubmit} style={{padding: '13px 32px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', letterSpacing: '0.3px', boxShadow: '0 8px 20px rgba(30,58,95,0.3)', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)'}} onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'}}>
+            <button style={{padding: '13px 32px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', letterSpacing: '0.3px', boxShadow: '0 8px 20px rgba(30,58,95,0.3)', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)'}} onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'}}>
               Submit Review / 提交评价
             </button>
           </div>
