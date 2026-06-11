@@ -11,6 +11,7 @@ export default function LeaderReviewForm() {
   const [user, setUser] = useState<User | null>(null);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
   const [employeeRows, setEmployeeRows] = useState<{[key: string]: number}>({});
+  const [positiveItemRows, setPositiveItemRows] = useState<{[key: string]: number}>({});
 
   const departmentEmployees: {[key: string]: string[]} = {
     'CORPORATE SECRETARIAL': ['Jenny Lai', 'Chin Kah Ye', 'Ang Shi Ming', 'Tey Shemin', 'Tan Min Quan'],
@@ -34,6 +35,25 @@ export default function LeaderReviewForm() {
       setEmployeeRows(prev => ({
         ...prev,
         [kpiId]: currentCount - 1
+      }));
+    }
+  };
+
+  const getPosRowCount = (posId: string) => positiveItemRows[posId] || 1;
+
+  const addPositiveItemRow = (posId: string) => {
+    setPositiveItemRows(prev => ({
+      ...prev,
+      [posId]: (prev[posId] || 1) + 1
+    }));
+  };
+
+  const removePositiveItemRow = (posId: string) => {
+    const currentCount = getPosRowCount(posId);
+    if (currentCount > 1) {
+      setPositiveItemRows(prev => ({
+        ...prev,
+        [posId]: currentCount - 1
       }));
     }
   };
@@ -320,33 +340,46 @@ export default function LeaderReviewForm() {
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
               {positiveItems.map((item, idx) => {
-                const fieldId = `pos_${idx}`;
+                const posId = `pos_${idx}`;
+                const rowCount = getPosRowCount(posId);
                 return (
-                <div key={idx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
-                  <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.label}</p>
-                  <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px', lineHeight: '1.7'}}>{item.desc}</p>
-                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                  <textarea id={`comment_${fieldId}`} placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                  <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
-                    <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                    <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
-                      <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                      <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
-                      <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
-                    </div>
-                    {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
-                      <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
-                        {fileLinks[fieldId].map((file, fIdx) => (
-                          <div key={fIdx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <span>📄 {file.name}</span>
-                            <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                  <div key={idx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
+                    <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.label}</p>
+                    <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px', lineHeight: '1.7'}}>{item.desc}</p>
+                    {Array.from({length: rowCount}).map((_, rowIdx) => {
+                      const fieldId = `${posId}_${rowIdx}`;
+                      return (
+                        <div key={rowIdx} style={{marginBottom: rowIdx < rowCount - 1 ? '24px' : '0', paddingBottom: rowIdx < rowCount - 1 ? '24px' : '0', borderBottom: rowIdx < rowCount - 1 ? '1.5px solid #e2e8f0' : 'none'}}>
+                          <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
+                          <textarea id={`comment_${fieldId}`} placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
+                          <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                            <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                            <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
+                              <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                              <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                              <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
+                            </div>
+                            {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
+                              <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                                {fileLinks[fieldId].map((file, fIdx) => (
+                                  <div key={fIdx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <span>📄 {file.name}</span>
+                                    <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      );
+                    })}
+                    <div style={{marginTop: '16px', paddingTop: '16px', borderTop: '1.5px solid #e2e8f0'}}>
+                      <button onClick={() => addPositiveItemRow(posId)} style={{width: '100%', padding: '12px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
+                        + Add another item / 增加另一个项目
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
+                );
               })}
             </div>
           </div>
