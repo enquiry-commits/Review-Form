@@ -9,6 +9,11 @@ export default function LeaderReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
+
+  const allEmployees = ['Alice Johnson', 'Bob Smith', 'Carol White', 'David Lee', 'Eve Martinez', 'Frank Chen', 'Grace Park', 'Henry Wong', 'Iris Zhang', 'Jack Ryan', 'Kathy Brown'];
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -23,6 +28,32 @@ export default function LeaderReviewForm() {
   const handleLogout = () => {
     localStorage.removeItem('user');
     router.push('/');
+  };
+
+  const handleFileUpload = (fieldId: string, files: FileList) => {
+    const newLinks = [...(fileLinks[fieldId] || [])];
+    Array.from(files).forEach(file => {
+      newLinks.push({ name: file.name, url: URL.createObjectURL(file) });
+    });
+    setFileLinks(prev => ({...prev, [fieldId]: newLinks}));
+  };
+
+  const removeFile = (fieldId: string, index: number) => {
+    setFileLinks(prev => ({
+      ...prev,
+      [fieldId]: prev[fieldId]?.filter((_, i) => i !== index) || []
+    }));
+  };
+
+  const addEmployee = () => {
+    if (selectedEmployee && !selectedEmployees.includes(selectedEmployee)) {
+      setSelectedEmployees([...selectedEmployees, selectedEmployee]);
+      setSelectedEmployee('');
+    }
+  };
+
+  const removeEmployee = (index: number) => {
+    setSelectedEmployees(selectedEmployees.filter((_, i) => i !== index));
   };
 
   if (loading) {
@@ -159,6 +190,37 @@ export default function LeaderReviewForm() {
                 </button>
               </div>
             </div>
+
+            {/* Employee Selection */}
+            <div style={{marginTop: '24px', paddingTop: '24px', borderTop: '1.5px solid #e2e8f0'}}>
+              <div style={{display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
+                <div style={{flex: 1}}>
+                  <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Employee / 员工：</label>
+                  <select value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', fontFamily: 'inherit', cursor: 'pointer'}}>
+                    <option value="">-- Select Employee / 选择员工 --</option>
+                    {allEmployees.filter(emp => !selectedEmployees.includes(emp)).map(emp => (
+                      <option key={emp} value={emp}>{emp}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={addEmployee} style={{padding: '12px 24px', background: '#7eb8d4', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', minWidth: '120px'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#6ba8c4'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#7eb8d4'}}>
+                  Add / 添加
+                </button>
+              </div>
+
+              {selectedEmployees.length > 0 && (
+                <div style={{marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                  {selectedEmployees.map((emp, idx) => (
+                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#0f172a', fontWeight: '500'}}>
+                      <span>{emp}</span>
+                      <button onClick={() => removeEmployee(idx)} style={{padding: '6px 16px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* KPI Sections */}
@@ -169,7 +231,9 @@ export default function LeaderReviewForm() {
                 <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a'}}>{cat.label}</span>
               </div>
               <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-                {cat.items.map((item, itemIdx) => (
+                {cat.items.map((item, itemIdx) => {
+                  const fieldId = `kpi_${idx}_${itemIdx}`;
+                  return (
                   <div key={itemIdx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                     <div style={{marginBottom: '14px'}}>
                       <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.kpi}</p>
@@ -177,14 +241,32 @@ export default function LeaderReviewForm() {
                     </div>
                     <div style={{marginBottom: '12px'}}>
                       <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Count / 数量</label>
-                      <input type="number" min="0" placeholder="0" style={{width: '100%', padding: '11px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '15px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#fff'}} />
+                      <input type="number" min="0" placeholder="0" id={`count_${fieldId}`} style={{width: '100%', padding: '11px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '15px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#fff'}} />
+                    </div>
+                    <div style={{marginBottom: '12px'}}>
+                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
+                      <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
                     </div>
                     <div>
-                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                      <textarea placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                      <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#1e3a5f'; e.currentTarget.style.background = '#eaf0f7'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
+                        <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                        <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
+                      </div>
+                      {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
+                        <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                          {fileLinks[fieldId].map((file, fIdx) => (
+                            <div key={fIdx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                              <span>📄 {file.name}</span>
+                              <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
           ))}
@@ -196,14 +278,32 @@ export default function LeaderReviewForm() {
               <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a'}}>Positive Items / 正面项目记录</span>
             </div>
             <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-              {positiveItems.map((item, idx) => (
+              {positiveItems.map((item, idx) => {
+                const fieldId = `pos_${idx}`;
+                return (
                 <div key={idx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                   <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.label}</p>
                   <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px', lineHeight: '1.7'}}>{item.desc}</p>
                   <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                  <textarea placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+                  <textarea id={`comment_${fieldId}`} placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
+                    <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
+                  </div>
+                  {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
+                    <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                      {fileLinks[fieldId].map((file, fIdx) => (
+                        <div key={fIdx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
+              );
+              })}
             </div>
           </div>
 
@@ -214,7 +314,22 @@ export default function LeaderReviewForm() {
               <span style={{fontSize: '17px', fontWeight: '800', color: '#0f172a'}}>Overall Remarks / 整体补充说明</span>
             </div>
             <p style={{fontSize: '13px', color: '#6b7280', marginBottom: '12px'}}>Any additional comments or observations for the team this review period. / 本评审周期内对部门的整体补充说明。</p>
-            <textarea placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '100px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit'}} />
+            <textarea id="overall_remarks" placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '100px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit', marginBottom: '12px'}} />
+            <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
+            <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#1e3a5f'; e.currentTarget.style.background = '#eaf0f7'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'}} onClick={() => document.getElementById('file_overall_remarks')?.click()}>
+              <input type="file" id="file_overall_remarks" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('overall_remarks', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+              <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
+            </div>
+            {fileLinks['overall_remarks'] && fileLinks['overall_remarks'].length > 0 && (
+              <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                {fileLinks['overall_remarks'].map((file, fIdx) => (
+                  <div key={fIdx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                    <span>📄 {file.name}</span>
+                    <button onClick={() => removeFile('overall_remarks', fIdx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Form Actions */}
