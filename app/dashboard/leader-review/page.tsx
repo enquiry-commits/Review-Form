@@ -281,19 +281,24 @@ export default function LeaderReviewForm() {
           ))}
 
           {/* Section Divider */}
-          <div style={{margin: '60px 0 40px 0'}}>
-            <div style={{height: '1px', background: '#e2e8f0', marginBottom: '20px'}}></div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            margin: '60px 0 40px 0'
+          }}>
+            <div style={{flex: 1, height: '1px', background: '#cbd5e1'}}></div>
             <div style={{
-              textAlign: 'center',
               color: '#334155',
               fontSize: '12px',
               fontWeight: '700',
               letterSpacing: '2px',
-              textTransform: 'uppercase'
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap'
             }}>
               — SECTION 2 — POSITIVE ITEMS —
             </div>
-            <div style={{height: '1px', background: '#e2e8f0', marginTop: '20px'}}></div>
+            <div style={{flex: 1, height: '1px', background: '#cbd5e1'}}></div>
           </div>
 
           {/* Positive Items Section */}
