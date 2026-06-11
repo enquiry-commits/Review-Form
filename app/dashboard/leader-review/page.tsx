@@ -244,10 +244,6 @@ export default function LeaderReviewForm() {
                               )}
                             </div>
                             <div style={{marginBottom: '12px'}}>
-                              <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Count / 数量</label>
-                              <input type="number" min="0" placeholder="0" id={`count_${fieldId}`} style={{width: '100%', padding: '11px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '15px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#fff'}} />
-                            </div>
-                            <div style={{marginBottom: '12px'}}>
                               <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
                               <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
                             </div>
