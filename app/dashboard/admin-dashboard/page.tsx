@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 interface SubmissionRow {
@@ -15,6 +14,7 @@ interface SubmissionRow {
   employee_name: string;
   employee_email: string;
   review_period: string;
+  form_data?: any;
 }
 
 export default function AdminDashboard() {
@@ -26,6 +26,9 @@ export default function AdminDashboard() {
   const [leaderReviews, setLeaderReviews] = useState<SubmissionRow[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isEmbedded, setIsEmbedded] = useState(false);
+  const [selectedDetail, setSelectedDetail] = useState<SubmissionRow | null>(null);
+  const [filterDept, setFilterDept] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -59,7 +62,8 @@ export default function AdminDashboard() {
           department: r.department,
           employee_name: r.employee_name,
           employee_email: r.employee_email,
-          review_period: r.review_period
+          review_period: r.review_period,
+          form_data: r.form_data
         })));
       }
 
@@ -72,7 +76,8 @@ export default function AdminDashboard() {
           department: r.department,
           employee_name: r.employee_name,
           employee_email: r.employee_email,
-          review_period: r.review_period
+          review_period: r.review_period,
+          form_data: r.form_data
         })));
       }
     } catch (error) {
@@ -98,11 +103,42 @@ export default function AdminDashboard() {
   }
 
   const displayData = activeMenu === 'self-reviews' ? selfReviews : leaderReviews;
-  const filteredData = displayData.filter(row =>
-    row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row.employee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    row.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = displayData.filter(row => {
+    const matchesSearch =
+      row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.employee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      row.department.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDept = !filterDept || row.department === filterDept;
+    const matchesStatus = !filterStatus || row.status === filterStatus;
+    return matchesSearch && matchesDept && matchesStatus;
+  });
+
+  const exportToCSV = () => {
+    const headers = activeMenu === 'self-reviews'
+      ? ['Name', 'Email', 'Department', 'Period', 'Status', 'Submitted Date']
+      : ['Name', 'Email', 'Department', 'Period', 'Status', 'Submitted Date'];
+
+    const rows = filteredData.map(row => [
+      row.employee_name,
+      row.employee_email,
+      row.department,
+      row.review_period,
+      row.status === 'submitted' ? 'Completed' : 'Draft',
+      row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-'
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeMenu}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  };
 
   const getStatusColor = (status: string) => {
     if (status === 'Completed') return { bg: '#d1fae5', color: '#065f46' };
@@ -257,18 +293,12 @@ export default function AdminDashboard() {
         {/* Toolbar */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          gap: '12px',
           marginBottom: '24px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          padding: '20px',
-          borderRadius: '14px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
-          gap: '16px'
+          flexWrap: 'wrap',
+          alignItems: 'center'
         }}>
-          <div style={{flex: 1, maxWidth: '320px', position: 'relative'}}>
+          <div style={{flex: 1, minWidth: '280px', position: 'relative'}}>
             <input
               type="text"
               placeholder="Search name, email, department..."
@@ -286,22 +316,72 @@ export default function AdminDashboard() {
             />
             <div style={{position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px'}}>🔍</div>
           </div>
-          <div style={{display: 'flex', gap: '10px'}}>
-            <button onClick={fetchAllReviews} style={{
-              padding: '10px 16px',
-              border: 'none',
+
+          <select
+            value={filterDept}
+            onChange={(e) => setFilterDept(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              border: '1.5px solid #e2e8f0',
               borderRadius: '10px',
               fontSize: '13px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
-              color: 'white',
-              boxShadow: '0 4px 12px rgba(30, 58, 95, 0.25)',
-              transition: 'all 0.3s'
-            }}>
-              🔄 Refresh
-            </button>
-          </div>
+              background: 'white',
+              fontFamily: 'inherit',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="">All Departments</option>
+            <option value="Corporate Secretarial">Corporate Secretarial</option>
+            <option value="Accounting">Accounting</option>
+            <option value="Tax">Tax</option>
+            <option value="Internal">Internal</option>
+          </select>
+
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: '10px',
+              fontSize: '13px',
+              background: 'white',
+              fontFamily: 'inherit',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="">All Status</option>
+            <option value="submitted">Submitted</option>
+            <option value="draft">Draft</option>
+          </select>
+
+          <button onClick={fetchAllReviews} style={{
+            padding: '10px 16px',
+            border: 'none',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
+            color: 'white',
+            whiteSpace: 'nowrap'
+          }}>
+            🔄 Refresh
+          </button>
+
+          <button onClick={exportToCSV} style={{
+            padding: '10px 16px',
+            border: 'none',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
+            color: 'white',
+            whiteSpace: 'nowrap'
+          }}>
+            📊 Export CSV
+          </button>
         </div>
 
         {/* Data Table */}
@@ -357,7 +437,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td style={{padding: '16px 18px'}}>
-                      <button style={{
+                      <button onClick={() => setSelectedDetail(row)} style={{
                         padding: '6px 12px',
                         border: 'none',
                         borderRadius: '8px',
@@ -421,6 +501,101 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+
+      {/* Detail Modal */}
+      {selectedDetail && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '40px',
+            maxWidth: '700px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          }}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+              <h2 style={{fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0}}>
+                {selectedDetail.employee_name}
+              </h2>
+              <button onClick={() => setSelectedDetail(null)} style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#64748b'
+              }}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px'}}>
+              <div>
+                <label style={{fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase'}}>Email</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '8px 0 0 0'}}>{selectedDetail.employee_email}</p>
+              </div>
+              <div>
+                <label style={{fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase'}}>Department</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '8px 0 0 0'}}>{selectedDetail.department}</p>
+              </div>
+              <div>
+                <label style={{fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase'}}>Period</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '8px 0 0 0'}}>{selectedDetail.review_period}</p>
+              </div>
+              <div>
+                <label style={{fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase'}}>Status</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '8px 0 0 0'}}>
+                  {selectedDetail.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
+              <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Form Data</h3>
+              {selectedDetail.form_data ? (
+                <pre style={{
+                  background: '#f8fafc',
+                  padding: '16px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  color: '#475569',
+                  overflow: 'auto',
+                  maxHeight: '300px'
+                }}>
+                  {JSON.stringify(selectedDetail.form_data, null, 2)}
+                </pre>
+              ) : (
+                <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>
+              )}
+            </div>
+
+            <div style={{display: 'flex', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
+              <button onClick={() => setSelectedDetail(null)} style={{
+                flex: 1,
+                padding: '12px 20px',
+                border: '1.5px solid #e2e8f0',
+                borderRadius: '10px',
+                background: 'white',
+                color: '#64748b',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
