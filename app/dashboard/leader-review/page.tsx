@@ -218,7 +218,15 @@ export default function LeaderReviewForm() {
 
           {/* KPI Sections */}
           {kpiCategories.map((cat, idx) => (
-            <div key={idx} style={{marginBottom: '40px'}}>
+            <div key={idx} style={{
+              marginBottom: '40px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: '14px',
+              padding: '24px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.3s'
+            }}>
               <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
                 <span style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: cat.badge, color: 'white', borderRadius: '8px', fontSize: '11px', fontWeight: '800', letterSpacing: '0.4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'}}>{cat.category}</span>
                 <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a'}}>{cat.label}</span>
@@ -265,7 +273,15 @@ export default function LeaderReviewForm() {
           ))}
 
           {/* Positive Items Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#10b981', color: 'white', borderRadius: '8px', fontSize: '11px', fontWeight: '800', letterSpacing: '0.4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'}}>★ Positive</span>
               <span style={{fontSize: '18px', fontWeight: '800', color: '#0f172a'}}>Positive Items / 正面项目记录</span>
