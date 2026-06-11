@@ -69,8 +69,7 @@ export default function SelfReviewForm() {
       }]);
 
       if (error) throw error;
-      alert('表单已成功提交！');
-      router.push('/dashboard');
+      router.push('/dashboard/submission-success?type=self-review');
     } catch (error) {
       console.error('提交失败:', error);
       alert('提交失败，请重试');
