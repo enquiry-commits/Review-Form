@@ -68,7 +68,6 @@ export default function Dashboard() {
             <img src="/tassure-logo.png" alt="Tassure" style={{height: '45px', width: 'auto'}} />
             <div>
               <div style={{fontSize: '18px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
-              <div style={{fontSize: '12px', color: '#64748b'}}>Performance Evaluation Platform</div>
             </div>
           </div>
           <button
