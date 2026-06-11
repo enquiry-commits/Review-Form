@@ -10,10 +10,6 @@ export default function LeaderReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<string>('');
-
-  const allEmployees = ['Alice Johnson', 'Bob Smith', 'Carol White', 'David Lee', 'Eve Martinez', 'Frank Chen', 'Grace Park', 'Henry Wong', 'Iris Zhang', 'Jack Ryan', 'Kathy Brown'];
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -42,17 +38,6 @@ export default function LeaderReviewForm() {
       ...prev,
       [fieldId]: prev[fieldId]?.filter((_, i) => i !== index) || []
     }));
-  };
-
-  const addEmployee = () => {
-    if (selectedEmployee && !selectedEmployees.includes(selectedEmployee)) {
-      setSelectedEmployees([...selectedEmployees, selectedEmployee]);
-      setSelectedEmployee('');
-    }
-  };
-
-  const removeEmployee = (index: number) => {
-    setSelectedEmployees(selectedEmployees.filter((_, i) => i !== index));
   };
 
   if (!user) {
@@ -185,42 +170,9 @@ export default function LeaderReviewForm() {
                 <input type="text" placeholder="e.g. April 2026" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
               </div>
               <div>
-                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Leader Email / 主管邮箱 *</label>
-                <button style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#6b7280', background: '#f3f4f6', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s'}}>
-                  Select Email / 选择邮箱
-                </button>
+                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Your Name / 你的名字 *</label>
+                <input type="text" placeholder="e.g. John Smith" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
               </div>
-            </div>
-
-            {/* Employee Selection */}
-            <div style={{marginTop: '24px', paddingTop: '24px', borderTop: '1.5px solid #e2e8f0'}}>
-              <div style={{display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
-                <div style={{flex: 1}}>
-                  <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Employee / 员工：</label>
-                  <select value={selectedEmployee} onChange={(e) => setSelectedEmployee(e.target.value)} style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', fontFamily: 'inherit', cursor: 'pointer'}}>
-                    <option value="">-- Select Employee / 选择员工 --</option>
-                    {allEmployees.filter(emp => !selectedEmployees.includes(emp)).map(emp => (
-                      <option key={emp} value={emp}>{emp}</option>
-                    ))}
-                  </select>
-                </div>
-                <button onClick={addEmployee} style={{padding: '12px 24px', background: '#7eb8d4', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', minWidth: '120px'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#6ba8c4'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#7eb8d4'}}>
-                  Add / 添加
-                </button>
-              </div>
-
-              {selectedEmployees.length > 0 && (
-                <div style={{marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                  {selectedEmployees.map((emp, idx) => (
-                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#0f172a', fontWeight: '500'}}>
-                      <span>{emp}</span>
-                      <button onClick={() => removeEmployee(idx)} style={{padding: '6px 16px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}>
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
