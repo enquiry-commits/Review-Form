@@ -556,7 +556,10 @@ export default function SelfReviewForm() {
               fontWeight: '700',
               letterSpacing: '2px',
               textTransform: 'uppercase',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              background: 'rgba(217, 226, 236, 0.8)',
+              padding: '0 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}>
               — SECTION 2 — POSITIVE ITEMS —
             </div>
