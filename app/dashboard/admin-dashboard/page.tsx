@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { User } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
-import { exportToCSV, exportToExcel, exportToPDF, summarizeData, groupByDepartment, filterByDateRange, filterByDepartments } from '@/lib/exportHelpers';
 
 interface SubmissionRow {
   id: string;
@@ -31,14 +30,6 @@ export default function AdminDashboard() {
   const [selectedDetail, setSelectedDetail] = useState<SubmissionRow | null>(null);
   const [filterDept, setFilterDept] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
-  const [exportType, setExportType] = useState<'raw' | 'summary' | 'grouped'>('raw');
-  const [exportDates, setExportDates] = useState({ start: '', end: '' });
-  const [exportDepts, setExportDepts] = useState<string[]>([]);
-  const [currentReviewPeriod, setCurrentReviewPeriod] = useState('JUNE 2026');
-  const [selectedKPIs, setSelectedKPIs] = useState<string[]>(['client_complaints', 'minor_delays', 'serious_errors']);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -123,61 +114,6 @@ export default function AdminDashboard() {
     return matchesSearch && matchesDept && matchesStatus;
   });
 
-  const handleExport = () => {
-    let dataToExport = filteredData;
-
-    // 按部门过滤
-    if (exportDepts.length > 0) {
-      dataToExport = filterByDepartments(dataToExport, exportDepts);
-    }
-
-    // 按日期范围过滤
-    if (exportDates.start && exportDates.end) {
-      dataToExport = filterByDateRange(dataToExport, exportDates.start, exportDates.end);
-    }
-
-    // 准备导出数据
-    let finalData: any[] = dataToExport.map(row => ({
-      '员工名字': row.employee_name,
-      '邮箱': row.employee_email,
-      '部门': row.department,
-      '评审周期': row.review_period,
-      '状态': row.status === 'submitted' ? '已提交' : '草稿',
-      '提交时间': row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-'
-    }));
-
-    // 根据导出类型处理数据
-    if (exportType === 'summary') {
-      const summary = summarizeData(dataToExport, selectedKPIs);
-      finalData = [summary];
-    } else if (exportType === 'grouped') {
-      const grouped = groupByDepartment(dataToExport);
-      finalData = Object.entries(grouped).map(([dept, items]) => ({
-        '部门': dept,
-        '提交数': items.filter(i => i.status === 'submitted').length,
-        '草稿数': items.filter(i => i.status === 'draft').length,
-        '总数': items.length
-      }));
-    }
-
-    // 执行导出
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `${activeMenu}_${timestamp}`;
-
-    switch (exportFormat) {
-      case 'csv':
-        exportToCSV(finalData, filename);
-        break;
-      case 'excel':
-        exportToExcel(finalData, filename);
-        break;
-      case 'pdf':
-        exportToPDF(finalData, filename);
-        break;
-    }
-
-    setShowExportDialog(false);
-  };
 
   const getStatusColor = (status: string) => {
     if (status === 'Completed') return { bg: '#d1fae5', color: '#065f46' };
@@ -290,7 +226,6 @@ export default function AdminDashboard() {
             {['settings', 'export'].map(item => (
               <div
                 key={item}
-                onClick={() => item === 'settings' ? setShowSettings(true) : setShowExportDialog(true)}
                 style={{
                   padding: '11px 14px',
                   borderRadius: '10px',
@@ -542,120 +477,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Export Dialog */}
-      {showExportDialog && (
-        <div style={{position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'}}>
-          <div style={{background: 'white', borderRadius: '16px', padding: '40px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
-              <h2 style={{fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0}}>导出数据</h2>
-              <button onClick={() => setShowExportDialog(false)} style={{background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b'}}>✕</button>
-            </div>
-
-            <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-              <div>
-                <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>导出格式</label>
-                <select value={exportFormat} onChange={(e) => setExportFormat(e.target.value as any)} style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px'}}>
-                  <option value="csv">CSV</option>
-                  <option value="excel">Excel (.xlsx)</option>
-                  <option value="pdf">PDF</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>数据类型</label>
-                <select value={exportType} onChange={(e) => setExportType(e.target.value as any)} style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px'}}>
-                  <option value="raw">原始数据</option>
-                  <option value="summary">汇总统计</option>
-                  <option value="grouped">按部门分组</option>
-                </select>
-              </div>
-
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                <div>
-                  <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>开始日期</label>
-                  <input type="date" value={exportDates.start} onChange={(e) => setExportDates({...exportDates, start: e.target.value})} style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px'}} />
-                </div>
-                <div>
-                  <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>结束日期</label>
-                  <input type="date" value={exportDates.end} onChange={(e) => setExportDates({...exportDates, end: e.target.value})} style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px'}} />
-                </div>
-              </div>
-
-              <div>
-                <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>部门筛选</label>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                  {['Corporate Secretarial', 'Accounting', 'Tax', 'Internal'].map(dept => (
-                    <label key={dept} style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
-                      <input
-                        type="checkbox"
-                        checked={exportDepts.includes(dept)}
-                        onChange={(e) => e.target.checked ? setExportDepts([...exportDepts, dept]) : setExportDepts(exportDepts.filter(d => d !== dept))}
-                        style={{cursor: 'pointer'}}
-                      />
-                      <span style={{fontSize: '14px', color: '#475569'}}>{dept}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{display: 'flex', gap: '12px', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
-                <button onClick={() => setShowExportDialog(false)} style={{flex: 1, padding: '12px 20px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#64748b', fontWeight: '600', cursor: 'pointer'}}>取消</button>
-                <button onClick={handleExport} style={{flex: 1, padding: '12px 20px', border: 'none', borderRadius: '10px', background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)', color: 'white', fontWeight: '600', cursor: 'pointer'}}>导出</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <div style={{position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'}}>
-          <div style={{background: 'white', borderRadius: '16px', padding: '40px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
-              <h2 style={{fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0}}>设置</h2>
-              <button onClick={() => setShowSettings(false)} style={{background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b'}}>✕</button>
-            </div>
-
-            <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-              <div style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '20px'}}>
-                <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '12px'}}>📅 评审周期</h3>
-                <div>
-                  <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>当前周期</label>
-                  <input type="text" value={currentReviewPeriod} onChange={(e) => setCurrentReviewPeriod(e.target.value)} placeholder="例如: JUNE 2026" style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px'}} />
-                  <p style={{fontSize: '12px', color: '#64748b', marginTop: '6px'}}>格式: MONTH YEAR (例如: JUNE 2026)</p>
-                </div>
-              </div>
-
-              <div style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '20px'}}>
-                <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '12px'}}>📊 报告配置</h3>
-                <div>
-                  <label style={{fontSize: '13px', fontWeight: '700', color: '#334155', marginBottom: '8px', display: 'block'}}>选择要包含的 KPI</label>
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                    {['client_complaints', 'minor_delays', 'serious_errors', 'communication_issues', 'learning_application'].map(kpi => (
-                      <label key={kpi} style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
-                        <input
-                          type="checkbox"
-                          checked={selectedKPIs.includes(kpi)}
-                          onChange={(e) => e.target.checked ? setSelectedKPIs([...selectedKPIs, kpi]) : setSelectedKPIs(selectedKPIs.filter(k => k !== kpi))}
-                          style={{cursor: 'pointer'}}
-                        />
-                        <span style={{fontSize: '14px', color: '#475569'}}>{kpi.replace(/_/g, ' ').toUpperCase()}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{display: 'flex', gap: '12px', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
-                <button onClick={() => setShowSettings(false)} style={{flex: 1, padding: '12px 20px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#64748b', fontWeight: '600', cursor: 'pointer'}}>关闭</button>
-                <button onClick={() => {setShowSettings(false); alert('设置已保存');}} style={{flex: 1, padding: '12px 20px', border: 'none', borderRadius: '10px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', fontWeight: '600', cursor: 'pointer'}}>保存设置</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Detail Modal */}
+{/* Detail Modal */}
       {selectedDetail && (
         <div style={{
           position: 'fixed',
