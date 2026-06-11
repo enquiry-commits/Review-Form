@@ -11,6 +11,13 @@ export default function LeaderReviewForm() {
   const [user, setUser] = useState<User | null>(null);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
 
+  const departmentEmployees: {[key: string]: string[]} = {
+    'CORPORATE SECRETARIAL': ['Jenny Lai', 'Chin Kah Ye', 'Ang Shi Ming', 'Tey Shemin', 'Tan Min Quan'],
+    'ACCOUNTING': ['Tee Yu Heng', 'Vernice Chai', 'Chee Wei En'],
+    'TAX': ['Quinnie Tan', 'Victoria Yap'],
+    'Internal': ['Chelsea Ang']
+  };
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (!userData) {
@@ -161,32 +168,13 @@ export default function LeaderReviewForm() {
                 <input type="text" value={user.department || ''} disabled style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f0f4f8', fontFamily: 'inherit', cursor: 'not-allowed', opacity: 0.6}} />
               </div>
               <div>
-                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Review Period / 评审周期 *</label>
-                <input type="text" placeholder="e.g. April 2026" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
-              </div>
-              <div>
                 <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Your Name / 你的名字 *</label>
                 <input type="text" value={user.name || ''} disabled style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f0f4f8', fontFamily: 'inherit', cursor: 'not-allowed', opacity: 0.6}} />
               </div>
-            </div>
-
-            {/* Select Employee Section */}
-            <div style={{marginTop: '24px', paddingTop: '24px', borderTop: '1.5px solid #e2e8f0'}}>
-              <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Select Employee / 选择员工 *</label>
-              <select style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc', fontFamily: 'inherit', cursor: 'pointer'}}>
-                <option>-- Select Employee --</option>
-                <option>Jenny Lai</option>
-                <option>Chin Kah Ye</option>
-                <option>Ang Shi Ming</option>
-                <option>Tey Shemin</option>
-                <option>Tan Min Quan</option>
-                <option>Tee Yu Heng</option>
-                <option>Vernice Chai</option>
-                <option>Chee Wei En</option>
-                <option>Quinnie Tan</option>
-                <option>Victoria Yap</option>
-                <option>Chelsea Ang</option>
-              </select>
+              <div>
+                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Review Period / 评审周期 *</label>
+                <input type="text" placeholder="e.g. April 2026" style={{width: '100%', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', color: '#1a1a2e', background: '#f8fafc'}} />
+              </div>
             </div>
           </div>
 
@@ -213,6 +201,20 @@ export default function LeaderReviewForm() {
                     <div style={{marginBottom: '14px'}}>
                       <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.kpi}</p>
                       <p style={{fontSize: '13px', color: '#64748b', lineHeight: '1.7'}}>{item.question}</p>
+                    </div>
+                    <div style={{marginBottom: '14px', display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Employee / 员工</label>
+                        <select style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', color: '#1a1a2e', background: '#fff', fontFamily: 'inherit', cursor: 'pointer'}}>
+                          <option>-- Select Employee / 选择员工 --</option>
+                          {user.department && departmentEmployees[user.department]?.map(emp => (
+                            <option key={emp} value={emp}>{emp}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <button style={{padding: '10px 16px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', whiteSpace: 'nowrap'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}>
+                        Remove
+                      </button>
                     </div>
                     <div style={{marginBottom: '12px'}}>
                       <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Count / 数量</label>
@@ -242,6 +244,9 @@ export default function LeaderReviewForm() {
                   </div>
                 );
                 })}
+                <button style={{width: '100%', padding: '14px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '16px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
+                  + Add another employee / 增加另一个员工
+                </button>
               </div>
             </div>
           ))}
