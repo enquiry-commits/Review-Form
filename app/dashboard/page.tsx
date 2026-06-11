@@ -17,9 +17,12 @@ export default function Dashboard() {
       router.push('/');
       return;
     }
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
     setLoading(false);
-  }, [router]);
+    // 自动跳转到 self-review 页面
+    router.push('/dashboard/self-review');
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
