@@ -347,7 +347,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Client Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
@@ -379,7 +387,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Efficiency Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
@@ -411,7 +427,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Quality Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
@@ -443,7 +467,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Coordination Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
@@ -475,7 +507,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Development Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
@@ -502,7 +542,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Positive Items Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
               <span style={{
                 display: 'inline-flex',
