@@ -284,7 +284,15 @@ export default function SelfReviewForm() {
           </div>
 
           {/* Basic Info Section */}
-          <div style={{marginBottom: '40px'}}>
+          <div style={{
+            marginBottom: '40px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '24px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+            transition: 'all 0.3s'
+          }}>
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
               <div>
                 <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Department</label>
