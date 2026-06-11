@@ -4,12 +4,27 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+
+interface SubmissionRow {
+  id: string;
+  user_id: string;
+  submitted_at: string | null;
+  status: 'draft' | 'submitted';
+  department: string;
+  employee_name: string;
+  employee_email: string;
+  review_period: string;
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState('self-reviews');
+  const [selfReviews, setSelfReviews] = useState<SubmissionRow[]>([]);
+  const [leaderReviews, setLeaderReviews] = useState<SubmissionRow[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -23,8 +38,47 @@ export default function AdminDashboard() {
       return;
     }
     setUser(parsedUser);
-    setLoading(false);
+    fetchAllReviews();
   }, [router]);
+
+  const fetchAllReviews = async () => {
+    try {
+      const [selfRes, leaderRes] = await Promise.all([
+        supabase.from('self_review_submissions').select('*'),
+        supabase.from('leader_review_submissions').select('*')
+      ]);
+
+      if (selfRes.data) {
+        setSelfReviews(selfRes.data.map((r: any) => ({
+          id: r.id,
+          user_id: r.user_id,
+          submitted_at: r.submitted_at,
+          status: r.submitted_at ? 'submitted' : 'draft',
+          department: r.department,
+          employee_name: r.employee_name,
+          employee_email: r.employee_email,
+          review_period: r.review_period
+        })));
+      }
+
+      if (leaderRes.data) {
+        setLeaderReviews(leaderRes.data.map((r: any) => ({
+          id: r.id,
+          user_id: r.user_id,
+          submitted_at: r.submitted_at,
+          status: r.submitted_at ? 'submitted' : 'draft',
+          department: r.department,
+          employee_name: r.employee_name,
+          employee_email: r.employee_email,
+          review_period: r.review_period
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -41,13 +95,12 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const mockData = [
-    { date: '2026-06-10 14:32', dept: 'Corporate Secretarial', name: 'Jenny Lai', email: 'jennylai@tassure.com', period: 'June 2026', status: 'Completed', action: 'View Details' },
-    { date: '2026-06-10 11:45', dept: 'Accounting', name: 'Tee Yu Heng', email: 'yuheng@tassure.com', period: 'June 2026', status: 'Draft', action: 'View Details' },
-    { date: '2026-06-08 09:20', dept: 'Tax', name: 'Quinnie Tan', email: 'quinnietan@tassure.com', period: 'June 2026', status: 'Completed', action: 'View Details' },
-    { date: '-', dept: 'Corporate Secretarial', name: 'Chin Kah Ye', email: 'kahye@tassure.com', period: 'June 2026', status: 'Pending', action: 'Send Reminder' },
-    { date: '-', dept: 'Accounting', name: 'Vernice Chai', email: 'vernice@tassure.com', period: 'June 2026', status: 'Pending', action: 'Send Reminder' },
-  ];
+  const displayData = activeMenu === 'self-reviews' ? selfReviews : leaderReviews;
+  const filteredData = displayData.filter(row =>
+    row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.employee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getStatusColor = (status: string) => {
     if (status === 'Completed') return { bg: '#d1fae5', color: '#065f46' };
@@ -215,6 +268,8 @@ export default function AdminDashboard() {
             <input
               type="text"
               placeholder="Search name, email, department..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px 14px 10px 36px',
@@ -228,7 +283,7 @@ export default function AdminDashboard() {
             <div style={{position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px'}}>🔍</div>
           </div>
           <div style={{display: 'flex', gap: '10px'}}>
-            <button style={{
+            <button onClick={fetchAllReviews} style={{
               padding: '10px 16px',
               border: 'none',
               borderRadius: '10px',
@@ -238,19 +293,6 @@ export default function AdminDashboard() {
               background: 'linear-gradient(135deg, #1e3a5f, #162d4a)',
               color: 'white',
               boxShadow: '0 4px 12px rgba(30, 58, 95, 0.25)',
-              transition: 'all 0.3s'
-            }}>
-              📥 Export CSV
-            </button>
-            <button style={{
-              padding: '10px 16px',
-              border: '1.5px solid rgba(126, 184, 212, 0.3)',
-              borderRadius: '10px',
-              fontSize: '13px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              background: 'rgba(126, 184, 212, 0.12)',
-              color: '#1e3a5f',
               transition: 'all 0.3s'
             }}>
               🔄 Refresh
@@ -280,20 +322,21 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {mockData.map((row, idx) => {
-                const statusColor = getStatusColor(row.status);
+              {filteredData.length > 0 ? filteredData.map((row, idx) => {
+                const statusColor = getStatusColor(row.status === 'submitted' ? 'Completed' : 'Draft');
+                const submittedDate = row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-';
                 return (
                   <tr
-                    key={idx}
-                    style={{borderBottom: idx < mockData.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
+                    key={row.id}
+                    style={{borderBottom: idx < filteredData.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
                     onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}}
                     onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
                   >
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.date}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.dept}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.name}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.email}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.period}</td>
+                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{submittedDate}</td>
+                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.department}</td>
+                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.employee_name}</td>
+                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.employee_email}</td>
+                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.review_period}</td>
                     <td style={{padding: '16px 18px', fontSize: '13px'}}>
                       <span style={{
                         display: 'inline-flex',
@@ -306,7 +349,7 @@ export default function AdminDashboard() {
                         background: statusColor.bg,
                         color: statusColor.color
                       }}>
-                        {row.status === 'Completed' ? '✓ Completed' : row.status === 'Draft' ? '⏱ Draft' : '⚠ Pending'}
+                        {row.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                       </span>
                     </td>
                     <td style={{padding: '16px 18px'}}>
@@ -324,12 +367,18 @@ export default function AdminDashboard() {
                       onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.3)'}}
                       onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.15)'}}
                       >
-                        {row.action}
+                        View Details
                       </button>
                     </td>
                   </tr>
                 );
-              })}
+              }) : (
+                <tr>
+                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                    No submissions yet
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
