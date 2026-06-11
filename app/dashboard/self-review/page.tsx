@@ -283,10 +283,10 @@ export default function SelfReviewForm() {
           }}>
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
               <div>
-                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Department</label>
+                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Department / 部门 *</label>
                 <input type="text" value={user.department || ''} disabled style={{
                   width: '100%',
-                  padding: '13px 16px',
+                  padding: '12px 16px',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
                   fontSize: '14px',
@@ -298,10 +298,10 @@ export default function SelfReviewForm() {
                 }} />
               </div>
               <div>
-                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Your Name</label>
+                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Your Name / 你的名字 *</label>
                 <input type="text" value={user.name || ''} disabled style={{
                   width: '100%',
-                  padding: '13px 16px',
+                  padding: '12px 16px',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
                   fontSize: '14px',
@@ -313,15 +313,15 @@ export default function SelfReviewForm() {
                 }} />
               </div>
               <div>
-                <label style={{fontSize: '12px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', textTransform: 'uppercase', display: 'block'}}>Review Period</label>
+                <label style={{fontSize: '13px', color: '#334155', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.4px', display: 'block'}}>Review Period / 评审周期 *</label>
                 <input type="text" placeholder="e.g. June 2026" style={{
                   width: '100%',
-                  padding: '13px 16px',
+                  padding: '12px 16px',
                   border: '1.5px solid #e2e8f0',
                   borderRadius: '12px',
                   fontSize: '14px',
                   color: '#1a1a2e',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  background: '#f8fafc',
                   fontFamily: 'inherit',
                   transition: 'all 0.3s'
                 }} />
