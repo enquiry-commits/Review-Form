@@ -10,12 +10,32 @@ export default function LeaderReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [fileLinks, setFileLinks] = useState<{[key: string]: Array<{name: string; url: string}>}>({});
+  const [employeeRows, setEmployeeRows] = useState<{[key: string]: number}>({});
 
   const departmentEmployees: {[key: string]: string[]} = {
     'CORPORATE SECRETARIAL': ['Jenny Lai', 'Chin Kah Ye', 'Ang Shi Ming', 'Tey Shemin', 'Tan Min Quan'],
     'ACCOUNTING': ['Tee Yu Heng', 'Vernice Chai', 'Chee Wei En'],
     'TAX': ['Quinnie Tan', 'Victoria Yap'],
     'Internal': ['Chelsea Ang']
+  };
+
+  const getRowCount = (kpiId: string) => employeeRows[kpiId] || 1;
+
+  const addEmployeeRow = (kpiId: string) => {
+    setEmployeeRows(prev => ({
+      ...prev,
+      [kpiId]: (prev[kpiId] || 1) + 1
+    }));
+  };
+
+  const removeEmployeeRow = (kpiId: string, rowIdx: number) => {
+    const currentCount = getRowCount(kpiId);
+    if (currentCount > 1) {
+      setEmployeeRows(prev => ({
+        ...prev,
+        [kpiId]: currentCount - 1
+      }));
+    }
   };
 
   useEffect(() => {
@@ -195,58 +215,68 @@ export default function LeaderReviewForm() {
               </div>
               <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
                 {cat.items.map((item, itemIdx) => {
-                  const fieldId = `kpi_${idx}_${itemIdx}`;
+                  const kpiId = `kpi_${idx}_${itemIdx}`;
+                  const rowCount = getRowCount(kpiId);
                   return (
-                  <div key={itemIdx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
-                    <div style={{marginBottom: '14px'}}>
-                      <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.kpi}</p>
-                      <p style={{fontSize: '13px', color: '#64748b', lineHeight: '1.7'}}>{item.question}</p>
-                    </div>
-                    <div style={{marginBottom: '14px', display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
-                      <div style={{flex: 1}}>
-                        <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Employee / 员工</label>
-                        <select style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', color: '#1a1a2e', background: '#fff', fontFamily: 'inherit', cursor: 'pointer'}}>
-                          <option>-- Select Employee / 选择员工 --</option>
-                          {user.department && departmentEmployees[user.department]?.map(emp => (
-                            <option key={emp} value={emp}>{emp}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <button style={{padding: '10px 16px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', whiteSpace: 'nowrap'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}>
-                        Remove
+                    <div key={itemIdx}>
+                      {Array.from({length: rowCount}).map((_, rowIdx) => {
+                        const fieldId = `${kpiId}_${rowIdx}`;
+                        return (
+                          <div key={rowIdx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc', marginBottom: rowIdx < rowCount - 1 ? '14px' : '0'}}>
+                            <div style={{marginBottom: '14px'}}>
+                              <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.kpi}</p>
+                              <p style={{fontSize: '13px', color: '#64748b', lineHeight: '1.7'}}>{item.question}</p>
+                            </div>
+                            <div style={{marginBottom: '14px', display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
+                              <div style={{flex: 1}}>
+                                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Employee / 员工</label>
+                                <select style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', color: '#1a1a2e', background: '#fff', fontFamily: 'inherit', cursor: 'pointer'}}>
+                                  <option>-- Select Employee / 选择员工 --</option>
+                                  {user.department && departmentEmployees[user.department]?.map(emp => (
+                                    <option key={emp} value={emp}>{emp}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              {rowCount > 1 && (
+                                <button onClick={() => removeEmployeeRow(kpiId, rowIdx)} style={{padding: '10px 16px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s', whiteSpace: 'nowrap'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#fecaca'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#fee2e2'}}>
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                            <div style={{marginBottom: '12px'}}>
+                              <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Count / 数量</label>
+                              <input type="number" min="0" placeholder="0" id={`count_${fieldId}`} style={{width: '100%', padding: '11px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '15px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#fff'}} />
+                            </div>
+                            <div style={{marginBottom: '12px'}}>
+                              <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
+                              <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+                            </div>
+                            <div>
+                              <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                              <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#1e3a5f'; e.currentTarget.style.background = '#eaf0f7'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
+                                <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                                <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
+                              </div>
+                              {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
+                                <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                                  {fileLinks[fieldId].map((file, fIdx) => (
+                                    <div key={fIdx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                                      <span>📄 {file.name}</span>
+                                      <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <button onClick={() => addEmployeeRow(kpiId)} style={{width: '100%', padding: '12px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', marginTop: '12px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
+                        + Add another employee / 增加另一个员工
                       </button>
                     </div>
-                    <div style={{marginBottom: '12px'}}>
-                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Count / 数量</label>
-                      <input type="number" min="0" placeholder="0" id={`count_${fieldId}`} style={{width: '100%', padding: '11px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '15px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#fff'}} />
-                    </div>
-                    <div style={{marginBottom: '12px'}}>
-                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                      <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
-                    </div>
-                    <div>
-                      <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                      <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#1e3a5f'; e.currentTarget.style.background = '#eaf0f7'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f8fafc'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
-                        <input type="file" id={`file_${fieldId}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload(fieldId, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                        <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                      </div>
-                      {fileLinks[fieldId] && fileLinks[fieldId].length > 0 && (
-                        <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                          {fileLinks[fieldId].map((file, fIdx) => (
-                            <div key={fIdx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                              <span>📄 {file.name}</span>
-                              <button onClick={() => removeFile(fieldId, fIdx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
+                  );
                 })}
-                <button style={{width: '100%', padding: '14px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', marginTop: '16px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
-                  + Add another employee / 增加另一个员工
-                </button>
               </div>
             </div>
           ))}
