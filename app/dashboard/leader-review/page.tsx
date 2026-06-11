@@ -153,7 +153,7 @@ export default function LeaderReviewForm() {
           ← Back to Dashboard
         </Link>
 
-        <div style={{background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', borderRadius: '24px', padding: '48px', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)', border: '1px solid rgba(30, 58, 95, 0.06)'}}>
+        <div>
           {/* Form Header */}
           <div style={{textAlign: 'center', marginBottom: '48px', paddingBottom: '32px', borderBottom: '1px solid rgba(30, 58, 95, 0.08)'}}>
             <h1 style={{fontSize: '36px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>Leader Review Form / 主管评价表</h1>

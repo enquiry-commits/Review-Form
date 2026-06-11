@@ -264,14 +264,7 @@ export default function SelfReviewForm() {
           ← Back to Dashboard
         </Link>
 
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '24px',
-          padding: '48px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
-          border: '1px solid rgba(30, 58, 95, 0.06)'
-        }}>
+        <div>
           {/* Form Header */}
           <div style={{
             textAlign: 'center',
