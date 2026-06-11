@@ -17,12 +17,9 @@ export default function Dashboard() {
       router.push('/');
       return;
     }
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
+    setUser(JSON.parse(userData));
     setLoading(false);
-    // 自动跳转到 self-review 页面
-    router.push('/dashboard/self-review');
-  }, []);
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -30,13 +27,7 @@ export default function Dashboard() {
   };
 
   const handleTabClick = (tabId: string) => {
-    if (tabId === 'self-review') {
-      router.push('/dashboard/self-review');
-    } else if (tabId === 'leader-review') {
-      router.push('/dashboard/leader-review');
-    } else if (tabId === 'admin-dashboard') {
-      router.push('/dashboard/admin-dashboard');
-    }
+    setActiveTab(tabId);
   };
 
   if (loading) {
@@ -150,7 +141,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Content - Redirect on first load */}
+      {/* Content */}
+      <div style={{padding: '32px', minHeight: '100vh', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+        {activeTab === 'self-review' && (
+          <iframe src="/dashboard/self-review" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+        )}
+        {activeTab === 'leader-review' && (
+          <iframe src="/dashboard/leader-review" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+        )}
+        {activeTab === 'admin-dashboard' && (
+          <iframe src="/dashboard/admin-dashboard" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+        )}
+      </div>
     </div>
   );
 }

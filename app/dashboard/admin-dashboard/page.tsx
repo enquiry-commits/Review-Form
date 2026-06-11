@@ -25,6 +25,7 @@ export default function AdminDashboard() {
   const [selfReviews, setSelfReviews] = useState<SubmissionRow[]>([]);
   const [leaderReviews, setLeaderReviews] = useState<SubmissionRow[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isEmbedded, setIsEmbedded] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
       return;
     }
     setUser(parsedUser);
+    setIsEmbedded(window.self !== window.top);
     fetchAllReviews();
   }, [router]);
 
@@ -111,48 +113,50 @@ export default function AdminDashboard() {
   return (
     <div style={{display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
       {/* Navbar (above everything) */}
-      <div style={{gridColumn: '1 / -1', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', borderBottom: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'}}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          maxWidth: '1600px',
-          margin: '0 auto',
-          padding: '0 32px',
-          height: '70px'
-        }}>
-          <Link href="/dashboard" style={{
+      {!isEmbedded && (
+        <div style={{gridColumn: '1 / -1', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', borderBottom: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'}}>
+          <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            textDecoration: 'none'
+            justifyContent: 'space-between',
+            maxWidth: '1600px',
+            margin: '0 auto',
+            padding: '0 32px',
+            height: '70px'
           }}>
-            <img src="/tassure-logo.png" alt="Tassure" style={{height: '32px', width: 'auto'}} />
-            <div style={{fontSize: '14px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
-          </Link>
-          <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-            <span style={{fontSize: '14px', color: '#64748b'}}>{user.name}</span>
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#1e3a5f',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: '10px',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)'}}
-              onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
-            >
-              Logout
-            </button>
+            <Link href="/dashboard" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              textDecoration: 'none'
+            }}>
+              <img src="/tassure-logo.png" alt="Tassure" style={{height: '32px', width: 'auto'}} />
+              <div style={{fontSize: '14px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
+            </Link>
+            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+              <span style={{fontSize: '14px', color: '#64748b'}}>{user.name}</span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1e3a5f',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: '10px',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)'}}
+                onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Sidebar */}
       <div style={{
