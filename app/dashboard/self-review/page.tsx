@@ -129,7 +129,8 @@ export default function SelfReviewForm() {
           borderRadius: '12px',
           fontSize: '13px',
           fontFamily: 'inherit',
-          resize: 'vertical'
+          resize: 'vertical',
+          background: '#fff'
         }} />
       </div>
       <div style={{marginTop: '14px'}}>
@@ -578,7 +579,7 @@ export default function SelfReviewForm() {
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Written Client Compliment / 客户书面表扬</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client proactively sent email/message with explicit praise (not routine thanks) / 客户主动发email/message有明确表扬，非常规感谢</p>
-                <textarea id="pos_compliment_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
+                <textarea id="pos_compliment_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px', background: '#fff'}} />
                 <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
                   <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
                   <div style={{

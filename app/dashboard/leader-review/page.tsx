@@ -265,7 +265,7 @@ export default function LeaderReviewForm() {
                             </div>
                             <div style={{marginBottom: '12px'}}>
                               <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                              <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit'}} />
+                              <textarea id={`comment_${fieldId}`} placeholder="Enter your assessment... / 请填写评价" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', background: '#fff'}} />
                             </div>
                             <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
                               <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
@@ -351,7 +351,7 @@ export default function LeaderReviewForm() {
                       return (
                         <div key={rowIdx} style={{marginBottom: rowIdx < rowCount - 1 ? '24px' : '0', paddingBottom: rowIdx < rowCount - 1 ? '24px' : '0', borderBottom: rowIdx < rowCount - 1 ? '1.5px solid #e2e8f0' : 'none'}}>
                           <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Leader Comment / 主管评语</label>
-                          <textarea id={`comment_${fieldId}`} placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
+                          <textarea id={`comment_${fieldId}`} placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px', background: '#fff'}} />
                           <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
                             <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
                             <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById(`file_${fieldId}`)?.click()}>
@@ -391,7 +391,7 @@ export default function LeaderReviewForm() {
               <span style={{fontSize: '17px', fontWeight: '800', color: '#0f172a'}}>Overall Remarks / 整体补充说明</span>
             </div>
             <p style={{fontSize: '13px', color: '#6b7280', marginBottom: '12px'}}>Any additional comments or observations for the team this review period. / 本评审周期内对部门的整体补充说明。</p>
-            <textarea id="overall_remarks" placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '100px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit', marginBottom: '12px'}} />
+            <textarea id="overall_remarks" placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '100px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit', marginBottom: '12px', background: '#fff'}} />
             <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
               <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
               <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_overall_remarks')?.click()}>
