@@ -385,16 +385,16 @@ export default function LeaderReviewForm() {
           </div>
 
           {/* Overall Remarks Section */}
-          <div style={{background: 'linear-gradient(135deg, #faf5ff, #fff)', border: 'none', borderLeft: '4px solid #7eb8d4', borderRadius: '0 24px 24px 0', padding: '2.5rem', marginBottom: '40px', boxShadow: '0 24px 64px rgba(0,0,0,0.08)'}}>
+          <div style={{background: '#1e3a5f', borderRadius: '16px', padding: '32px', marginBottom: '40px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)'}}>
             <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px'}}>
-              <span style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#7eb8d4', color: 'white', borderRadius: '8px', fontSize: '13px', fontWeight: '800', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'}}>🎯 Overall</span>
-              <span style={{fontSize: '17px', fontWeight: '800', color: '#0f172a'}}>Overall Remarks / 整体补充说明</span>
+              <span style={{display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#7eb8d4', color: 'white', borderRadius: '8px', fontSize: '13px', fontWeight: '800', boxShadow: '0 2px 8px rgba(0,0,0,0.15)'}}>🎯 Overall</span>
+              <span style={{fontSize: '18px', fontWeight: '800', color: 'white'}}>Overall Remarks / 整体补充说明</span>
             </div>
-            <p style={{fontSize: '13px', color: '#6b7280', marginBottom: '12px'}}>Any additional comments or observations for the team this review period. / 本评审周期内对部门的整体补充说明。</p>
-            <textarea id="overall_remarks" placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '100px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit', marginBottom: '12px', background: '#fff'}} />
-            <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+            <p style={{fontSize: '13px', color: '#cbd5e1', marginBottom: '16px'}}>Any additional comments or observations for the team this review period. / 本评审周期内对部门的整体补充说明。</p>
+            <textarea id="overall_remarks" placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充" style={{width: '100%', minHeight: '120px', padding: '14px 16px', border: 'none', borderRadius: '12px', fontSize: '14px', fontFamily: 'inherit', marginBottom: '16px', background: '#fff'}} />
+            <div style={{background: 'rgba(255, 255, 255, 0.95)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '16px'}}>
               <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
-              <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_overall_remarks')?.click()}>
+              <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.04)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.1)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.04)'}} onClick={() => document.getElementById('file_overall_remarks')?.click()}>
                 <input type="file" id="file_overall_remarks" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('overall_remarks', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
                 <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
                 <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
