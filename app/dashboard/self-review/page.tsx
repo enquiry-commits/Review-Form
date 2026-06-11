@@ -579,24 +579,25 @@ export default function SelfReviewForm() {
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Written Client Compliment / 客户书面表扬</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client proactively sent email/message with explicit praise (not routine thanks) / 客户主动发email/message有明确表扬，非常规感谢</p>
                 <textarea id="pos_compliment_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{
-                  border: '2px dashed #cbd5e1',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  textAlign: 'center',
-                  background: '#f8fafc',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#1e3a5f';
-                  e.currentTarget.style.background = '#eaf0f7';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                  e.currentTarget.style.background = '#f8fafc';
-                }}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{
+                    border: '1.5px dashed #7eb8d4',
+                    borderRadius: '10px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    background: 'rgba(126, 184, 212, 0.06)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#5a9bc4';
+                    e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#7eb8d4';
+                    e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)';
+                  }}
                 onClick={() => document.getElementById('file_pos_compliment')?.click()}
                 >
                   <input
@@ -607,20 +608,21 @@ export default function SelfReviewForm() {
                     onChange={(e) => e.target.files && handleFileUpload('pos_compliment', e.target.files)}
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                   />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>
-                    📁 Click to upload
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
                 </div>
                 {fileLinks['pos_compliment'] && fileLinks['pos_compliment'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_compliment'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_compliment', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
+                        <button onClick={() => removeFile('pos_compliment', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Client Requested Same Staff / 客户点名继续服务</p>
@@ -632,15 +634,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_requested'] && fileLinks['pos_requested'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_requested'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_requested', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Prevented Major Risk / Penalty / 避免重大风险／罚款</p>
@@ -652,15 +655,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_prevented'] && fileLinks['pos_prevented'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_prevented'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_prevented', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Recovered Client / 挽回客户</p>
@@ -672,15 +676,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_recovered'] && fileLinks['pos_recovered'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_recovered'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_recovered', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Resolved Legacy / Complex Issues / 解决遗留／复杂问题</p>
@@ -692,15 +697,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_resolved'] && fileLinks['pos_resolved'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_resolved'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_resolved', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Additional Business Opportunity / 额外业务机会</p>
@@ -712,15 +718,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_business'] && fileLinks['pos_business'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_business'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_business', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Special Contribution / 特别贡献</p>
@@ -732,15 +739,16 @@ export default function SelfReviewForm() {
                   <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
                 </div>
                 {fileLinks['pos_special'] && fileLinks['pos_special'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                  <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
                     {fileLinks['pos_special'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
+                      <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                         <span>📄 {file.name}</span>
                         <button onClick={() => removeFile('pos_special', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
                       </div>
                     ))}
                   </div>
                 )}
+                </div>
               </div>
             </div>
           </div>
