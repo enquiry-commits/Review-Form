@@ -218,11 +218,11 @@ export default function LeaderReviewForm() {
                   const kpiId = `kpi_${idx}_${itemIdx}`;
                   const rowCount = getRowCount(kpiId);
                   return (
-                    <div key={itemIdx}>
+                    <div key={itemIdx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                       {Array.from({length: rowCount}).map((_, rowIdx) => {
                         const fieldId = `${kpiId}_${rowIdx}`;
                         return (
-                          <div key={rowIdx} style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc', marginBottom: rowIdx < rowCount - 1 ? '14px' : '0'}}>
+                          <div key={rowIdx} style={{marginBottom: rowIdx < rowCount - 1 ? '24px' : '0', paddingBottom: rowIdx < rowCount - 1 ? '24px' : '0', borderBottom: rowIdx < rowCount - 1 ? '1.5px solid #e2e8f0' : 'none'}}>
                             <div style={{marginBottom: '14px'}}>
                               <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{item.kpi}</p>
                               <p style={{fontSize: '13px', color: '#64748b', lineHeight: '1.7'}}>{item.question}</p>
@@ -271,9 +271,11 @@ export default function LeaderReviewForm() {
                           </div>
                         );
                       })}
-                      <button onClick={() => addEmployeeRow(kpiId)} style={{width: '100%', padding: '12px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', marginTop: '12px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
-                        + Add another employee / 增加另一个员工
-                      </button>
+                      <div style={{marginTop: '16px', paddingTop: '16px', borderTop: '1.5px solid #e2e8f0'}}>
+                        <button onClick={() => addEmployeeRow(kpiId)} style={{width: '100%', padding: '12px 24px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.background = '#152840'}} onMouseLeave={(e) => {e.currentTarget.style.background = '#1e3a5f'}}>
+                          + Add another employee / 增加另一个员工
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
