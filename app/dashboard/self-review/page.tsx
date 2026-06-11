@@ -579,168 +579,191 @@ export default function SelfReviewForm() {
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Written Client Compliment / 客户书面表扬</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client proactively sent email/message with explicit praise (not routine thanks) / 客户主动发email/message有明确表扬，非常规感谢</p>
                 <textarea id="pos_compliment_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{
-                  border: '2px dashed #cbd5e1',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  textAlign: 'center',
-                  background: '#f8fafc',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#1e3a5f';
-                  e.currentTarget.style.background = '#eaf0f7';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                  e.currentTarget.style.background = '#f8fafc';
-                }}
-                onClick={() => document.getElementById('file_pos_compliment')?.click()}
-                >
-                  <input
-                    type="file"
-                    id="file_pos_compliment"
-                    multiple
-                    style={{display: 'none'}}
-                    onChange={(e) => e.target.files && handleFileUpload('pos_compliment', e.target.files)}
-                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                  />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>
-                    📁 Click to upload
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{
+                    border: '1.5px dashed #7eb8d4',
+                    borderRadius: '10px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    background: 'rgba(126, 184, 212, 0.06)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#5a9bc4';
+                    e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#7eb8d4';
+                    e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)';
+                  }}
+                  onClick={() => document.getElementById('file_pos_compliment')?.click()}
+                  >
+                    <input
+                      type="file"
+                      id="file_pos_compliment"
+                      multiple
+                      style={{display: 'none'}}
+                      onChange={(e) => e.target.files && handleFileUpload('pos_compliment', e.target.files)}
+                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                    />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>
+                      📁 Click or drag files to upload / 点击或拖拽文件上传
+                    </div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>
+                      Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel
+                    </div>
                   </div>
+                  {fileLinks['pos_compliment'] && fileLinks['pos_compliment'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_compliment'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_compliment', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {fileLinks['pos_compliment'] && fileLinks['pos_compliment'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_compliment'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_compliment', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Client Requested Same Staff / 客户点名继续服务</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Client explicitly requested the same employee or gave special recognition / 客户明确要求继续由该员工负责，有特别认可</p>
                 <textarea id="pos_requested_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_requested')?.click()}>
-                  <input type="file" id="file_pos_requested" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_requested', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_requested'] && fileLinks['pos_requested'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_requested'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_requested', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_requested')?.click()}>
+                    <input type="file" id="file_pos_requested" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_requested', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_requested'] && fileLinks['pos_requested'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_requested'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_requested', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Prevented Major Risk / Penalty / 避免重大风险／罚款</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Identified issues outside scope and prevented significant losses / 超职责范围发现问题并避免重大损失</p>
                 <textarea id="pos_prevented_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_prevented')?.click()}>
-                  <input type="file" id="file_pos_prevented" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_prevented', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_prevented'] && fileLinks['pos_prevented'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_prevented'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_prevented', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_prevented')?.click()}>
+                    <input type="file" id="file_pos_prevented" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_prevented', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_prevented'] && fileLinks['pos_prevented'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_prevented'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_prevented', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Recovered Client / 挽回客户</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Successfully retained a client at risk of leaving / 已有流失风险客户被成功挽回</p>
                 <textarea id="pos_recovered_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_recovered')?.click()}>
-                  <input type="file" id="file_pos_recovered" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_recovered', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_recovered'] && fileLinks['pos_recovered'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_recovered'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_recovered', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_recovered')?.click()}>
+                    <input type="file" id="file_pos_recovered" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_recovered', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_recovered'] && fileLinks['pos_recovered'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_recovered'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_recovered', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Resolved Legacy / Complex Issues / 解决遗留／复杂问题</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Took over and resolved problems not caused by themselves / 接手非本人造成的问题并成功处理</p>
                 <textarea id="pos_resolved_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_resolved')?.click()}>
-                  <input type="file" id="file_pos_resolved" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_resolved', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_resolved'] && fileLinks['pos_resolved'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_resolved'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_resolved', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_resolved')?.click()}>
+                    <input type="file" id="file_pos_resolved" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_resolved', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_resolved'] && fileLinks['pos_resolved'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_resolved'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_resolved', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Additional Business Opportunity / 额外业务机会</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Referral / upsell / cross-sell (outside sales role) / 转介业务</p>
                 <textarea id="pos_business_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_business')?.click()}>
-                  <input type="file" id="file_pos_business" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_business', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_business'] && fileLinks['pos_business'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_business'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_business', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_business')?.click()}>
+                    <input type="file" id="file_pos_business" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_business', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_business'] && fileLinks['pos_business'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_business'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_business', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div style={{border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '1.5rem', background: '#f8fafc'}}>
                 <p style={{fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>Special Contribution / 特别贡献</p>
                 <p style={{fontSize: '13px', color: '#64748b', marginBottom: '12px'}}>Contribution clearly beyond job scope, requires manager explanation / 有明显超出岗位职责的贡献，需主管说明</p>
                 <textarea id="pos_special_desc" placeholder="Evidence / Event description... / 证据／事件描述" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', marginBottom: '12px'}} />
-                <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Upload Evidence / 上传证据</label>
-                <div style={{border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '16px', textAlign: 'center', background: '#f8fafc', cursor: 'pointer'}} onClick={() => document.getElementById('file_pos_special')?.click()}>
-                  <input type="file" id="file_pos_special" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_special', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-                  <div style={{fontSize: '12px', color: '#1e3a5f', fontWeight: '700'}}>📁 Click to upload</div>
-                </div>
-                {fileLinks['pos_special'] && fileLinks['pos_special'].length > 0 && (
-                  <div style={{marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                    {fileLinks['pos_special'].map((file, idx) => (
-                      <div key={idx} style={{fontSize: '11px', color: '#1e3a5f', background: '#eaf0f7', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                        <span>📄 {file.name}</span>
-                        <button onClick={() => removeFile('pos_special', idx)} style={{background: 'none', border: 'none', color: '#1e3a5f', cursor: 'pointer'}}>✕</button>
-                      </div>
-                    ))}
+                <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+                  <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+                  <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'}} onMouseLeave={(e) => {e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}} onClick={() => document.getElementById('file_pos_special')?.click()}>
+                    <input type="file" id="file_pos_special" multiple style={{display: 'none'}} onChange={(e) => e.target.files && handleFileUpload('pos_special', e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+                    <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                    <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
                   </div>
-                )}
+                  {fileLinks['pos_special'] && fileLinks['pos_special'].length > 0 && (
+                    <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+                      {fileLinks['pos_special'].map((file, idx) => (
+                        <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <span>📄 {file.name}</span>
+                          <button onClick={() => removeFile('pos_special', idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
