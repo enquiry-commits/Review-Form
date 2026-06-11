@@ -113,7 +113,7 @@ export default function LeaderReviewForm() {
       }]);
 
       if (error) throw error;
-      router.push('/dashboard/submission-success?type=leader-review');
+      router.push('/dashboard/leader-review-success');
     } catch (error) {
       console.error('提交失败:', error);
       alert('提交失败，请重试');
