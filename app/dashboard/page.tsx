@@ -143,13 +143,58 @@ export default function Dashboard() {
       {/* Content */}
       <div style={{flex: 1, overflowY: 'auto', padding: '32px', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
         {activeTab === 'self-review' && (
-          <iframe src="/dashboard/self-review" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+          <iframe
+            src="/dashboard/self-review"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
         )}
         {activeTab === 'leader-review' && (
-          <iframe src="/dashboard/leader-review" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+          <iframe
+            src="/dashboard/leader-review"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
         )}
         {activeTab === 'admin-dashboard' && (
-          <iframe src="/dashboard/admin-dashboard" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
+          <iframe
+            src="/dashboard/admin-dashboard"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
         )}
       </div>
     </div>
