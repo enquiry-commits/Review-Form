@@ -919,8 +919,12 @@ export default function AdminDashboard() {
           const person = personMap.get(selEmail);
           const personSelf = tableAllSelf.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
           const personLeader = tableAllLeader.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
-          // All unique periods for this person
-          const periods = [...new Set([...personSelf, ...personLeader].map(r=>r.review_period))].sort().reverse();
+          // All unique years across all data
+          const allYears = [...new Set([...tableAllSelf, ...tableAllLeader].map(r=>r.review_period?.split('-')[0]).filter(Boolean))].sort().reverse();
+          const selPersonYear = tableYearSel || allYears[0] || '';
+          // All unique periods for this person, filtered by year
+          const allPeriods = [...new Set([...personSelf, ...personLeader].map(r=>r.review_period))].sort().reverse();
+          const periods = selPersonYear ? allPeriods.filter(p => p.startsWith(selPersonYear)) : allPeriods;
 
           const statusCell = (row: SubmissionRow | undefined) => row
             ? <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:row.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor:'pointer'}}
@@ -946,8 +950,19 @@ export default function AdminDashboard() {
 
           return (
             <div>
-              {/* Demo toggle */}
-              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'12px'}}>
+              {/* Year filter + Demo toggle */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+                <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                  <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Year:</span>
+                  {allYears.map(y => (
+                    <button key={y} onClick={() => setTableYearSel(y)}
+                      style={{padding:'6px 18px',borderRadius:'8px',border:'1.5px solid',fontWeight:'700',fontSize:'13px',cursor:'pointer',transition:'all 0.2s',
+                        borderColor: selPersonYear===y?'#1e3a5f':'#e2e8f0',
+                        background: selPersonYear===y?'#1e3a5f':'white',
+                        color: selPersonYear===y?'white':'#64748b'
+                      }}>{y}</button>
+                  ))}
+                </div>
                 {tableDemoMode
                   ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
                   : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
