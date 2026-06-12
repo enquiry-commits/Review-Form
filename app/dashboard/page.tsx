@@ -56,6 +56,7 @@ export default function Dashboard() {
     { id: 'self-review', label: 'Employee Self Review', allowed: true },
     { id: 'leader-review', label: 'Leader Review', allowed: hasAccess(user.role, 'leader-review') },
     { id: 'admin-dashboard', label: 'Admin Dashboard', allowed: hasAccess(user.role, 'admin-dashboard') },
+    { id: 'suggestion-box', label: '💬 Suggestion Box', allowed: true },
   ];
 
   const visibleTabs = tabs.filter(t => t.allowed);
@@ -206,6 +207,24 @@ export default function Dashboard() {
               observer.observe(iframe.contentDocument!.body);
             }}
             style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
+        )}
+        {activeTab === 'suggestion-box' && (
+          <iframe
+            src="/dashboard/suggestion-box"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '700px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
           />
         )}
       </div>

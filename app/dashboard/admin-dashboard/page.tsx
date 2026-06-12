@@ -18,6 +18,17 @@ interface SubmissionRow {
   form_data?: any;
 }
 
+interface SuggestionRow {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  department: string;
+  suggestion: string;
+  files: Array<{name: string; url: string}>;
+  submitted_at: string | null;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -25,6 +36,9 @@ export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState('self-reviews');
   const [selfReviews, setSelfReviews] = useState<SubmissionRow[]>([]);
   const [leaderReviews, setLeaderReviews] = useState<SubmissionRow[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionRow[]>([]);
+  const [totalSuggestions, setTotalSuggestions] = useState(0);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionRow | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isEmbedded, setIsEmbedded] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState<SubmissionRow | null>(null);
@@ -51,6 +65,7 @@ export default function AdminDashboard() {
     setUser(parsedUser);
     setIsEmbedded(window.self !== window.top);
     fetchAllReviews(currentPage);
+    fetchSuggestions(currentPage);
   }, [router, currentPage]);
 
   const handleActiveMenuChange = (menu: string) => {
@@ -61,6 +76,17 @@ export default function AdminDashboard() {
     setFilterStatus('');
     setFilterYear('');
     setFilterMonth('');
+  };
+
+  const fetchSuggestions = async (page: number = 0) => {
+    const start = page * pageSize;
+    const end = start + pageSize - 1;
+    const [countRes, dataRes] = await Promise.all([
+      supabase.from('suggestion_submissions').select('id', { count: 'exact', head: true }),
+      supabase.from('suggestion_submissions').select('*').order('submitted_at', { ascending: false }).range(start, end)
+    ]);
+    setTotalSuggestions(countRes.count || 0);
+    if (dataRes.data) setSuggestions(dataRes.data as SuggestionRow[]);
   };
 
   const fetchAllReviews = async (page: number = 0) => {
@@ -112,6 +138,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteSuggestion = async (row: SuggestionRow) => {
+    if (!confirm(`Delete suggestion by ${row.user_name}? This cannot be undone.`)) return;
+    const { error } = await supabase.from('suggestion_submissions').delete().eq('id', row.id);
+    if (error) {
+      alert('Delete failed: ' + error.message);
+    } else {
+      fetchSuggestions(currentPage);
+    }
+  };
+
   const handleDelete = async (row: SubmissionRow) => {
     if (!confirm(`Delete submission by ${row.employee_name}? This cannot be undone.`)) return;
     const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
@@ -124,6 +160,29 @@ export default function AdminDashboard() {
   };
 
   const handleExportAll = async () => {
+    if (activeMenu === 'suggestions') {
+      const { data, error } = await supabase.from('suggestion_submissions').select('*').order('submitted_at', { ascending: false });
+      if (error || !data) { alert('Export failed: ' + error?.message); return; }
+      const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const headers = ['Submitted At', 'Name', 'Email', 'Department', 'Suggestion', 'File Count'];
+      let csv = headers.join(',') + '\n';
+      data.forEach((row: any) => {
+        csv += [
+          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
+          esc(row.user_name), esc(row.user_email), esc(row.department),
+          esc(row.suggestion), esc(row.files?.length ?? 0)
+        ].join(',') + '\n';
+      });
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `suggestions_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
     const { data, error } = await supabase.from(table).select('*').order('submitted_at', { ascending: false });
     if (error || !data) { alert('Export failed: ' + error?.message); return; }
@@ -531,7 +590,7 @@ export default function AdminDashboard() {
         <div style={{marginBottom: '28px'}}>
           <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {['self-reviews', 'leader-reviews'].map(item => (
+            {['self-reviews', 'leader-reviews', 'suggestions'].map(item => (
               <div
                 key={item}
                 onClick={() => handleActiveMenuChange(item)}
@@ -560,7 +619,7 @@ export default function AdminDashboard() {
                   }
                 }}
               >
-                {item === 'self-reviews' ? 'Self Reviews' : 'Leader Reviews'}
+                {item === 'self-reviews' ? 'Self Reviews' : item === 'leader-reviews' ? 'Leader Reviews' : '💬 Suggestion Box'}
               </div>
             ))}
           </div>
@@ -572,16 +631,86 @@ export default function AdminDashboard() {
       <div style={{padding: '40px', overflowY: 'auto'}}>
         <div style={{marginBottom: '32px'}}>
           <h1 style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>
-            {activeMenu === 'self-reviews' ? 'Self Review Submissions' : 'Leader Review Submissions'}
+            {activeMenu === 'self-reviews' ? 'Self Review Submissions' : activeMenu === 'leader-reviews' ? 'Leader Review Submissions' : 'Suggestion Box'}
           </h1>
           <p style={{color: '#64748b', fontSize: '14px'}}>
             {activeMenu === 'self-reviews'
               ? 'Monitor employee self-review submissions and completion status'
-              : 'Monitor leader review submissions and completion status'}
+              : activeMenu === 'leader-reviews'
+              ? 'Monitor leader review submissions and completion status'
+              : 'All suggestions submitted by team members'}
           </p>
         </div>
 
-        {/* Toolbar */}
+        {/* Suggestion Box View */}
+        {activeMenu === 'suggestions' && (
+          <div>
+            <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', gap: '10px'}}>
+              <button onClick={() => fetchSuggestions(currentPage)} style={{padding: '10px 16px', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white'}}>🔄 Refresh</button>
+              <button onClick={handleExportAll} style={{padding: '10px 16px', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', background: 'linear-gradient(135deg, #16a34a, #15803d)', color: 'white'}}>⬇ Export All</button>
+            </div>
+            <div style={{background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.08)', border: '1px solid rgba(255,255,255,0.8)'}}>
+              <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
+                  <tr>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Submitted</th>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Name</th>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Department</th>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Suggestion Preview</th>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Files</th>
+                    <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suggestions.length > 0 ? suggestions.map((row, idx) => (
+                    <tr key={row.id} style={{borderBottom: idx < suggestions.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
+                      onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126,184,212,0.06)'}}
+                      onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
+                    >
+                      <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569', whiteSpace: 'nowrap'}}>
+                        {row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-'}
+                      </td>
+                      <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>
+                        <div style={{fontWeight: '700', color: '#0f172a'}}>{row.user_name}</div>
+                        <div style={{fontSize: '11px', color: '#94a3b8'}}>{row.user_email}</div>
+                      </td>
+                      <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.department}</td>
+                      <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569', maxWidth: '260px'}}>
+                        <span style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>
+                          {row.suggestion}
+                        </span>
+                      </td>
+                      <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>
+                        {row.files?.length > 0 ? (
+                          <span style={{background: 'rgba(126,184,212,0.15)', color: '#1e3a5f', padding: '3px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
+                            📎 {row.files.length}
+                          </span>
+                        ) : '-'}
+                      </td>
+                      <td style={{padding: '16px 18px'}}>
+                        <div style={{display: 'flex', gap: '8px'}}>
+                          <button onClick={() => setSelectedSuggestion(row)} style={{padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'rgba(126,184,212,0.15)', color: '#1e3a5f', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
+                            onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126,184,212,0.3)'}}
+                            onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126,184,212,0.15)'}}
+                          >View</button>
+                          <button onClick={() => handleDeleteSuggestion(row)} style={{padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', color: '#dc2626', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
+                            onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}}
+                            onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}}
+                          >Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan={6} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>No suggestions yet</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Toolbar + Table + Pagination (reviews only) */}
+        {activeMenu !== 'suggestions' && <>
         <div style={{
           display: 'flex',
           gap: '12px',
@@ -690,7 +819,7 @@ export default function AdminDashboard() {
             ))}
           </select>
 
-          <button onClick={() => fetchAllReviews(currentPage)} style={{
+          <button onClick={() => { fetchAllReviews(currentPage); fetchSuggestions(currentPage); }} style={{
             padding: '10px 16px',
             border: 'none',
             borderRadius: '10px',
@@ -897,6 +1026,7 @@ export default function AdminDashboard() {
             </div>
           );
         })()}
+        </>}
       </div>
 
 {/* Detail Modal */}
@@ -978,6 +1108,62 @@ export default function AdminDashboard() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suggestion Detail Modal */}
+      {selectedSuggestion && (
+        <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'}}>
+          <div style={{background: 'white', borderRadius: '16px', padding: '40px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
+              <h2 style={{fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: 0}}>💬 Suggestion</h2>
+              <button onClick={() => setSelectedSuggestion(null)} style={{background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b'}}>✕</button>
+            </div>
+
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '20px'}}>
+              <div>
+                <label style={{fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px'}}>From</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '6px 0 0 0', fontWeight: '700'}}>{selectedSuggestion.user_name}</p>
+                <p style={{fontSize: '12px', color: '#94a3b8', margin: '2px 0 0 0'}}>{selectedSuggestion.user_email}</p>
+              </div>
+              <div>
+                <label style={{fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Department</label>
+                <p style={{fontSize: '14px', color: '#0f172a', margin: '6px 0 0 0'}}>{selectedSuggestion.department}</p>
+              </div>
+              <div style={{gridColumn: '1/-1'}}>
+                <label style={{fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Submitted</label>
+                <p style={{fontSize: '13px', color: '#0f172a', margin: '6px 0 0 0'}}>{selectedSuggestion.submitted_at ? new Date(selectedSuggestion.submitted_at).toLocaleString() : '-'}</p>
+              </div>
+            </div>
+
+            <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginBottom: '20px'}}>
+              <label style={{fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Suggestion Content</label>
+              <div style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', marginTop: '10px', fontSize: '14px', color: '#0f172a', lineHeight: '1.7', whiteSpace: 'pre-wrap'}}>
+                {selectedSuggestion.suggestion}
+              </div>
+            </div>
+
+            {selectedSuggestion.files?.length > 0 && (
+              <div style={{marginBottom: '20px'}}>
+                <label style={{fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Attachments</label>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px'}}>
+                  {selectedSuggestion.files.map((f, i) => (
+                    f.url && !f.url.startsWith('blob:') ? (
+                      <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" style={{background: '#e0f2fe', color: '#0369a1', padding: '6px 12px', borderRadius: '7px', fontSize: '12px', fontWeight: '600', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px'}}>
+                        📎 {f.name} ↗
+                      </a>
+                    ) : (
+                      <span key={i} style={{background: '#f1f5f9', color: '#94a3b8', padding: '6px 12px', borderRadius: '7px', fontSize: '12px', fontWeight: '600'}}>📎 {f.name} (expired)</span>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button onClick={() => setSelectedSuggestion(null)} style={{width: '100%', padding: '12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#64748b', fontWeight: '600', cursor: 'pointer', fontSize: '14px'}}>
+              Close
+            </button>
           </div>
         </div>
       )}
