@@ -168,13 +168,31 @@ export default function AdminDashboard() {
     pos_special: 'Special Contribution',
   };
 
+  const hasContent = (val: any) =>
+    (val?.count ?? 0) > 0 || val?.comment?.trim() || val?.description?.trim() || val?.files?.length > 0;
+
+  const renderFiles = (files: any[]) => {
+    if (!files?.length) return null;
+    return (
+      <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px'}}>
+        {files.map((f: any, i: number) => (
+          <span key={i} style={{background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '5px', fontSize: '11px', fontWeight: '600'}}>
+            📎 {f.name}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   const renderFormData = (form_data: any, type: string) => {
     if (type === 'self-reviews') {
       const kpis = form_data?.kpis || {};
       const positiveItems = form_data?.positive_items || {};
 
-      const filledKpis = Object.entries(kpis).filter(([, val]: any) => val.count > 0 || val.comment?.trim());
-      const filledPositive = Object.entries(positiveItems).filter(([, val]: any) => val.description?.trim());
+      const filledKpis = Object.entries(kpis).filter(([, val]: any) => hasContent(val));
+      const filledPositive = Object.entries(positiveItems).filter(([, val]: any) =>
+        val?.description?.trim() || val?.files?.length > 0
+      );
 
       return (
         <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
@@ -199,6 +217,7 @@ export default function AdminDashboard() {
                     {val.comment?.trim() && (
                       <p style={{fontSize: '13px', color: '#475569', margin: '8px 0 0 0', lineHeight: '1.6'}}>{val.comment}</p>
                     )}
+                    {renderFiles(val.files)}
                   </div>
                 ))}
               </div>
@@ -220,7 +239,10 @@ export default function AdminDashboard() {
                 {filledPositive.map(([key, val]: any) => (
                   <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
                     <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px'}}>{POSITIVE_LABELS[key] || key}</div>
-                    <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{val.description}</p>
+                    {val.description?.trim() && (
+                      <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{val.description}</p>
+                    )}
+                    {renderFiles(val.files)}
                   </div>
                 ))}
               </div>
@@ -240,12 +262,12 @@ export default function AdminDashboard() {
     const overallRemarks = form_data?.overall_remarks || {};
 
     const filledKpis = Object.entries(kpis).filter(([, val]: any) =>
-      val.rows?.some((r: any) => r.employee?.trim() || r.comment?.trim())
+      val.rows?.some((r: any) => r.employee?.trim() || r.comment?.trim() || r.files?.length > 0)
     );
     const filledPositive = Object.entries(positiveItems).filter(([, val]: any) =>
-      val.rows?.some((r: any) => r.comment?.trim())
+      val.rows?.some((r: any) => r.comment?.trim() || r.files?.length > 0)
     );
-    const hasRemarks = overallRemarks.remarks?.trim();
+    const hasRemarks = overallRemarks.remarks?.trim() || overallRemarks.files?.length > 0;
 
     return (
       <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
@@ -260,10 +282,11 @@ export default function AdminDashboard() {
               {filledKpis.map(([key, val]: any) => (
                 <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
                   <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px'}}>{val.kpi}</div>
-                  {val.rows?.filter((r: any) => r.employee?.trim() || r.comment?.trim()).map((row: any, i: number) => (
+                  {val.rows?.filter((r: any) => r.employee?.trim() || r.comment?.trim() || r.files?.length > 0).map((row: any, i: number) => (
                     <div key={i} style={{marginTop: i > 0 ? '8px' : 0, paddingTop: i > 0 ? '8px' : 0, borderTop: i > 0 ? '1px dashed #fecaca' : 'none'}}>
                       {row.employee && <span style={{display: 'inline-block', background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '4px'}}>{row.employee}</span>}
                       {row.comment?.trim() && <p style={{fontSize: '13px', color: '#475569', margin: '4px 0 0 0', lineHeight: '1.6'}}>{row.comment}</p>}
+                      {renderFiles(row.files)}
                     </div>
                   ))}
                 </div>
@@ -287,8 +310,11 @@ export default function AdminDashboard() {
               {filledPositive.map(([key, val]: any) => (
                 <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
                   <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px'}}>{val.label}</div>
-                  {val.rows?.filter((r: any) => r.comment?.trim()).map((row: any, i: number) => (
-                    <p key={i} style={{fontSize: '13px', color: '#475569', margin: i > 0 ? '6px 0 0 0' : 0, lineHeight: '1.6'}}>{row.comment}</p>
+                  {val.rows?.filter((r: any) => r.comment?.trim() || r.files?.length > 0).map((row: any, i: number) => (
+                    <div key={i} style={{marginTop: i > 0 ? '6px' : 0}}>
+                      {row.comment?.trim() && <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{row.comment}</p>}
+                      {renderFiles(row.files)}
+                    </div>
                   ))}
                 </div>
               ))}
@@ -308,7 +334,8 @@ export default function AdminDashboard() {
               <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Overall Remarks</span>
             </div>
             <div style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
-              <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{overallRemarks.remarks}</p>
+              {overallRemarks.remarks?.trim() && <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{overallRemarks.remarks}</p>}
+              {renderFiles(overallRemarks.files)}
             </div>
           </div>
         )}
