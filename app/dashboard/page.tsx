@@ -55,8 +55,8 @@ export default function Dashboard() {
   const tabs = [
     { id: 'self-review', label: 'Employee Self Review', allowed: true },
     { id: 'leader-review', label: 'Leader Review', allowed: hasAccess(user.role, 'leader-review') },
-    { id: 'admin-dashboard', label: 'Admin Dashboard', allowed: hasAccess(user.role, 'admin-dashboard') },
     { id: 'suggestion-box', label: '💬 Suggestion Box', allowed: true },
+    { id: 'admin-dashboard', label: 'Admin Dashboard', allowed: hasAccess(user.role, 'admin-dashboard') },
   ];
 
   const visibleTabs = tabs.filter(t => t.allowed);
