@@ -155,26 +155,26 @@ export default function AdminDashboard() {
   });
 
 
-  const KPI_LABELS: Record<string, string> = {
-    client_complaints: 'Client Complaints / Issues',
-    client_attrition: 'Client Attrition',
-    minor_delays: 'Minor Delays',
-    serious_delays: 'Serious Delays',
-    minor_errors: 'Minor Errors',
-    serious_errors: 'Serious Errors',
-    communication_issues: 'Communication Issues',
-    team_impact: 'Team Impact',
-    learning_application: 'Learning & Application',
+  const KPI_INFO: Record<string, {name: string; question: string}> = {
+    client_complaints: { name: 'Client Complaints / Issues 客户抱怨／异常', question: 'Were there any client complaints, issues or controllable churn? / 有没有客户抱怨、异常和可控流失？' },
+    client_attrition:  { name: 'Client Attrition / 客户流失', question: 'Was there client loss due to lack of follow-up or unresolved issues? / 因为没有及时跟进和解决问题，导致客户流失？' },
+    minor_delays:      { name: 'Chased / Minor Delays / 被催、一般延误', question: 'Was the employee chased by clients or management? / 有没有被催、被客户或被管理？' },
+    serious_delays:    { name: 'Serious Delays / 严重延误', question: 'Were there delays that affected client arrangements or led to cancellations? / 有没有延误影响客户安排，甚至导致客户取消服务？' },
+    minor_errors:      { name: 'Minor Errors / 轻微错误', question: 'Were there any mistakes made? / 有没有出错？' },
+    serious_errors:    { name: 'Serious Errors / Penalty Risk / 严重错误／罚款风险', question: 'Were there any filing issues, penalty risks or client impact? / 是否有申报、罚款和客户影响风险？' },
+    communication_issues: { name: 'Communication / Handover Issues / 沟通／交接问题', question: 'Was collaboration with colleagues smooth? / 和员工和同事协作顺不顺？' },
+    team_impact:       { name: 'Team Impact / 影响团队', question: 'Were there any communication or handover problems? / 有没有沟通和交接问题？' },
+    learning_application: { name: 'Learning & Application / 学习并应用', question: 'Has new knowledge been applied to work? / 学到的东西有没有在工作里正用？' },
   };
 
-  const POSITIVE_LABELS: Record<string, string> = {
-    pos_compliment: 'Client Compliment',
-    pos_requested: 'Personally Requested',
-    pos_prevented: 'Issue Prevention',
-    pos_recovered: 'Recovery Action',
-    pos_resolved: 'Conflict Resolution',
-    pos_business: 'Business Development',
-    pos_special: 'Special Contribution',
+  const POSITIVE_INFO: Record<string, {name: string; question: string}> = {
+    pos_compliment: { name: 'Written Client Compliment / 客户书面表扬', question: 'Client proactively sent email/message with explicit praise (not routine thanks) / 客户主动发email/message有明确表扬，非常规感谢' },
+    pos_requested:  { name: 'Client Requested Same Staff / 客户点名继续服务', question: 'Client explicitly requested the same employee or gave special recognition / 客户明确要求继续由该员工负责，有特别认可' },
+    pos_prevented:  { name: 'Prevented Major Risk / Penalty / 避免重大风险／罚款', question: 'Identified issues outside scope and prevented significant losses / 超职责范围发现问题并避免重大损失' },
+    pos_recovered:  { name: 'Recovered Client / 挽回客户', question: 'Successfully retained a client at risk of leaving / 已有流失风险客户被成功挽回' },
+    pos_resolved:   { name: 'Resolved Legacy / Complex Issues / 解决遗留／复杂问题', question: 'Took over and resolved problems not caused by themselves / 接手非本人造成的问题并成功处理' },
+    pos_business:   { name: 'Additional Business Opportunity / 额外业务机会', question: 'Referral / upsell / cross-sell (outside sales role) / 转介业务' },
+    pos_special:    { name: 'Special Contribution / 特别贡献', question: 'Contribution clearly beyond job scope, requires manager explanation / 有明显超出岗位职责的贡献，需主管说明' },
   };
 
   const hasContent = (val: any) =>
@@ -185,9 +185,18 @@ export default function AdminDashboard() {
     return (
       <div style={{display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px'}}>
         {files.map((f: any, i: number) => (
-          <span key={i} style={{background: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '5px', fontSize: '11px', fontWeight: '600'}}>
-            📎 {f.name}
-          </span>
+          f.url && !f.url.startsWith('blob:') ? (
+            <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" style={{
+              background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '5px',
+              fontSize: '11px', fontWeight: '600', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px'
+            }}>
+              📎 {f.name} ↗
+            </a>
+          ) : (
+            <span key={i} style={{background: '#f1f5f9', color: '#94a3b8', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px'}} title="File URL expired (uploaded before storage was set up)">
+              📎 {f.name} (expired)
+            </span>
+          )
         ))}
       </div>
     );
@@ -213,22 +222,28 @@ export default function AdminDashboard() {
             </div>
             {filledKpis.length > 0 ? (
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                {filledKpis.map(([key, val]: any) => (
-                  <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px'}}>
-                      <span style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{KPI_LABELS[key] || key}</span>
-                      {val.count > 0 && (
-                        <span style={{flexShrink: 0, background: '#fee2e2', color: '#dc2626', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
-                          ×{val.count}
-                        </span>
+                {filledKpis.map(([key, val]: any) => {
+                  const info = KPI_INFO[key];
+                  return (
+                    <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '4px'}}>
+                        <span style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{info?.name || key}</span>
+                        {val.count > 0 && (
+                          <span style={{flexShrink: 0, background: '#fee2e2', color: '#dc2626', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
+                            ×{val.count}
+                          </span>
+                        )}
+                      </div>
+                      {info?.question && (
+                        <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic'}}>{info.question}</p>
                       )}
+                      {val.comment?.trim() && (
+                        <p style={{fontSize: '13px', color: '#475569', margin: '6px 0 0 0', lineHeight: '1.6', background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px'}}>{val.comment}</p>
+                      )}
+                      {renderFiles(val.files)}
                     </div>
-                    {val.comment?.trim() && (
-                      <p style={{fontSize: '13px', color: '#475569', margin: '8px 0 0 0', lineHeight: '1.6'}}>{val.comment}</p>
-                    )}
-                    {renderFiles(val.files)}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d', fontWeight: '600'}}>
@@ -245,15 +260,21 @@ export default function AdminDashboard() {
             </div>
             {filledPositive.length > 0 ? (
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                {filledPositive.map(([key, val]: any) => (
-                  <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
-                    <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px'}}>{POSITIVE_LABELS[key] || key}</div>
-                    {val.description?.trim() && (
-                      <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{val.description}</p>
-                    )}
-                    {renderFiles(val.files)}
-                  </div>
-                ))}
+                {filledPositive.map(([key, val]: any) => {
+                  const info = POSITIVE_INFO[key];
+                  return (
+                    <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
+                      <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px'}}>{info?.name || key}</div>
+                      {info?.question && (
+                        <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic'}}>{info.question}</p>
+                      )}
+                      {val.description?.trim() && (
+                        <p style={{fontSize: '13px', color: '#475569', margin: '6px 0 0 0', lineHeight: '1.6', background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px'}}>{val.description}</p>
+                      )}
+                      {renderFiles(val.files)}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#94a3b8'}}>

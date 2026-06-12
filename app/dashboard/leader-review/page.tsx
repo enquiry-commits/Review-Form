@@ -75,11 +75,19 @@ export default function LeaderReviewForm() {
     router.push('/');
   };
 
-  const handleFileUpload = (fieldId: string, files: FileList) => {
+  const handleFileUpload = async (fieldId: string, files: FileList) => {
     const newLinks = [...(fileLinks[fieldId] || [])];
-    Array.from(files).forEach(file => {
-      newLinks.push({ name: file.name, url: URL.createObjectURL(file) });
-    });
+    for (const file of Array.from(files)) {
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await supabase.storage.from('review-files').upload(fileName, file);
+      if (!error && data) {
+        const { data: urlData } = supabase.storage.from('review-files').getPublicUrl(data.path);
+        newLinks.push({ name: file.name, url: urlData.publicUrl });
+      } else {
+        newLinks.push({ name: file.name, url: URL.createObjectURL(file) });
+      }
+    }
     setFileLinks(prev => ({...prev, [fieldId]: newLinks}));
   };
 
