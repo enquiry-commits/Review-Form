@@ -1112,7 +1112,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Toolbar + Table + Pagination (reviews only) */}
-        {activeMenu !== 'suggestions' && <>
+        {activeMenu !== 'suggestions' && activeMenu !== 'table-by-year' && activeMenu !== 'table-by-person' && <>
         <div style={{
           display: 'flex',
           gap: '12px',
