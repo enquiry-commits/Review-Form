@@ -3,7 +3,7 @@
 export default function SelfReviewSuccess() {
 
   return (
-    <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'}}>
+    <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '60px 20px 20px'}}>
       <div style={{maxWidth: '500px', width: '100%'}}>
         <div style={{
           background: 'rgba(255, 255, 255, 0.98)',
