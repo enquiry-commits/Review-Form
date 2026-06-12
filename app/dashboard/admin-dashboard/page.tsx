@@ -217,19 +217,19 @@ export default function AdminDashboard() {
           {/* KPI Issues */}
           <div>
             <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
-              <div style={{width: '4px', height: '16px', background: '#dc2626', borderRadius: '2px'}} />
-              <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance Issues</span>
+              <div style={{width: '4px', height: '16px', background: '#7eb8d4', borderRadius: '2px'}} />
+              <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance</span>
             </div>
             {filledKpis.length > 0 ? (
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                 {filledKpis.map(([key, val]: any) => {
                   const info = KPI_INFO[key];
                   return (
-                    <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
+                    <div key={key} style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
                       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '4px'}}>
                         <span style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{info?.name || key}</span>
                         {val.count > 0 && (
-                          <span style={{flexShrink: 0, background: '#fee2e2', color: '#dc2626', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
+                          <span style={{flexShrink: 0, background: '#dbeafe', color: '#1d4ed8', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
                             ×{val.count}
                           </span>
                         )}
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                 })}
               </div>
             ) : (
-              <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d', fontWeight: '600'}}>
+              <div style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#1d4ed8', fontWeight: '600'}}>
                 ✓ No issues reported
               </div>
             )}
@@ -304,17 +304,17 @@ export default function AdminDashboard() {
         {/* KPI Evaluations */}
         <div>
           <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
-            <div style={{width: '4px', height: '16px', background: '#dc2626', borderRadius: '2px'}} />
-            <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Evaluations</span>
+            <div style={{width: '4px', height: '16px', background: '#7eb8d4', borderRadius: '2px'}} />
+            <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance</span>
           </div>
           {filledKpis.length > 0 ? (
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
               {filledKpis.map(([key, val]: any) => (
-                <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
+                <div key={key} style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
                   <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px'}}>{val.kpi}</div>
                   {val.rows?.filter((r: any) => r.employee?.trim() || r.comment?.trim() || r.files?.length > 0).map((row: any, i: number) => (
-                    <div key={i} style={{marginTop: i > 0 ? '8px' : 0, paddingTop: i > 0 ? '8px' : 0, borderTop: i > 0 ? '1px dashed #fecaca' : 'none'}}>
-                      {row.employee && <span style={{display: 'inline-block', background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '4px'}}>{row.employee}</span>}
+                    <div key={i} style={{marginTop: i > 0 ? '8px' : 0, paddingTop: i > 0 ? '8px' : 0, borderTop: i > 0 ? '1px dashed #bfdbfe' : 'none'}}>
+                      {row.employee && <span style={{display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '4px'}}>{row.employee}</span>}
                       {row.comment?.trim() && <p style={{fontSize: '13px', color: '#475569', margin: '4px 0 0 0', lineHeight: '1.6'}}>{row.comment}</p>}
                       {renderFiles(row.files)}
                     </div>
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d', fontWeight: '600'}}>
+            <div style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#1d4ed8', fontWeight: '600'}}>
               ✓ No KPI issues recorded
             </div>
           )}
