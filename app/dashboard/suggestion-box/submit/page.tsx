@@ -158,8 +158,8 @@ export default function SuggestionSubmitPage() {
             </label>
             <div
               style={{
-                border: '1.5px dashed #7eb8d4', borderRadius: '12px',
-                padding: '24px', textAlign: 'center',
+                border: '1.5px dashed #e2e8f0', borderRadius: '12px',
+                padding: '20px', textAlign: 'center',
                 background: 'rgba(126,184,212,0.04)', cursor: 'pointer', transition: 'all 0.2s'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(126,184,212,0.1)'; }}
@@ -169,12 +169,11 @@ export default function SuggestionSubmitPage() {
               <input
                 type="file" id="suggestion_files" multiple
                 style={{display: 'none'}}
-                accept="image/*,.pdf,.doc,.docx"
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                 onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
               />
-              <div style={{fontSize: '24px', marginBottom: '8px'}}>📎</div>
-              <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>Click to upload / 点击上传</div>
-              <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '4px'}}>Images, PDF, Word</div>
+              <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+              <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
             </div>
             {files.length > 0 && (
               <div style={{marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
