@@ -73,30 +73,34 @@ export default function SuggestionSubmitPage() {
       background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)',
       minHeight: '100vh',
       display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      padding: '60px 20px 40px'
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      padding: '40px 20px'
     }}>
+      {/* Image at top */}
+      <div style={{marginBottom: '24px', textAlign: 'center'}}>
+        <img
+          src="/BOX.png"
+          alt="Suggestion Box"
+          draggable={false}
+          style={{maxWidth: '180px', width: '100%', display: 'block', margin: '0 auto', userSelect: 'none'}}
+        />
+      </div>
+
       <div style={{maxWidth: '620px', width: '100%'}}>
         <div style={{
           background: 'rgba(255,255,255,0.98)',
           borderRadius: '20px',
-          padding: '48px',
+          padding: '40px 48px',
           boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
         }}>
           {/* Header */}
-          <div style={{textAlign: 'center', marginBottom: '36px'}}>
-            <div style={{
-              width: '64px', height: '64px',
-              background: 'linear-gradient(135deg, #7eb8d4, #1e3a5f)',
-              borderRadius: '16px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '28px', margin: '0 auto 16px'
-            }}>💬</div>
-            <h1 style={{fontSize: '24px', fontWeight: '900', color: '#0f172a', marginBottom: '6px'}}>
+          <div style={{textAlign: 'center', marginBottom: '28px'}}>
+            <h1 style={{fontSize: '22px', fontWeight: '900', color: '#0f172a', marginBottom: '4px'}}>
               Suggestion Box
             </h1>
-            <p style={{fontSize: '14px', color: '#64748b'}}>意见箱 · Your voice matters</p>
+            <p style={{fontSize: '13px', color: '#64748b'}}>意见箱 · Your voice matters</p>
           </div>
 
           {/* User info */}
