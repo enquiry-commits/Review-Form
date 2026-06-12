@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, hasAccess } from '@/lib/auth';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('self-review');
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -20,6 +21,16 @@ export default function Dashboard() {
     setUser(JSON.parse(userData));
     setLoading(false);
   }, [router]);
+
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'scrollToTop' && contentRef.current) {
+        contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -141,7 +152,7 @@ export default function Dashboard() {
       </div>
 
       {/* Content */}
-      <div style={{flex: 1, overflowY: 'auto', padding: '32px', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+      <div ref={contentRef} style={{flex: 1, overflowY: 'auto', padding: '32px', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
         {activeTab === 'self-review' && (
           <iframe
             src="/dashboard/self-review"

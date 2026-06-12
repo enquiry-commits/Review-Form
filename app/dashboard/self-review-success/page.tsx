@@ -1,6 +1,16 @@
 'use client';
 
+import { useEffect } from 'react';
+
 export default function SelfReviewSuccess() {
+
+  useEffect(() => {
+    if (window.top && window.top !== window.self) {
+      window.top.postMessage({ type: 'scrollToTop' }, '*');
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   return (
     <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '60px 20px 20px'}}>
