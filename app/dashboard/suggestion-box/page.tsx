@@ -67,7 +67,7 @@ export default function SuggestionBoxPage() {
           user-select: none;
           display: block;
           margin: 0 auto;
-          max-width: 280px;
+          max-width: 560px;
           width: 100%;
         }
         .box-idle {
