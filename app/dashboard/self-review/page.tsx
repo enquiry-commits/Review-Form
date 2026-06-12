@@ -7,6 +7,65 @@ import { getCurrentReviewMonth } from '@/lib/reviewHelpers';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+interface KPIItemProps {
+  id: string;
+  name: string;
+  question: string;
+  fileLinks: {[key: string]: Array<{name: string; url: string}>};
+  onFileUpload: (fieldId: string, files: FileList) => void;
+  onRemoveFile: (fieldId: string, index: number) => void;
+}
+
+function KPIItem({ id, name, question, fileLinks, onFileUpload, onRemoveFile }: KPIItemProps) {
+  return (
+    <div style={{background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '20px', transition: 'all 0.3s'}}
+    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+    >
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '20px'}}>
+        <div style={{flex: 1}}>
+          <div style={{fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{name}</div>
+          <div style={{fontSize: '13px', color: '#64748b', lineHeight: '1.6'}}>{question}</div>
+        </div>
+        <div style={{display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
+          <div>
+            <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block'}}>Count / 次数</label>
+            <input type="number" min="0" defaultValue="0" id={`count_${id}`} style={{width: '100px', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', textAlign: 'center', fontWeight: '700', color: '#1e3a5f', background: '#f8fafc'}} />
+          </div>
+        </div>
+      </div>
+      <div style={{marginTop: '12px', marginBottom: '14px'}}>
+        <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Self Comment / 自评备注</label>
+        <textarea id={`comment_${id}`} placeholder="Enter your comments or remarks... / 请填写说明或备注" style={{width: '100%', minHeight: '70px', padding: '12px 16px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical', background: '#fff'}} />
+      </div>
+      <div style={{marginTop: '14px'}}>
+        <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
+          <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
+          <div style={{border: '1.5px dashed #7eb8d4', borderRadius: '10px', padding: '20px', textAlign: 'center', background: 'rgba(126, 184, 212, 0.06)', cursor: 'pointer', transition: 'all 0.3s'}}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#5a9bc4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'; }}
+          onClick={() => document.getElementById(`file_${id}`)?.click()}
+          >
+            <input type="file" id={`file_${id}`} multiple style={{display: 'none'}} onChange={(e) => e.target.files && onFileUpload(id, e.target.files)} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+            <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+            <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
+          </div>
+          {fileLinks[id] && fileLinks[id].length > 0 && (
+            <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
+              {fileLinks[id].map((file, idx) => (
+                <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <span>📄 {file.name}</span>
+                  <button onClick={() => onRemoveFile(id, idx)} style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}} onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}} onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SelfReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -126,120 +185,6 @@ export default function SelfReviewForm() {
   if (!user) {
     return null;
   }
-
-  const KPIItem = ({ id, name, question }: { id: string; name: string; question: string }) => (
-    <div style={{
-      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-      border: '1.5px solid #e2e8f0',
-      borderRadius: '14px',
-      padding: '20px',
-      transition: 'all 0.3s'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.borderColor = '#cbd5e1';
-      e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.08)';
-      e.currentTarget.style.transform = 'translateY(-2px)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.borderColor = '#e2e8f0';
-      e.currentTarget.style.boxShadow = 'none';
-      e.currentTarget.style.transform = 'none';
-    }}
-    >
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '20px'}}>
-        <div style={{flex: 1}}>
-          <div style={{fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '6px'}}>{name}</div>
-          <div style={{fontSize: '13px', color: '#64748b', lineHeight: '1.6'}}>{question}</div>
-        </div>
-        <div style={{display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
-          <div>
-            <label style={{fontSize: '11px', color: '#94a3b8', fontWeight: '700', marginBottom: '6px', display: 'block'}}>Count / 次数</label>
-            <input type="number" min="0" defaultValue="0" id={`count_${id}`} style={{
-              width: '100px',
-              padding: '10px 12px',
-              border: '1.5px solid #e2e8f0',
-              borderRadius: '10px',
-              fontSize: '14px',
-              textAlign: 'center',
-              fontWeight: '700',
-              color: '#1e3a5f',
-              background: '#f8fafc'
-            }} />
-          </div>
-        </div>
-      </div>
-      <div style={{marginTop: '12px', marginBottom: '14px'}}>
-        <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Self Comment / 自评备注</label>
-        <textarea id={`comment_${id}`} placeholder="Enter your comments or remarks... / 请填写说明或备注" style={{
-          width: '100%',
-          minHeight: '70px',
-          padding: '12px 16px',
-          border: '1.5px solid #e2e8f0',
-          borderRadius: '12px',
-          fontSize: '13px',
-          fontFamily: 'inherit',
-          resize: 'vertical',
-          background: '#fff'
-        }} />
-      </div>
-      <div style={{marginTop: '14px'}}>
-        <div style={{background: 'rgba(126, 184, 212, 0.04)', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginTop: '4px'}}>
-          <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '10px', display: 'block'}}>Upload Evidence / 上传证据</label>
-          <div style={{
-            border: '1.5px dashed #7eb8d4',
-            borderRadius: '10px',
-            padding: '20px',
-            textAlign: 'center',
-            background: 'rgba(126, 184, 212, 0.06)',
-            cursor: 'pointer',
-            transition: 'all 0.3s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#5a9bc4';
-            e.currentTarget.style.background = 'rgba(126, 184, 212, 0.12)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#7eb8d4';
-            e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)';
-          }}
-          onClick={() => document.getElementById(`file_${id}`)?.click()}
-          >
-            <input
-              type="file"
-              id={`file_${id}`}
-              multiple
-              style={{display: 'none'}}
-              onChange={(e) => e.target.files && handleFileUpload(id, e.target.files)}
-              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-            />
-            <div style={{fontSize: '13px', color: '#7eb8d4', fontWeight: '700'}}>
-              📁 Click or drag files to upload / 点击或拖拽文件上传
-            </div>
-            <div style={{fontSize: '11px', color: '#94a3b8', marginTop: '6px'}}>
-              Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel
-            </div>
-          </div>
-          {fileLinks[id] && fileLinks[id].length > 0 && (
-            <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px'}}>
-              {fileLinks[id].map((file, idx) => (
-                <div key={idx} style={{fontSize: '12px', color: '#0f172a', background: 'rgba(126, 184, 212, 0.08)', padding: '8px 12px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <span>📄 {file.name}</span>
-                  <button
-                    onClick={() => removeFile(id, idx)}
-                    style={{background: 'none', border: 'none', color: '#7eb8d4', cursor: 'pointer', fontSize: '14px', padding: '0 4px', transition: 'all 0.3s'}}
-                    onMouseEnter={(e) => {e.currentTarget.style.color = '#5a9bc4'}}
-                    onMouseLeave={(e) => {e.currentTarget.style.color = '#7eb8d4'}}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh'}}>
@@ -414,11 +359,17 @@ export default function SelfReviewForm() {
                 id="client_complaints"
                 name="Client Complaints / Issues 客户抱怨／异常"
                 question="Were there any client complaints, issues or controllable churn? / 有没有客户抱怨、异常和可控流失？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
               <KPIItem
                 id="client_attrition"
                 name="Client Attrition / 客户流失"
                 question="Was there client loss due to lack of follow-up or unresolved issues? / 因为没有及时跟进和解决问题，导致客户流失？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
             </div>
           </div>
@@ -454,11 +405,17 @@ export default function SelfReviewForm() {
                 id="minor_delays"
                 name="Chased / Minor Delays / 被催、一般延误"
                 question="Was the employee chased by clients or management? / 有没有被催、被客户或被管理？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
               <KPIItem
                 id="serious_delays"
                 name="Serious Delays / 严重延误"
                 question="Were there delays that affected client arrangements or led to cancellations? / 有没有延误影响客户安排，甚至导致客户取消服务？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
             </div>
           </div>
@@ -494,11 +451,17 @@ export default function SelfReviewForm() {
                 id="minor_errors"
                 name="Minor Errors / 轻微错误"
                 question="Were there any mistakes made? / 有没有出错？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
               <KPIItem
                 id="serious_errors"
                 name="Serious Errors / Penalty Risk / 严重错误／罚款风险"
                 question="Were there any filing issues, penalty risks or client impact? / 是否有申报、罚款和客户影响风险？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
             </div>
           </div>
@@ -534,11 +497,17 @@ export default function SelfReviewForm() {
                 id="communication_issues"
                 name="Communication / Handover Issues / 沟通／交接问题"
                 question="Was collaboration with colleagues smooth? / 和员工和同事协作顺不顺？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
               <KPIItem
                 id="team_impact"
                 name="Team Impact / 影响团队"
                 question="Were there any communication or handover problems? / 有没有沟通和交接问题？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
             </div>
           </div>
@@ -574,6 +543,9 @@ export default function SelfReviewForm() {
                 id="learning_application"
                 name="Learning & Application / 学习并应用"
                 question="Has new knowledge been applied to work? / 学到的东西有没有在工作里正用？"
+                fileLinks={fileLinks}
+                onFileUpload={handleFileUpload}
+                onRemoveFile={removeFile}
               />
             </div>
           </div>
