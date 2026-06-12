@@ -46,12 +46,51 @@ export default function SelfReviewForm() {
   const handleSubmit = async () => {
     if (!user) return;
     try {
-      const formData: any = {};
-      document.querySelectorAll('[id^="count_"]').forEach((el: any) => {
-        const id = el.id.replace('count_', '');
-        formData[id] = {
-          count: parseInt(el.value) || 0,
-          comment: (document.getElementById(`comment_${id}`) as HTMLTextAreaElement)?.value || '',
+      const formData: any = {
+        kpis: {},
+        positive_items: {}
+      };
+
+      // 第一部分：收集 KPI 数据（9个）
+      const kpiIds = [
+        'client_complaints',
+        'client_attrition',
+        'minor_delays',
+        'serious_delays',
+        'minor_errors',
+        'serious_errors',
+        'communication_issues',
+        'team_impact',
+        'learning_application'
+      ];
+
+      kpiIds.forEach(id => {
+        const countEl = document.getElementById(`count_${id}`) as HTMLInputElement;
+        const commentEl = document.getElementById(`comment_${id}`) as HTMLTextAreaElement;
+
+        formData.kpis[id] = {
+          count: parseInt(countEl?.value) || 0,
+          comment: commentEl?.value || '',
+          files: fileLinks[id] || []
+        };
+      });
+
+      // 第二部分：收集 Positive Items 数据（7个）
+      const positiveItemIds = [
+        'pos_compliment',
+        'pos_requested',
+        'pos_prevented',
+        'pos_recovered',
+        'pos_resolved',
+        'pos_business',
+        'pos_special'
+      ];
+
+      positiveItemIds.forEach(id => {
+        const descEl = document.getElementById(`${id}_desc`) as HTMLTextAreaElement;
+
+        formData.positive_items[id] = {
+          description: descEl?.value || '',
           files: fileLinks[id] || []
         };
       });

@@ -86,25 +86,77 @@ export default function LeaderReviewForm() {
   const handleSubmit = async () => {
     if (!user) return;
     try {
-      const formData: any = {};
-      document.querySelectorAll('[id^="comment_"]').forEach((el: any) => {
-        const id = el.id.replace('comment_', '');
-        formData[id] = {
-          comment: el.value || '',
-          files: fileLinks[id] || []
+      const formData: any = {
+        leader_name: user.name,
+        leader_email: user.email,
+        kpis: {},
+        positive_items: {},
+        overall_remarks: {}
+      };
+
+      // 收集 KPI 数据：每个 KPI 可能有多个员工行
+      const kpiCategoryCount = kpiCategories.length;
+      for (let catIdx = 0; catIdx < kpiCategoryCount; catIdx++) {
+        const cat = kpiCategories[catIdx];
+        for (let itemIdx = 0; itemIdx < cat.items.length; itemIdx++) {
+          const kpiId = `kpi_${catIdx}_${itemIdx}`;
+          const rowCount = employeeRows[kpiId] || 1;
+          const rows = [];
+
+          for (let rowIdx = 0; rowIdx < rowCount; rowIdx++) {
+            const fieldId = `${kpiId}_${rowIdx}`;
+            const selectEl = document.getElementById(`select_${fieldId}`) as HTMLSelectElement;
+            const commentEl = document.getElementById(`comment_${fieldId}`) as HTMLTextAreaElement;
+
+            rows.push({
+              employee: selectEl?.value || '',
+              comment: commentEl?.value || '',
+              files: fileLinks[fieldId] || []
+            });
+          }
+
+          formData.kpis[kpiId] = {
+            category: cat.category,
+            kpi: cat.items[itemIdx].kpi,
+            rows
+          };
+        }
+      }
+
+      // 收集 Positive Items 数据：每项也可以有多行
+      for (let idx = 0; idx < positiveItems.length; idx++) {
+        const posId = `pos_${idx}`;
+        const rowCount = positiveItemRows[posId] || 1;
+        const rows = [];
+
+        for (let rowIdx = 0; rowIdx < rowCount; rowIdx++) {
+          const fieldId = `${posId}_${rowIdx}`;
+          const commentEl = document.getElementById(`comment_${fieldId}`) as HTMLTextAreaElement;
+
+          rows.push({
+            comment: commentEl?.value || '',
+            files: fileLinks[fieldId] || []
+          });
+        }
+
+        formData.positive_items[posId] = {
+          label: positiveItems[idx].label,
+          rows
         };
-      });
-      const overallRemarks = (document.getElementById('overall_remarks') as HTMLTextAreaElement)?.value || '';
-      formData['overall_remarks'] = {
-        remarks: overallRemarks,
+      }
+
+      // 收集 Overall Remarks
+      const overallEl = document.getElementById('overall_remarks') as HTMLTextAreaElement;
+      formData.overall_remarks = {
+        remarks: overallEl?.value || '',
         files: fileLinks['overall_remarks'] || []
       };
 
       const month = new Date().toISOString().slice(0, 7);
       const { error } = await supabase.from('leader_review_submissions').insert([{
         user_id: user.id,
-        leader_name: user.name,
-        leader_email: user.email,
+        employee_name: user.name,
+        employee_email: user.email,
         department: user.department,
         review_period: month,
         form_data: formData,
@@ -294,8 +346,8 @@ export default function LeaderReviewForm() {
                             <div style={{marginBottom: '14px', display: 'flex', gap: '12px', alignItems: 'flex-end'}}>
                               <div style={{flex: 1}}>
                                 <label style={{fontSize: '12px', color: '#64748b', fontWeight: '700', marginBottom: '8px', display: 'block'}}>Employee / 员工</label>
-                                <select style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', color: '#1a1a2e', background: '#fff', fontFamily: 'inherit', cursor: 'pointer'}}>
-                                  <option>-- Select Employee / 选择员工 --</option>
+                                <select id={`select_${fieldId}`} style={{width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', color: '#1a1a2e', background: '#fff', fontFamily: 'inherit', cursor: 'pointer'}}>
+                                  <option value="">-- Select Employee / 选择员工 --</option>
                                   {user.department && departmentEmployees[user.department]?.map(emp => (
                                     <option key={emp} value={emp}>{emp}</option>
                                   ))}
