@@ -108,6 +108,17 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDelete = async (row: SubmissionRow) => {
+    if (!confirm(`Delete submission by ${row.employee_name}? This cannot be undone.`)) return;
+    const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
+    const { error } = await supabase.from(table).delete().eq('id', row.id);
+    if (error) {
+      alert('Delete failed: ' + error.message);
+    } else {
+      fetchAllReviews(currentPage);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     router.push('/');
@@ -556,22 +567,40 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td style={{padding: '16px 18px'}}>
-                      <button onClick={() => setSelectedDetail(row)} style={{
-                        padding: '6px 12px',
-                        border: 'none',
-                        borderRadius: '8px',
-                        background: 'rgba(126, 184, 212, 0.15)',
-                        color: '#1e3a5f',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        transition: 'all 0.3s'
-                      }}
-                      onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.3)'}}
-                      onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.15)'}}
-                      >
-                        View Details
-                      </button>
+                      <div style={{display: 'flex', gap: '8px'}}>
+                        <button onClick={() => setSelectedDetail(row)} style={{
+                          padding: '6px 12px',
+                          border: 'none',
+                          borderRadius: '8px',
+                          background: 'rgba(126, 184, 212, 0.15)',
+                          color: '#1e3a5f',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.3)'}}
+                        onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.15)'}}
+                        >
+                          View Details
+                        </button>
+                        <button onClick={() => handleDelete(row)} style={{
+                          padding: '6px 12px',
+                          border: 'none',
+                          borderRadius: '8px',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}}
+                        onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
