@@ -318,7 +318,7 @@ export default function AdminDashboard() {
             <option value="draft">Draft</option>
           </select>
 
-          <button onClick={fetchAllReviews} style={{
+          <button onClick={() => fetchAllReviews(currentPage)} style={{
             padding: '10px 16px',
             border: 'none',
             borderRadius: '10px',
