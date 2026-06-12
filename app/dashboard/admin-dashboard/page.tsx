@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [tableMonthSel, setTableMonthSel] = useState('');
   const [tablePersonSel, setTablePersonSel] = useState('');
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
+  const [tableDemoMode, setTableDemoMode] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -96,6 +97,73 @@ export default function AdminDashboard() {
       employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data
     })));
     setTableDataLoaded(true);
+  };
+
+  const loadDemoData = () => {
+    const employees = [
+      { name: 'Alice Tan',    email: 'alice@tassure.com',   dept: 'Accounting',            isLeader: false },
+      { name: 'Bob Lee',      email: 'bob@tassure.com',     dept: 'Tax',                   isLeader: false },
+      { name: 'Carol Wong',   email: 'carol@tassure.com',   dept: 'Corporate Secretarial', isLeader: false },
+      { name: 'David Chen',   email: 'david@tassure.com',   dept: 'Accounting',            isLeader: true  },
+      { name: 'Emily Lim',    email: 'emily@tassure.com',   dept: 'Tax',                   isLeader: true  },
+      { name: 'Frank Ng',     email: 'frank@tassure.com',   dept: 'Corporate Secretarial', isLeader: true  },
+      { name: 'Grace Koh',    email: 'grace@tassure.com',   dept: 'Accounting',            isLeader: false },
+      { name: 'Henry Teo',    email: 'henry@tassure.com',   dept: 'Tax',                   isLeader: false },
+      { name: 'Irene Yap',    email: 'irene@tassure.com',   dept: 'Corporate Secretarial', isLeader: false },
+      { name: 'James Ong',    email: 'james@tassure.com',   dept: 'Internal',              isLeader: true  },
+    ];
+    const periods = ['2026-04','2026-05','2026-06'];
+    // Statuses: submitted / draft / null (missing)
+    const selfMatrix: (string|null)[][] = [
+      ['submitted','submitted','submitted'],
+      ['submitted','submitted','draft'],
+      ['submitted','submitted',null],
+      ['submitted','submitted','submitted'],
+      ['submitted','draft','submitted'],
+      ['submitted','submitted','submitted'],
+      ['draft','submitted','submitted'],
+      ['submitted',null,'submitted'],
+      ['submitted','submitted',null],
+      ['submitted','submitted','submitted'],
+    ];
+    const leaderMatrix: (string|null)[][] = [
+      [null,null,null],[null,null,null],[null,null,null],
+      ['submitted','submitted','submitted'],
+      ['submitted','draft',null],
+      ['submitted','submitted','submitted'],
+      [null,null,null],[null,null,null],[null,null,null],
+      ['submitted','submitted','draft'],
+    ];
+    const selfRows: SubmissionRow[] = [];
+    const leaderRows: SubmissionRow[] = [];
+    let idCounter = 1000;
+    employees.forEach((emp, ei) => {
+      periods.forEach((period, pi) => {
+        const sStatus = selfMatrix[ei][pi];
+        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`2026-${period.split('-')[1]}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null });
+        if (emp.isLeader) {
+          const lStatus = leaderMatrix[ei][pi];
+          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`2026-${period.split('-')[1]}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null });
+        }
+      });
+    });
+    setTableAllSelf(selfRows);
+    setTableAllLeader(leaderRows);
+    setTableDataLoaded(true);
+    setTableDemoMode(true);
+    setTableYearSel('2026');
+    setTableMonthSel('');
+    setTablePersonSel('');
+  };
+
+  const clearDemoData = () => {
+    setTableAllSelf([]);
+    setTableAllLeader([]);
+    setTableDataLoaded(false);
+    setTableDemoMode(false);
+    setTableYearSel('');
+    setTableMonthSel('');
+    setTablePersonSel('');
   };
 
   const handleActiveMenuChange = (menu: string) => {
@@ -727,12 +795,20 @@ export default function AdminDashboard() {
           };
 
           if (!tableDataLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>;
-          if (years.length === 0) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>;
+          if (years.length === 0) return (
+            <div style={{textAlign:'center',padding:'60px'}}>
+              <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
+              <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
+                👁 Preview with Demo Data (10 employees × 3 months)
+              </button>
+            </div>
+          );
 
           return (
             <div>
-              {/* Year tabs */}
-              <div style={{display:'flex',gap:'8px',marginBottom:'20px',alignItems:'center'}}>
+              {/* Year tabs + demo toggle */}
+              <div style={{display:'flex',gap:'8px',marginBottom:'20px',alignItems:'center',justifyContent:'space-between'}}>
+              <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
                 <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginRight:'4px'}}>Year:</span>
                 {years.map(y => (
                   <button key={y} onClick={() => setTableYearSel(y)}
@@ -742,6 +818,11 @@ export default function AdminDashboard() {
                       color: selYear===y?'white':'#64748b'
                     }}>{y}</button>
                 ))}
+              </div>
+                {tableDemoMode
+                  ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
+                  : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
+                }
               </div>
 
               {/* Spreadsheet */}
@@ -854,10 +935,24 @@ export default function AdminDashboard() {
               </td>;
 
           if (!tableDataLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>;
-          if (people.length === 0) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>;
+          if (people.length === 0) return (
+            <div style={{textAlign:'center',padding:'60px'}}>
+              <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
+              <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
+                👁 Preview with Demo Data (10 employees × 3 months)
+              </button>
+            </div>
+          );
 
           return (
             <div>
+              {/* Demo toggle */}
+              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'12px'}}>
+                {tableDemoMode
+                  ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
+                  : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
+                }
+              </div>
               {/* Person sheet tabs */}
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                 {/* Tab bar */}
