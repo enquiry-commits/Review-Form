@@ -123,6 +123,96 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleExportAll = async () => {
+    const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
+    const { data, error } = await supabase.from(table).select('*').order('submitted_at', { ascending: false });
+    if (error || !data) { alert('Export failed: ' + error?.message); return; }
+
+    let csv = '';
+
+    if (activeMenu === 'self-reviews') {
+      const kpiKeys = ['client_complaints','client_attrition','minor_delays','serious_delays','minor_errors','serious_errors','communication_issues','team_impact','learning_application'];
+      const posKeys = ['pos_compliment','pos_requested','pos_prevented','pos_recovered','pos_resolved','pos_business','pos_special'];
+
+      const headers = [
+        'Submitted At','Name','Email','Department','Period','Status',
+        ...kpiKeys.flatMap(k => [`${k}_count`, `${k}_comment`]),
+        ...posKeys.map(k => `${k}_description`)
+      ];
+      csv = headers.join(',') + '\n';
+
+      data.forEach((row: any) => {
+        const fd = row.form_data || {};
+        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const cols = [
+          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
+          esc(row.employee_name), esc(row.employee_email),
+          esc(row.department), esc(row.review_period),
+          esc(row.submitted_at ? 'Submitted' : 'Draft'),
+          ...kpiKeys.flatMap(k => [
+            esc(fd.kpis?.[k]?.count ?? 0),
+            esc(fd.kpis?.[k]?.comment ?? '')
+          ]),
+          ...posKeys.map(k => esc(fd.positive_items?.[k]?.description ?? ''))
+        ];
+        csv += cols.join(',') + '\n';
+      });
+    } else {
+      const headers = ['Submitted At','Leader Name','Leader Email','Department','Period','Status','KPI','Employee','Comment','Positive Item','Positive Comment','Overall Remarks'];
+      csv = headers.join(',') + '\n';
+
+      data.forEach((row: any) => {
+        const fd = row.form_data || {};
+        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const base = [
+          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
+          esc(row.employee_name), esc(row.employee_email),
+          esc(row.department), esc(row.review_period),
+          esc(row.submitted_at ? 'Submitted' : 'Draft')
+        ];
+
+        const kpiEntries: string[][] = [];
+        Object.values(fd.kpis || {}).forEach((kpi: any) => {
+          (kpi.rows || []).forEach((r: any) => {
+            if (r.employee?.trim() || r.comment?.trim()) {
+              kpiEntries.push([esc(kpi.kpi), esc(r.employee), esc(r.comment), esc(''), esc(''), esc('')]);
+            }
+          });
+        });
+
+        const posEntries: string[][] = [];
+        Object.values(fd.positive_items || {}).forEach((pos: any) => {
+          (pos.rows || []).forEach((r: any) => {
+            if (r.comment?.trim()) {
+              posEntries.push([esc(''), esc(''), esc(''), esc(pos.label), esc(r.comment), esc('')]);
+            }
+          });
+        });
+
+        const remarksRow = fd.overall_remarks?.remarks?.trim()
+          ? [[esc(''), esc(''), esc(''), esc(''), esc(''), esc(fd.overall_remarks.remarks)]]
+          : [];
+
+        const allRows = [...kpiEntries, ...posEntries, ...remarksRow];
+        if (allRows.length === 0) {
+          csv += [...base, esc(''), esc(''), esc(''), esc(''), esc(''), esc('')].join(',') + '\n';
+        } else {
+          allRows.forEach((extra, i) => {
+            csv += [...(i === 0 ? base : base.map(() => esc(''))), ...extra].join(',') + '\n';
+          });
+        }
+      });
+    }
+
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeMenu}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     router.push('/');
@@ -612,6 +702,20 @@ export default function AdminDashboard() {
             whiteSpace: 'nowrap'
           }}>
             🔄 Refresh
+          </button>
+
+          <button onClick={handleExportAll} style={{
+            padding: '10px 16px',
+            border: 'none',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            background: 'linear-gradient(135deg, #16a34a, #15803d)',
+            color: 'white',
+            whiteSpace: 'nowrap'
+          }}>
+            ⬇ Export All
           </button>
         </div>
 
