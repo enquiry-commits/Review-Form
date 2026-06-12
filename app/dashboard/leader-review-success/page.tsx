@@ -1,22 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
 export default function LeaderReviewSuccess() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (window.top && window.top !== window.self) {
-        window.top.location.href = '/dashboard';
-      } else {
-        router.push('/dashboard');
-      }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
 
   return (
     <div style={{background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'}}>
@@ -69,24 +53,32 @@ export default function LeaderReviewSuccess() {
           </p>
 
           {/* Back Button */}
-          <a href="/dashboard" style={{
-            display: 'inline-block',
-            padding: '13px 40px',
-            background: '#1e3a5f',
-            color: 'white',
-            borderRadius: '12px',
-            textDecoration: 'none',
-            fontWeight: '700',
-            fontSize: '14px',
-            letterSpacing: '0.3px',
-            transition: 'all 0.3s',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.3)'}}
-          onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'}}
+          <button
+            onClick={() => {
+              if (window.top && window.top !== window.self) {
+                window.top.location.href = '/dashboard';
+              } else {
+                window.location.href = '/dashboard';
+              }
+            }}
+            style={{
+              display: 'inline-block',
+              padding: '13px 40px',
+              background: '#1e3a5f',
+              color: 'white',
+              borderRadius: '12px',
+              border: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              letterSpacing: '0.3px',
+              transition: 'all 0.3s',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(30, 58, 95, 0.3)'}}
+            onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'}}
           >
-            ← Back to Form / 返回表单
-          </a>
+            ← Back to Dashboard / 返回主页
+          </button>
 
           {/* Footer */}
           <div style={{marginTop: '48px', fontSize: '12px', color: '#cbd5e1', letterSpacing: '0.5px', fontWeight: '700'}}>
