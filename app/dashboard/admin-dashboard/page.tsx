@@ -683,7 +683,7 @@ export default function AdminDashboard() {
                       <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>
                         {row.files?.length > 0 ? (
                           <span style={{background: 'rgba(126,184,212,0.15)', color: '#1e3a5f', padding: '3px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
-                            📎 {row.files.length}
+                            📁 {row.files.length}
                           </span>
                         ) : '-'}
                       </td>
