@@ -135,6 +135,176 @@ export default function AdminDashboard() {
   });
 
 
+  const KPI_LABELS: Record<string, string> = {
+    client_complaints: 'Client Complaints / Issues',
+    client_attrition: 'Client Attrition',
+    minor_delays: 'Minor Delays',
+    serious_delays: 'Serious Delays',
+    minor_errors: 'Minor Errors',
+    serious_errors: 'Serious Errors',
+    communication_issues: 'Communication Issues',
+    team_impact: 'Team Impact',
+    learning_application: 'Learning & Application',
+  };
+
+  const POSITIVE_LABELS: Record<string, string> = {
+    pos_compliment: 'Client Compliment',
+    pos_requested: 'Personally Requested',
+    pos_prevented: 'Issue Prevention',
+    pos_recovered: 'Recovery Action',
+    pos_resolved: 'Conflict Resolution',
+    pos_business: 'Business Development',
+    pos_special: 'Special Contribution',
+  };
+
+  const renderFormData = (form_data: any, type: string) => {
+    if (type === 'self-reviews') {
+      const kpis = form_data?.kpis || {};
+      const positiveItems = form_data?.positive_items || {};
+
+      const filledKpis = Object.entries(kpis).filter(([, val]: any) => val.count > 0 || val.comment?.trim());
+      const filledPositive = Object.entries(positiveItems).filter(([, val]: any) => val.description?.trim());
+
+      return (
+        <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+          {/* KPI Issues */}
+          <div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+              <div style={{width: '4px', height: '16px', background: '#dc2626', borderRadius: '2px'}} />
+              <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance Issues</span>
+            </div>
+            {filledKpis.length > 0 ? (
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {filledKpis.map(([key, val]: any) => (
+                  <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px'}}>
+                      <span style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{KPI_LABELS[key] || key}</span>
+                      {val.count > 0 && (
+                        <span style={{flexShrink: 0, background: '#fee2e2', color: '#dc2626', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700'}}>
+                          ×{val.count}
+                        </span>
+                      )}
+                    </div>
+                    {val.comment?.trim() && (
+                      <p style={{fontSize: '13px', color: '#475569', margin: '8px 0 0 0', lineHeight: '1.6'}}>{val.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d', fontWeight: '600'}}>
+                ✓ No issues reported
+              </div>
+            )}
+          </div>
+
+          {/* Positive Contributions */}
+          <div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+              <div style={{width: '4px', height: '16px', background: '#16a34a', borderRadius: '2px'}} />
+              <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Positive Contributions</span>
+            </div>
+            {filledPositive.length > 0 ? (
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {filledPositive.map(([key, val]: any) => (
+                  <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
+                    <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px'}}>{POSITIVE_LABELS[key] || key}</div>
+                    <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{val.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#94a3b8'}}>
+                No positive contributions noted
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Leader review
+    const kpis = form_data?.kpis || {};
+    const positiveItems = form_data?.positive_items || {};
+    const overallRemarks = form_data?.overall_remarks || {};
+
+    const filledKpis = Object.entries(kpis).filter(([, val]: any) =>
+      val.rows?.some((r: any) => r.employee?.trim() || r.comment?.trim())
+    );
+    const filledPositive = Object.entries(positiveItems).filter(([, val]: any) =>
+      val.rows?.some((r: any) => r.comment?.trim())
+    );
+    const hasRemarks = overallRemarks.remarks?.trim();
+
+    return (
+      <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        {/* KPI Evaluations */}
+        <div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+            <div style={{width: '4px', height: '16px', background: '#dc2626', borderRadius: '2px'}} />
+            <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Evaluations</span>
+          </div>
+          {filledKpis.length > 0 ? (
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+              {filledKpis.map(([key, val]: any) => (
+                <div key={key} style={{background: '#fff7f7', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 14px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px'}}>{val.kpi}</div>
+                  {val.rows?.filter((r: any) => r.employee?.trim() || r.comment?.trim()).map((row: any, i: number) => (
+                    <div key={i} style={{marginTop: i > 0 ? '8px' : 0, paddingTop: i > 0 ? '8px' : 0, borderTop: i > 0 ? '1px dashed #fecaca' : 'none'}}>
+                      {row.employee && <span style={{display: 'inline-block', background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '4px'}}>{row.employee}</span>}
+                      {row.comment?.trim() && <p style={{fontSize: '13px', color: '#475569', margin: '4px 0 0 0', lineHeight: '1.6'}}>{row.comment}</p>}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d', fontWeight: '600'}}>
+              ✓ No KPI issues recorded
+            </div>
+          )}
+        </div>
+
+        {/* Positive Items */}
+        <div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+            <div style={{width: '4px', height: '16px', background: '#16a34a', borderRadius: '2px'}} />
+            <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Positive Contributions</span>
+          </div>
+          {filledPositive.length > 0 ? (
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+              {filledPositive.map(([key, val]: any) => (
+                <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
+                  <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px'}}>{val.label}</div>
+                  {val.rows?.filter((r: any) => r.comment?.trim()).map((row: any, i: number) => (
+                    <p key={i} style={{fontSize: '13px', color: '#475569', margin: i > 0 ? '6px 0 0 0' : 0, lineHeight: '1.6'}}>{row.comment}</p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#94a3b8'}}>
+              No positive contributions noted
+            </div>
+          )}
+        </div>
+
+        {/* Overall Remarks */}
+        {hasRemarks && (
+          <div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+              <div style={{width: '4px', height: '16px', background: '#7eb8d4', borderRadius: '2px'}} />
+              <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Overall Remarks</span>
+            </div>
+            <div style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
+              <p style={{fontSize: '13px', color: '#475569', margin: 0, lineHeight: '1.6'}}>{overallRemarks.remarks}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const getStatusColor = (status: string) => {
     if (status === 'Completed') return { bg: '#d1fae5', color: '#065f46' };
     if (status === 'Draft') return { bg: '#fef3c7', color: '#92400e' };
@@ -554,20 +724,8 @@ export default function AdminDashboard() {
             </div>
 
             <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
-              <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Form Data</h3>
-              {selectedDetail.form_data ? (
-                <pre style={{
-                  background: '#f8fafc',
-                  padding: '16px',
-                  borderRadius: '10px',
-                  fontSize: '12px',
-                  color: '#475569',
-                  overflow: 'auto',
-                  maxHeight: '300px'
-                }}>
-                  {JSON.stringify(selectedDetail.form_data, null, 2)}
-                </pre>
-              ) : (
+              <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
+              {selectedDetail.form_data ? renderFormData(selectedDetail.form_data, activeMenu) : (
                 <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>
               )}
             </div>
