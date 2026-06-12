@@ -39,6 +39,7 @@ export default function Dashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
+    contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
