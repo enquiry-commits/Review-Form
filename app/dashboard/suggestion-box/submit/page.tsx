@@ -103,26 +103,6 @@ export default function SuggestionSubmitPage() {
             <p style={{fontSize: '13px', color: '#64748b'}}>意见箱 · Your voice matters</p>
           </div>
 
-          {/* User info */}
-          <div style={{
-            background: '#f8fafc', border: '1.5px solid #e2e8f0',
-            borderRadius: '12px', padding: '14px 18px',
-            marginBottom: '28px',
-            display: 'flex', alignItems: 'center', gap: '12px'
-          }}>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: '#1e3a5f', color: 'white',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '800', flexShrink: 0
-            }}>
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{user.name}</div>
-              <div style={{fontSize: '12px', color: '#94a3b8'}}>{user.department} · {user.email}</div>
-            </div>
-          </div>
 
           {/* Suggestion textarea */}
           <div style={{marginBottom: '24px'}}>
