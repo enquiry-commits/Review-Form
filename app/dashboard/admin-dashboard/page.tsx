@@ -30,6 +30,8 @@ export default function AdminDashboard() {
   const [selectedDetail, setSelectedDetail] = useState<SubmissionRow | null>(null);
   const [filterDept, setFilterDept] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  const [filterMonth, setFilterMonth] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalSelfReviews, setTotalSelfReviews] = useState(0);
   const [totalLeaderReviews, setTotalLeaderReviews] = useState(0);
@@ -57,6 +59,8 @@ export default function AdminDashboard() {
     setSearchTerm('');
     setFilterDept('');
     setFilterStatus('');
+    setFilterYear('');
+    setFilterMonth('');
   };
 
   const fetchAllReviews = async (page: number = 0) => {
@@ -142,7 +146,12 @@ export default function AdminDashboard() {
       row.department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = !filterDept || row.department === filterDept;
     const matchesStatus = !filterStatus || row.status === filterStatus;
-    return matchesSearch && matchesDept && matchesStatus;
+    const matchesPeriod = !filterYear
+      ? true
+      : filterMonth
+        ? row.review_period === `${filterYear}-${filterMonth}`
+        : row.review_period?.startsWith(filterYear);
+    return matchesSearch && matchesDept && matchesStatus && matchesPeriod;
   });
 
 
@@ -524,6 +533,50 @@ export default function AdminDashboard() {
             <option value="">All Status</option>
             <option value="submitted">Submitted</option>
             <option value="draft">Draft</option>
+          </select>
+
+          <select
+            value={filterYear}
+            onChange={(e) => { setFilterYear(e.target.value); setFilterMonth(''); }}
+            style={{
+              padding: '10px 14px',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: '10px',
+              fontSize: '13px',
+              background: 'white',
+              fontFamily: 'inherit',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="">All Years</option>
+            {[2024, 2025, 2026, 2027, 2028].map(y => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+
+          <select
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            disabled={!filterYear}
+            style={{
+              padding: '10px 14px',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: '10px',
+              fontSize: '13px',
+              background: filterYear ? 'white' : '#f8fafc',
+              fontFamily: 'inherit',
+              cursor: filterYear ? 'pointer' : 'not-allowed',
+              opacity: filterYear ? 1 : 0.5
+            }}
+          >
+            <option value="">All Months</option>
+            {[
+              ['01','January'],['02','February'],['03','March'],['04','April'],
+              ['05','May'],['06','June'],['07','July'],['08','August'],
+              ['09','September'],['10','October'],['11','November'],['12','December']
+            ].map(([val, label]) => (
+              <option key={val} value={val}>{label}</option>
+            ))}
           </select>
 
           <button onClick={() => fetchAllReviews(currentPage)} style={{
