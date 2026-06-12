@@ -54,8 +54,10 @@ export default function Dashboard() {
       <div style={{
         background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         borderBottom: '1px solid rgba(30, 58, 95, 0.08)',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 1000,
         boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'
       }}>
@@ -142,7 +144,7 @@ export default function Dashboard() {
       </div>
 
       {/* Content */}
-      <div style={{padding: '32px', minHeight: '100vh', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+      <div style={{padding: '32px', paddingTop: '130px', minHeight: '100vh', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
         {activeTab === 'self-review' && (
           <iframe src="/dashboard/self-review" style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px'}} />
         )}

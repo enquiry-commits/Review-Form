@@ -8,7 +8,11 @@ export default function SelfReviewSuccess() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push('/dashboard');
+      if (window.top && window.top !== window.self) {
+        window.top.location.href = '/dashboard';
+      } else {
+        router.push('/dashboard');
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
