@@ -400,7 +400,7 @@ export default function AdminDashboard() {
               textDecoration: 'none'
             }}>
               <img src="/tassure-logo.png" alt="Tassure" style={{height: '32px', width: 'auto'}} />
-              <div style={{fontSize: '14px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
+              <div style={{fontSize: '14px', fontWeight: '800', color: '#1e3a5f'}}>Tassure Review System</div>
             </Link>
             <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
               <span style={{fontSize: '14px', color: '#64748b'}}>{user.name}</span>

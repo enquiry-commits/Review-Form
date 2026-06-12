@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -82,7 +82,7 @@ export default function Dashboard() {
           <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
             <img src="/tassure-logo.png" alt="Tassure" style={{height: '45px', width: 'auto'}} />
             <div>
-              <div style={{fontSize: '18px', fontWeight: '800', color: '#1e3a5f'}}>Review System</div>
+              <div style={{fontSize: '18px', fontWeight: '800', color: '#1e3a5f'}}>Tassure Review System</div>
             </div>
           </div>
           <div style={{display: 'flex', alignItems: 'center', gap: '24px'}}>
@@ -212,3 +212,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
