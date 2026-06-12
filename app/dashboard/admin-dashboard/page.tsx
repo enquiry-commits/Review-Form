@@ -806,19 +806,15 @@ export default function AdminDashboard() {
 
           return (
             <div>
-              {/* Year tabs + demo toggle */}
-              <div style={{display:'flex',gap:'8px',marginBottom:'20px',alignItems:'center',justifyContent:'space-between'}}>
-              <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-                <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginRight:'4px'}}>Year:</span>
-                {years.map(y => (
-                  <button key={y} onClick={() => setTableYearSel(y)}
-                    style={{padding:'6px 18px',borderRadius:'8px',border:'1.5px solid',fontWeight:'700',fontSize:'13px',cursor:'pointer',transition:'all 0.2s',
-                      borderColor: selYear===y?'#1e3a5f':'#e2e8f0',
-                      background: selYear===y?'#1e3a5f':'white',
-                      color: selYear===y?'white':'#64748b'
-                    }}>{y}</button>
-                ))}
-              </div>
+              {/* Year dropdown + demo toggle */}
+              <div style={{display:'flex',gap:'12px',marginBottom:'20px',alignItems:'center',justifyContent:'space-between'}}>
+                <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                  <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Year:</span>
+                  <select value={selYear} onChange={e=>setTableYearSel(e.target.value)}
+                    style={{padding:'8px 14px',border:'1.5px solid #e2e8f0',borderRadius:'8px',fontWeight:'700',fontSize:'13px',cursor:'pointer',background:'white',color:'#1e3a5f',fontFamily:'inherit'}}>
+                    {years.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
                 {tableDemoMode
                   ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
                   : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
@@ -950,41 +946,31 @@ export default function AdminDashboard() {
 
           return (
             <div>
-              {/* Year filter + Demo toggle */}
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
-                <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
-                  <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Year:</span>
-                  {allYears.map(y => (
-                    <button key={y} onClick={() => setTableYearSel(y)}
-                      style={{padding:'6px 18px',borderRadius:'8px',border:'1.5px solid',fontWeight:'700',fontSize:'13px',cursor:'pointer',transition:'all 0.2s',
-                        borderColor: selPersonYear===y?'#1e3a5f':'#e2e8f0',
-                        background: selPersonYear===y?'#1e3a5f':'white',
-                        color: selPersonYear===y?'white':'#64748b'
-                      }}>{y}</button>
-                  ))}
+              {/* Person + Year dropdowns + Demo toggle */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px',gap:'12px',flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
+                  <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                    <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Employee:</span>
+                    <select value={selEmail} onChange={e=>setTablePersonSel(e.target.value)}
+                      style={{padding:'8px 14px',border:'1.5px solid #e2e8f0',borderRadius:'8px',fontWeight:'700',fontSize:'13px',cursor:'pointer',background:'white',color:'#1e3a5f',fontFamily:'inherit',minWidth:'160px'}}>
+                      {people.map(p => <option key={p.email} value={p.email}>{p.isLeader?'👔':'👤'} {p.name} ({p.dept})</option>)}
+                    </select>
+                  </div>
+                  <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+                    <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Year:</span>
+                    <select value={selPersonYear} onChange={e=>setTableYearSel(e.target.value)}
+                      style={{padding:'8px 14px',border:'1.5px solid #e2e8f0',borderRadius:'8px',fontWeight:'700',fontSize:'13px',cursor:'pointer',background:'white',color:'#1e3a5f',fontFamily:'inherit'}}>
+                      {allYears.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
                 </div>
                 {tableDemoMode
                   ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
                   : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
                 }
               </div>
-              {/* Person sheet tabs */}
+              {/* Spreadsheet card */}
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                {/* Tab bar */}
-                <div style={{background:'#f1f5f9',borderBottom:'1px solid #e2e8f0',padding:'0 12px',display:'flex',alignItems:'flex-end',gap:'2px',overflowX:'auto'}}>
-                  {people.map(p => (
-                    <div key={p.email} onClick={()=>setTablePersonSel(p.email)}
-                      style={{padding:'10px 16px',fontSize:'12px',fontWeight:'700',cursor:'pointer',whiteSpace:'nowrap',
-                        borderBottom: selEmail===p.email?'2px solid #1e3a5f':'2px solid transparent',
-                        color: selEmail===p.email?'#1e3a5f':'#64748b',
-                        background: selEmail===p.email?'white':'transparent',
-                        borderRadius:'6px 6px 0 0', transition:'all 0.15s', marginBottom:'-1px'
-                      }}>
-                      {p.isLeader?'👔':'👤'} {p.name}
-                    </div>
-                  ))}
-                </div>
-
                 {/* Person info bar */}
                 {person && (
                   <div style={{padding:'12px 20px',background:'white',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:'16px'}}>
