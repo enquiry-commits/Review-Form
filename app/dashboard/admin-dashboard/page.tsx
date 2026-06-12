@@ -691,118 +691,144 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        {/* ───── TABLE BY YEAR ───── */}
+        {/* ───── TABLE BY YEAR (Google Sheets style) ───── */}
         {activeMenu === 'table-by-year' && (() => {
           const allRows = [...tableAllSelf, ...tableAllLeader];
           const years = [...new Set(allRows.map(r => r.review_period?.split('-')[0]).filter(Boolean))].sort().reverse();
           const selYear = tableYearSel || years[0] || '';
           const rowsInYear = allRows.filter(r => r.review_period?.startsWith(selYear));
           const months = [...new Set(rowsInYear.map(r => r.review_period?.split('-')[1]).filter(Boolean))].sort();
-          const selMonth = tableMonthSel || months[0] || '';
-          const period = `${selYear}-${selMonth}`;
-          const selfInPeriod = tableAllSelf.filter(r => r.review_period === period);
-          const leaderInPeriod = tableAllLeader.filter(r => r.review_period === period);
-          const emailSet = new Set([...selfInPeriod.map(r => r.employee_email), ...leaderInPeriod.map(r => r.employee_email)]);
+          // All unique employees across all months of this year
+          const emailSet = new Set(rowsInYear.map(r => r.employee_email));
           const employees = [...emailSet].map(email => {
-            const self = selfInPeriod.find(r => r.employee_email === email);
-            const leader = leaderInPeriod.find(r => r.employee_email === email);
-            const ref = self || leader!;
-            return { email, name: ref.employee_name, dept: ref.department, self, leader };
-          }).sort((a, b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
-          const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
-          const badge = (row: SubmissionRow | undefined) => row
-            ? <span style={{display:'inline-block',padding:'3px 10px',borderRadius:'6px',fontSize:'11px',fontWeight:'700',background: row.status==='submitted'?'#d1fae5':'#fef3c7',color: row.status==='submitted'?'#065f46':'#92400e'}}>{row.status==='submitted'?'✓ Submitted':'⏱ Draft'}</span>
-            : <span style={{display:'inline-block',padding:'3px 10px',borderRadius:'6px',fontSize:'11px',fontWeight:'600',background:'#f1f5f9',color:'#94a3b8'}}>— Not submitted</span>;
+            const ref = rowsInYear.find(r => r.employee_email === email)!;
+            return { email, name: ref.employee_name, dept: ref.department };
+          }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+          const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          const fullMonthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 
-          return !tableDataLoaded ? (
-            <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>
-          ) : years.length === 0 ? (
-            <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>
-          ) : (
+          const cellStyle = (row: SubmissionRow | undefined, onClick: ()=>void) => {
+            const submitted = row?.status === 'submitted';
+            const draft = row?.status === 'draft';
+            return (
+              <td key={Math.random()} onClick={row ? onClick : undefined}
+                style={{border:'1px solid #e2e8f0', padding:'8px 10px', textAlign:'center', width:'80px', cursor: row ? 'pointer' : 'default',
+                  background: submitted ? 'rgba(220,252,231,0.6)' : draft ? 'rgba(254,249,195,0.6)' : 'transparent',
+                  transition:'background 0.15s'
+                }}
+                onMouseEnter={(e)=>{ if(row) e.currentTarget.style.opacity='0.7'; }}
+                onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}
+              >
+                {submitted ? <span style={{color:'#15803d',fontWeight:'700',fontSize:'13px'}}>✓</span>
+                  : draft ? <span style={{color:'#92400e',fontWeight:'700',fontSize:'13px'}}>○</span>
+                  : <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>}
+              </td>
+            );
+          };
+
+          if (!tableDataLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>;
+          if (years.length === 0) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>;
+
+          return (
             <div>
               {/* Year tabs */}
-              <div style={{display:'flex',gap:'8px',marginBottom:'24px',flexWrap:'wrap'}}>
+              <div style={{display:'flex',gap:'8px',marginBottom:'20px',alignItems:'center'}}>
+                <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginRight:'4px'}}>Year:</span>
                 {years.map(y => (
-                  <button key={y} onClick={() => { setTableYearSel(y); setTableMonthSel(''); }}
-                    style={{padding:'8px 20px',borderRadius:'10px',border:'none',fontWeight:'700',fontSize:'13px',cursor:'pointer',
-                      background: selYear===y ? 'linear-gradient(135deg,#1e3a5f,#162d4a)' : 'rgba(255,255,255,0.9)',
-                      color: selYear===y ? 'white' : '#64748b',
-                      boxShadow: selYear===y ? '0 4px 12px rgba(30,58,95,0.2)' : '0 1px 4px rgba(0,0,0,0.06)',
-                      transition:'all 0.2s'
+                  <button key={y} onClick={() => setTableYearSel(y)}
+                    style={{padding:'6px 18px',borderRadius:'8px',border:'1.5px solid',fontWeight:'700',fontSize:'13px',cursor:'pointer',transition:'all 0.2s',
+                      borderColor: selYear===y?'#1e3a5f':'#e2e8f0',
+                      background: selYear===y?'#1e3a5f':'white',
+                      color: selYear===y?'white':'#64748b'
                     }}>{y}</button>
                 ))}
               </div>
 
-              {/* Month tabs */}
-              {months.length > 0 && (
-                <div style={{display:'flex',gap:'6px',marginBottom:'24px',flexWrap:'wrap'}}>
+              {/* Spreadsheet */}
+              <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
+                {/* Sheet tab bar */}
+                <div style={{background:'#f1f5f9',borderBottom:'1px solid #e2e8f0',padding:'0 16px',display:'flex',alignItems:'center',gap:'2px'}}>
                   {months.map(m => (
-                    <button key={m} onClick={() => setTableMonthSel(m)}
-                      style={{padding:'6px 16px',borderRadius:'8px',border:'1.5px solid',fontSize:'12px',fontWeight:'600',cursor:'pointer',transition:'all 0.2s',
-                        borderColor: selMonth===m ? '#7eb8d4' : '#e2e8f0',
-                        background: selMonth===m ? 'rgba(126,184,212,0.15)' : 'white',
-                        color: selMonth===m ? '#1e3a5f' : '#64748b'
-                      }}>{monthNames[parseInt(m)] || m}</button>
+                    <div key={m} onClick={()=>setTableMonthSel(m===tableMonthSel?'':m)}
+                      style={{padding:'8px 16px',fontSize:'12px',fontWeight:'700',cursor:'pointer',borderBottom: (tableMonthSel||months[0])===m?'2px solid #1e3a5f':'2px solid transparent',
+                        color:(tableMonthSel||months[0])===m?'#1e3a5f':'#64748b',transition:'all 0.2s',marginBottom:'-1px'
+                      }}>{fullMonthNames[parseInt(m)]} {selYear}</div>
                   ))}
                 </div>
-              )}
 
-              {/* Table */}
-              {selMonth && (
-                <div style={{background:'rgba(255,255,255,0.95)',backdropFilter:'blur(10px)',borderRadius:'16px',overflow:'hidden',boxShadow:'0 20px 60px rgba(0,0,0,0.08)',border:'1px solid rgba(255,255,255,0.8)'}}>
-                  {/* Sheet header */}
-                  <div style={{padding:'16px 24px',background:'linear-gradient(135deg,#1e3a5f,#162d4a)',color:'white',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                    <div>
-                      <div style={{fontWeight:'800',fontSize:'15px'}}>{monthNames[parseInt(selMonth)]} {selYear}</div>
-                      <div style={{fontSize:'12px',opacity:0.7,marginTop:'2px'}}>{employees.length} employees · Period {period}</div>
-                    </div>
-                    <div style={{display:'flex',gap:'20px',fontSize:'12px',opacity:0.85}}>
-                      <span>Self Review: {selfInPeriod.filter(r=>r.status==='submitted').length}/{selfInPeriod.length}</span>
-                      <span>Leader Review: {leaderInPeriod.filter(r=>r.status==='submitted').length}/{leaderInPeriod.length}</span>
-                    </div>
-                  </div>
-                  <table style={{width:'100%',borderCollapse:'collapse'}}>
-                    <thead style={{background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'2px solid #e2e8f0'}}>
-                      <tr>
-                        {['Employee','Department','Self Review','Leader Review','Actions'].map(h => (
-                          <th key={h} style={{padding:'13px 18px',textAlign:'left',fontWeight:'700',fontSize:'11px',color:'#334155',letterSpacing:'0.5px',textTransform:'uppercase'}}>{h}</th>
+                {/* The spreadsheet table */}
+                <div style={{overflowX:'auto'}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
+                    {/* Header row 1: frozen columns + month group headers */}
+                    <thead>
+                      <tr style={{background:'#f8fafc'}}>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Department</th>
+                        {months.map(m => (
+                          <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
+                            {fullMonthNames[parseInt(m)]}
+                          </th>
+                        ))}
+                      </tr>
+                      {/* Header row 2: Self / Leader sub-columns */}
+                      <tr style={{background:'#f8fafc'}}>
+                        {months.map(m => (
+                          [
+                            <th key={`${m}-s`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#3b82f6',fontSize:'11px',background:'rgba(219,234,254,0.3)',width:'72px'}}>📝 Self</th>,
+                            <th key={`${m}-l`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#16a34a',fontSize:'11px',background:'rgba(220,252,231,0.3)',width:'72px'}}>👔 Leader</th>
+                          ]
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {employees.length > 0 ? employees.map((emp, i) => (
-                        <tr key={emp.email} style={{borderBottom: i<employees.length-1?'1px solid #f1f5f9':'none',transition:'all 0.2s'}}
-                          onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
-                          onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                      {employees.length === 0 ? (
+                        <tr><td colSpan={3 + months.length*2} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions for {selYear}</td></tr>
+                      ) : employees.map((emp, i) => (
+                        <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
+                          onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
+                          onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                         >
-                          <td style={{padding:'14px 18px'}}>
-                            <div style={{fontWeight:'700',fontSize:'13px',color:'#0f172a'}}>{emp.name}</div>
-                            <div style={{fontSize:'11px',color:'#94a3b8'}}>{emp.email}</div>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
+                            <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
+                            <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                           </td>
-                          <td style={{padding:'14px 18px',fontSize:'13px',color:'#475569'}}>{emp.dept}</td>
-                          <td style={{padding:'14px 18px'}}>{badge(emp.self)}</td>
-                          <td style={{padding:'14px 18px'}}>{badge(emp.leader)}</td>
-                          <td style={{padding:'14px 18px'}}>
-                            <div style={{display:'flex',gap:'6px'}}>
-                              {emp.self && <button onClick={()=>setTableDetailRow(emp.self!)} style={{padding:'5px 10px',border:'none',borderRadius:'6px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',cursor:'pointer',fontSize:'11px',fontWeight:'700'}}
-                                onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.3)'}} onMouseLeave={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.15)'}}>Self ↗</button>}
-                              {emp.leader && <button onClick={()=>setTableDetailRow(emp.leader!)} style={{padding:'5px 10px',border:'none',borderRadius:'6px',background:'rgba(22,163,74,0.1)',color:'#15803d',cursor:'pointer',fontSize:'11px',fontWeight:'700'}}
-                                onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(22,163,74,0.2)'}} onMouseLeave={(e)=>{e.currentTarget.style.background='rgba(22,163,74,0.1)'}}>Leader ↗</button>}
-                            </div>
-                          </td>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>{emp.dept}</td>
+                          {months.map(m => {
+                            const period = `${selYear}-${m}`;
+                            const selfRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period);
+                            const leaderRow = tableAllLeader.find(r => r.employee_email===emp.email && r.review_period===period);
+                            return [
+                              cellStyle(selfRow, ()=>setTableDetailRow(selfRow!)),
+                              cellStyle(leaderRow, ()=>setTableDetailRow(leaderRow!))
+                            ];
+                          })}
                         </tr>
-                      )) : (
-                        <tr><td colSpan={5} style={{padding:'40px',textAlign:'center',color:'#94a3b8',fontSize:'14px'}}>No submissions for this period</td></tr>
-                      )}
+                      ))}
                     </tbody>
+                    {/* Legend footer */}
+                    <tfoot>
+                      <tr>
+                        <td colSpan={3 + months.length*2} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                          <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
+                            <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
+                            <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
+                            <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
+                            <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
+                            <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a cell to view details</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
-              )}
+              </div>
             </div>
           );
         })()}
 
-        {/* ───── TABLE BY PERSON ───── */}
+        {/* ───── TABLE BY PERSON (Google Sheets style) ───── */}
         {activeMenu === 'table-by-person' && (() => {
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
           tableAllSelf.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:false}); });
@@ -810,108 +836,115 @@ export default function AdminDashboard() {
           const people = [...personMap.values()].sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
           const selEmail = tablePersonSel || people[0]?.email || '';
           const person = personMap.get(selEmail);
-          const personSelf = tableAllSelf.filter(r => r.employee_email === selEmail).sort((a,b) => (b.review_period||'').localeCompare(a.review_period||''));
-          const personLeader = tableAllLeader.filter(r => r.employee_email === selEmail).sort((a,b) => (b.review_period||'').localeCompare(a.review_period||''));
+          const personSelf = tableAllSelf.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
+          const personLeader = tableAllLeader.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
+          // All unique periods for this person
+          const periods = [...new Set([...personSelf, ...personLeader].map(r=>r.review_period))].sort().reverse();
 
-          const recordTable = (rows: SubmissionRow[], type: string) => (
-            <div style={{background:'rgba(255,255,255,0.95)',backdropFilter:'blur(10px)',borderRadius:'14px',overflow:'hidden',boxShadow:'0 8px 32px rgba(0,0,0,0.06)',border:'1px solid rgba(255,255,255,0.8)',marginBottom:'20px'}}>
-              <div style={{padding:'14px 20px',background: type==='Self'?'linear-gradient(135deg,#eff6ff,#dbeafe)':'linear-gradient(135deg,#f0fdf4,#dcfce7)',borderBottom:'1px solid',borderBottomColor:type==='Self'?'#bfdbfe':'#bbf7d0',display:'flex',alignItems:'center',gap:'10px'}}>
-                <span style={{fontSize:'16px'}}>{type==='Self'?'📝':'👔'}</span>
-                <div>
-                  <div style={{fontWeight:'800',fontSize:'13px',color:'#0f172a'}}>{type} Review Submissions</div>
-                  <div style={{fontSize:'11px',color:'#64748b'}}>{rows.length} record{rows.length!==1?'s':''}</div>
-                </div>
-              </div>
-              {rows.length === 0 ? (
-                <div style={{padding:'28px',textAlign:'center',color:'#94a3b8',fontSize:'13px'}}>No submissions yet</div>
-              ) : (
-                <table style={{width:'100%',borderCollapse:'collapse'}}>
-                  <thead style={{background:'#f8fafc',borderBottom:'1px solid #e2e8f0'}}>
-                    <tr>
-                      {['Period','Submitted At','Status','Action'].map(h => (
-                        <th key={h} style={{padding:'11px 18px',textAlign:'left',fontWeight:'700',fontSize:'11px',color:'#334155',letterSpacing:'0.5px',textTransform:'uppercase'}}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, i) => (
-                      <tr key={row.id} style={{borderBottom: i<rows.length-1?'1px solid #f1f5f9':'none',transition:'all 0.2s'}}
-                        onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.04)'}}
-                        onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
-                      >
-                        <td style={{padding:'13px 18px',fontWeight:'700',fontSize:'13px',color:'#1e3a5f'}}>{row.review_period}</td>
-                        <td style={{padding:'13px 18px',fontSize:'13px',color:'#475569'}}>{row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '—'}</td>
-                        <td style={{padding:'13px 18px'}}>
-                          <span style={{display:'inline-block',padding:'3px 10px',borderRadius:'6px',fontSize:'11px',fontWeight:'700',background:row.status==='submitted'?'#d1fae5':'#fef3c7',color:row.status==='submitted'?'#065f46':'#92400e'}}>
-                            {row.status==='submitted'?'✓ Submitted':'⏱ Draft'}
-                          </span>
-                        </td>
-                        <td style={{padding:'13px 18px'}}>
-                          <button onClick={()=>setTableDetailRow(row)} style={{padding:'5px 12px',border:'none',borderRadius:'7px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',cursor:'pointer',fontSize:'12px',fontWeight:'700'}}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.3)'}} onMouseLeave={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.15)'}}>View ↗</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          );
+          const statusCell = (row: SubmissionRow | undefined) => row
+            ? <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:row.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor:'pointer'}}
+                onClick={()=>setTableDetailRow(row)}
+                onMouseEnter={(e)=>{e.currentTarget.style.opacity='0.75'}} onMouseLeave={(e)=>{e.currentTarget.style.opacity='1'}}
+              >
+                <span style={{fontWeight:'700',fontSize:'12px',color:row.status==='submitted'?'#15803d':'#92400e'}}>{row.status==='submitted'?'✓ Submitted':'○ Draft'}</span>
+                <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'2px'}}>{row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+              </td>
+            : <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:'transparent'}}>
+                <span style={{color:'#e2e8f0',fontSize:'14px'}}>—</span>
+              </td>;
 
-          return !tableDataLoaded ? (
-            <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>
-          ) : people.length === 0 ? (
-            <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>
-          ) : (
+          if (!tableDataLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>;
+          if (people.length === 0) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>No data yet</div>;
+
+          return (
             <div>
-              {/* Person selector */}
-              <div style={{background:'rgba(255,255,255,0.95)',borderRadius:'14px',padding:'16px',boxShadow:'0 4px 20px rgba(0,0,0,0.06)',marginBottom:'24px',border:'1px solid rgba(255,255,255,0.8)'}}>
-                <div style={{fontSize:'11px',fontWeight:'700',color:'#94a3b8',letterSpacing:'0.5px',textTransform:'uppercase',marginBottom:'12px'}}>Select Employee</div>
-                <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+              {/* Person sheet tabs */}
+              <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
+                {/* Tab bar */}
+                <div style={{background:'#f1f5f9',borderBottom:'1px solid #e2e8f0',padding:'0 12px',display:'flex',alignItems:'flex-end',gap:'2px',overflowX:'auto'}}>
                   {people.map(p => (
-                    <button key={p.email} onClick={()=>setTablePersonSel(p.email)}
-                      style={{padding:'7px 14px',borderRadius:'10px',border:'1.5px solid',fontSize:'12px',fontWeight:'700',cursor:'pointer',transition:'all 0.2s',
-                        borderColor: selEmail===p.email?'#7eb8d4':'#e2e8f0',
-                        background: selEmail===p.email?'linear-gradient(135deg,#1e3a5f,#162d4a)':'white',
-                        color: selEmail===p.email?'white':'#334155'
+                    <div key={p.email} onClick={()=>setTablePersonSel(p.email)}
+                      style={{padding:'10px 16px',fontSize:'12px',fontWeight:'700',cursor:'pointer',whiteSpace:'nowrap',
+                        borderBottom: selEmail===p.email?'2px solid #1e3a5f':'2px solid transparent',
+                        color: selEmail===p.email?'#1e3a5f':'#64748b',
+                        background: selEmail===p.email?'white':'transparent',
+                        borderRadius:'6px 6px 0 0', transition:'all 0.15s', marginBottom:'-1px'
                       }}>
-                      {p.isLeader ? '👔' : '👤'} {p.name}
-                      <span style={{marginLeft:'6px',opacity:0.6,fontSize:'10px'}}>{p.dept}</span>
-                    </button>
+                      {p.isLeader?'👔':'👤'} {p.name}
+                    </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Person detail */}
-              {person && (
-                <div>
-                  {/* Person header */}
-                  <div style={{background:'linear-gradient(135deg,#1e3a5f,#162d4a)',borderRadius:'14px',padding:'20px 24px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'16px'}}>
-                    <div style={{width:'48px',height:'48px',borderRadius:'50%',background:'rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',fontWeight:'800',color:'white',flexShrink:0}}>
+                {/* Person info bar */}
+                {person && (
+                  <div style={{padding:'12px 20px',background:'white',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:'16px'}}>
+                    <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'linear-gradient(135deg,#1e3a5f,#162d4a)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',fontWeight:'800',color:'white',flexShrink:0}}>
                       {person.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{fontSize:'18px',fontWeight:'900',color:'white'}}>{person.name}</div>
-                      <div style={{fontSize:'12px',color:'rgba(255,255,255,0.65)',marginTop:'2px'}}>{person.dept} · {person.email}</div>
+                      <div style={{fontWeight:'800',fontSize:'14px',color:'#0f172a'}}>{person.name}</div>
+                      <div style={{fontSize:'11px',color:'#94a3b8'}}>{person.dept} · {person.email}</div>
                     </div>
-                    <div style={{marginLeft:'auto',display:'flex',gap:'16px'}}>
+                    <div style={{marginLeft:'auto',display:'flex',gap:'24px'}}>
                       <div style={{textAlign:'center'}}>
-                        <div style={{fontSize:'22px',fontWeight:'900',color:'white'}}>{personSelf.length}</div>
-                        <div style={{fontSize:'10px',color:'rgba(255,255,255,0.6)',textTransform:'uppercase',letterSpacing:'0.5px'}}>Self Reviews</div>
+                        <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personSelf.filter(r=>r.status==='submitted').length}/{personSelf.length}</div>
+                        <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Submitted</div>
                       </div>
                       {person.isLeader && (
                         <div style={{textAlign:'center'}}>
-                          <div style={{fontSize:'22px',fontWeight:'900',color:'white'}}>{personLeader.length}</div>
-                          <div style={{fontSize:'10px',color:'rgba(255,255,255,0.6)',textTransform:'uppercase',letterSpacing:'0.5px'}}>Leader Reviews</div>
+                          <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personLeader.filter(r=>r.status==='submitted').length}/{personLeader.length}</div>
+                          <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Submitted</div>
                         </div>
                       )}
                     </div>
                   </div>
+                )}
 
-                  {recordTable(personSelf, 'Self')}
-                  {person.isLeader && recordTable(personLeader, 'Leader')}
+                {/* Spreadsheet */}
+                <div style={{overflowX:'auto'}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%'}}>
+                    <thead>
+                      <tr style={{background:'#f8fafc'}}>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 10px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px'}}>Period</th>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',minWidth:'200px',background:'rgba(219,234,254,0.2)'}}>📝 Self Review</th>
+                        {person?.isLeader && <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',minWidth:'200px',background:'rgba(220,252,231,0.2)'}}>👔 Leader Review</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {periods.length === 0 ? (
+                        <tr><td colSpan={person?.isLeader?4:3} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions yet</td></tr>
+                      ) : periods.map((period, i) => {
+                        const selfRow = personSelf.find(r=>r.review_period===period);
+                        const leaderRow = personLeader.find(r=>r.review_period===period);
+                        return (
+                          <tr key={period} style={{background: i%2===0?'white':'#fafafa'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
+                            onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
+                          >
+                            <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                            <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'13px'}}>{period}</td>
+                            {statusCell(selfRow)}
+                            {person?.isLeader && statusCell(leaderRow)}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan={person?.isLeader?4:3} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                          <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
+                            <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
+                            <span><span style={{color:'#15803d',fontWeight:'800'}}>✓ Submitted</span></span>
+                            <span><span style={{color:'#92400e',fontWeight:'800'}}>○ Draft</span></span>
+                            <span style={{fontStyle:'italic'}}>Click a cell to view details</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
-              )}
+              </div>
             </div>
           );
         })()}
