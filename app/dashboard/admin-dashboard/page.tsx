@@ -30,6 +30,10 @@ export default function AdminDashboard() {
   const [selectedDetail, setSelectedDetail] = useState<SubmissionRow | null>(null);
   const [filterDept, setFilterDept] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalSelfReviews, setTotalSelfReviews] = useState(0);
+  const [totalLeaderReviews, setTotalLeaderReviews] = useState(0);
+  const pageSize = 50;
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -44,18 +48,34 @@ export default function AdminDashboard() {
     }
     setUser(parsedUser);
     setIsEmbedded(window.self !== window.top);
-    fetchAllReviews();
-  }, [router]);
+    fetchAllReviews(currentPage);
+  }, [router, currentPage]);
 
-  const fetchAllReviews = async () => {
+  const handleActiveMenuChange = (menu: string) => {
+    setActiveMenu(menu);
+    setCurrentPage(0);
+    setSearchTerm('');
+    setFilterDept('');
+    setFilterStatus('');
+  };
+
+  const fetchAllReviews = async (page: number = 0) => {
     try {
-      const [selfRes, leaderRes] = await Promise.all([
-        supabase.from('self_review_submissions').select('*'),
-        supabase.from('leader_review_submissions').select('*')
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+
+      const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes] = await Promise.all([
+        supabase.from('self_review_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('self_review_submissions').select('*').range(start, end),
+        supabase.from('leader_review_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('leader_review_submissions').select('*').range(start, end)
       ]);
 
-      if (selfRes.data) {
-        setSelfReviews(selfRes.data.map((r: any) => ({
+      setTotalSelfReviews(selfCountRes.count || 0);
+      setTotalLeaderReviews(leaderCountRes.count || 0);
+
+      if (selfDataRes.data) {
+        setSelfReviews(selfDataRes.data.map((r: any) => ({
           id: r.id,
           user_id: r.user_id,
           submitted_at: r.submitted_at,
@@ -68,8 +88,8 @@ export default function AdminDashboard() {
         })));
       }
 
-      if (leaderRes.data) {
-        setLeaderReviews(leaderRes.data.map((r: any) => ({
+      if (leaderDataRes.data) {
+        setLeaderReviews(leaderDataRes.data.map((r: any) => ({
           id: r.id,
           user_id: r.user_id,
           submitted_at: r.submitted_at,
@@ -186,7 +206,7 @@ export default function AdminDashboard() {
             {['self-reviews', 'leader-reviews'].map(item => (
               <div
                 key={item}
-                onClick={() => setActiveMenu(item)}
+                onClick={() => handleActiveMenuChange(item)}
                 style={{
                   padding: '11px 14px',
                   borderRadius: '10px',
@@ -218,38 +238,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <hr style={{border: 'none', borderTop: '1px solid #e2e8f0', margin: '20px 0'}} />
-
-        <div style={{marginBottom: '28px'}}>
-          <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>🔧 Tools</div>
-          <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {['settings', 'export'].map(item => (
-              <div
-                key={item}
-                style={{
-                  padding: '11px 14px',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#64748b',
-                  transition: 'all 0.3s',
-                  borderLeft: '3px solid transparent'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(30, 58, 95, 0.06)';
-                  e.currentTarget.style.color = '#1e3a5f';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#64748b';
-                }}
-              >
-                {item === 'settings' ? 'Settings' : 'Export All'}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Main Content */}
@@ -343,20 +331,6 @@ export default function AdminDashboard() {
           }}>
             🔄 Refresh
           </button>
-
-          <button onClick={exportToCSV} style={{
-            padding: '10px 16px',
-            border: 'none',
-            borderRadius: '10px',
-            fontSize: '13px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            background: 'linear-gradient(135deg, #7eb8d4, #6ba3c5)',
-            color: 'white',
-            whiteSpace: 'nowrap'
-          }}>
-            📊 Export CSV
-          </button>
         </div>
 
         {/* Data Table */}
@@ -443,38 +417,82 @@ export default function AdminDashboard() {
         </div>
 
         {/* Pagination */}
-        <div style={{display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
-          {['← Previous', '1', '2', 'Next →'].map((btn) => (
-            <button
-              key={btn}
-              style={{
-                padding: '8px 12px',
-                border: '1.5px solid #e2e8f0',
-                borderRadius: '8px',
-                background: btn === '1' ? 'linear-gradient(135deg, #1e3a5f, #162d4a)' : 'white',
-                color: btn === '1' ? 'white' : '#64748b',
-                fontWeight: '600',
-                fontSize: '12px',
-                cursor: 'pointer',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                if (btn !== '1') {
-                  e.currentTarget.style.borderColor = '#7eb8d4';
-                  e.currentTarget.style.color = '#1e3a5f';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (btn !== '1') {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.color = '#64748b';
-                }
-              }}
-            >
-              {btn}
-            </button>
-          ))}
-        </div>
+        {(() => {
+          const totalCount = activeMenu === 'self-reviews' ? totalSelfReviews : totalLeaderReviews;
+          const totalPages = Math.ceil(totalCount / pageSize);
+          const hasPrev = currentPage > 0;
+          const hasNext = currentPage < totalPages - 1;
+
+          return (
+            <div style={{display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
+              <button
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                disabled={!hasPrev}
+                style={{
+                  padding: '8px 12px',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: hasPrev ? '#64748b' : '#cbd5e1',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  cursor: hasPrev ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.3s',
+                  opacity: hasPrev ? 1 : 0.5
+                }}
+                onMouseEnter={(e) => {
+                  if (hasPrev) {
+                    e.currentTarget.style.borderColor = '#7eb8d4';
+                    e.currentTarget.style.color = '#1e3a5f';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (hasPrev) {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.color = '#64748b';
+                  }
+                }}
+              >
+                ← Previous
+              </button>
+
+              <span style={{fontSize: '12px', color: '#64748b', fontWeight: '600', minWidth: '60px', textAlign: 'center'}}>
+                Page {currentPage + 1} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                disabled={!hasNext}
+                style={{
+                  padding: '8px 12px',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: hasNext ? '#64748b' : '#cbd5e1',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  cursor: hasNext ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.3s',
+                  opacity: hasNext ? 1 : 0.5
+                }}
+                onMouseEnter={(e) => {
+                  if (hasNext) {
+                    e.currentTarget.style.borderColor = '#7eb8d4';
+                    e.currentTarget.style.color = '#1e3a5f';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (hasNext) {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.color = '#64748b';
+                  }
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          );
+        })()}
       </div>
 
 {/* Detail Modal */}
