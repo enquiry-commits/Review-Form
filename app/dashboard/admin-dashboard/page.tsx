@@ -1073,11 +1073,25 @@ export default function AdminDashboard() {
                 <div style={{overflowX:'auto'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%'}}>
                     <thead>
-                      <tr style={{background:'#f8fafc'}}>
-                        <th style={{border:'1px solid #e2e8f0',padding:'10px 10px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px'}}>Period</th>
-                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',minWidth:'200px',background:'rgba(219,234,254,0.2)'}}>📝 Self Review</th>
-                        {person?.isLeader && <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',minWidth:'200px',background:'rgba(220,252,231,0.2)'}}>👔 Leader Review</th>}
+                      <tr>
+                        <th style={{border:'1px solid rgba(255,255,255,0.15)',padding:'13px 10px',textAlign:'center',fontWeight:'700',color:'rgba(255,255,255,0.5)',width:'40px',background:'#1e3a5f',fontSize:'11px'}}>#</th>
+                        <th style={{border:'1px solid rgba(255,255,255,0.15)',padding:'13px 16px',textAlign:'left',fontWeight:'800',color:'white',minWidth:'110px',background:'#1e3a5f',fontSize:'12px',letterSpacing:'0.3px'}}>Period</th>
+                        <th style={{border:'1px solid rgba(255,255,255,0.15)',padding:'13px 16px',textAlign:'center',fontWeight:'800',color:'white',minWidth:'200px',background:'linear-gradient(135deg,#1e4a8f,#1e3a5f)',fontSize:'12px',letterSpacing:'0.3px'}}>
+                          <span style={{display:'inline-flex',alignItems:'center',gap:'6px'}}>
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.85}}>
+                              <rect x="3" y="1.5" width="10" height="13" rx="1.5"/><line x1="5.5" y1="5.5" x2="10.5" y2="5.5"/><line x1="5.5" y1="8" x2="10.5" y2="8"/><line x1="5.5" y1="10.5" x2="9" y2="10.5"/>
+                            </svg>
+                            Self Review
+                          </span>
+                        </th>
+                        {person?.isLeader && <th style={{border:'1px solid rgba(255,255,255,0.15)',padding:'13px 16px',textAlign:'center',fontWeight:'800',color:'white',minWidth:'200px',background:'linear-gradient(135deg,#1a5c3a,#1e3a5f)',fontSize:'12px',letterSpacing:'0.3px'}}>
+                          <span style={{display:'inline-flex',alignItems:'center',gap:'6px'}}>
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.85}}>
+                              <circle cx="8" cy="5" r="2.5"/><path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/><polyline points="10,8.5 11.5,10.5 14,7.5"/>
+                            </svg>
+                            Leader Review
+                          </span>
+                        </th>}
                       </tr>
                     </thead>
                     <tbody>
