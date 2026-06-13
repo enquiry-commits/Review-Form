@@ -1245,7 +1245,13 @@ export default function AdminDashboard() {
                     <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>{dept}</span>
                     <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{users.length} member{users.length!==1?'s':''}</span>
                   </div>
-                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed'}}>
+                    <colgroup>
+                      <col style={{width:'38%'}} />
+                      <col style={{width:'14%'}} />
+                      <col style={{width:'24%'}} />
+                      <col style={{width:'24%'}} />
+                    </colgroup>
                     <thead>
                       <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
                         <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
