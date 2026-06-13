@@ -739,6 +739,50 @@ export default function AdminDashboard() {
           {sidebarCollapsed ? '›' : '‹'}
         </button>
 
+        {/* STATUS OVERVIEW section */}
+        <div style={{marginBottom: '20px'}}>
+          {!sidebarCollapsed && (
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'4px',verticalAlign:'middle'}}>
+                <circle cx="6.5" cy="6.5" r="5.5"/>
+                <path d="M4 6.5l1.5 1.5L9 4.5"/>
+              </svg>
+              Status
+            </div>
+          )}
+          <div
+            onClick={() => handleActiveMenuChange('status-overview')}
+            title={sidebarCollapsed ? 'Status Overview' : undefined}
+            style={{
+              padding: sidebarCollapsed ? '10px' : '11px 14px',
+              borderRadius: '10px', cursor: 'pointer',
+              fontSize: '13px', fontWeight: '600',
+              color: activeMenu === 'status-overview' ? '#1e3a5f' : '#64748b',
+              transition: 'all 0.2s',
+              borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+              borderLeftColor: activeMenu === 'status-overview' ? '#7eb8d4' : 'transparent',
+              background: activeMenu === 'status-overview' ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+              display: 'flex', alignItems: 'center',
+              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+              gap: '10px',
+              whiteSpace: 'nowrap', overflow: 'hidden'
+            }}
+            onMouseEnter={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+            onMouseLeave={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
+          >
+            <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="8" r="6"/>
+                <path d="M5.5 8.5l2 2L11 6"/>
+              </svg>
+            </span>
+            {!sidebarCollapsed && 'Status Overview'}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{borderTop: '1.5px dashed #e2e8f0', margin: '4px 0 20px 0'}} />
+
         {/* DATA section */}
         <div style={{marginBottom: '20px'}}>
           {!sidebarCollapsed && (
@@ -788,50 +832,6 @@ export default function AdminDashboard() {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div style={{borderTop: '1.5px dashed #e2e8f0', margin: '4px 0 20px 0'}} />
-
-        {/* STATUS OVERVIEW section */}
-        <div style={{marginBottom: '20px'}}>
-          {!sidebarCollapsed && (
-            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'4px',verticalAlign:'middle'}}>
-                <circle cx="6.5" cy="6.5" r="5.5"/>
-                <path d="M4 6.5l1.5 1.5L9 4.5"/>
-              </svg>
-              Status
-            </div>
-          )}
-          <div
-            onClick={() => handleActiveMenuChange('status-overview')}
-            title={sidebarCollapsed ? 'Status Overview' : undefined}
-            style={{
-              padding: sidebarCollapsed ? '10px' : '11px 14px',
-              borderRadius: '10px', cursor: 'pointer',
-              fontSize: '13px', fontWeight: '600',
-              color: activeMenu === 'status-overview' ? '#1e3a5f' : '#64748b',
-              transition: 'all 0.2s',
-              borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-              borderLeftColor: activeMenu === 'status-overview' ? '#7eb8d4' : 'transparent',
-              background: activeMenu === 'status-overview' ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
-              display: 'flex', alignItems: 'center',
-              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-              gap: '10px',
-              whiteSpace: 'nowrap', overflow: 'hidden'
-            }}
-            onMouseEnter={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-            onMouseLeave={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
-          >
-            <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="8" r="6"/>
-                <path d="M5.5 8.5l2 2L11 6"/>
-              </svg>
-            </span>
-            {!sidebarCollapsed && 'Status Overview'}
           </div>
         </div>
 
