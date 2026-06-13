@@ -1697,10 +1697,11 @@ export default function AdminDashboard() {
           inset: 0,
           background: 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '20px'
+          padding: '40px 20px 20px',
+          overflowY: 'auto'
         }}>
           <div style={{
             background: 'white',
@@ -1708,8 +1709,6 @@ export default function AdminDashboard() {
             padding: '40px',
             maxWidth: '700px',
             width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
           }}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
@@ -1775,8 +1774,8 @@ export default function AdminDashboard() {
 
       {/* Table Detail Modal */}
       {tableDetailRow && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>
-          <div style={{background:'white',borderRadius:'16px',padding:'40px',maxWidth:'700px',width:'100%',maxHeight:'90vh',overflowY:'auto',boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'40px 20px 20px',overflowY:'auto'}}>
+          <div style={{background:'white',borderRadius:'16px',padding:'40px',maxWidth:'700px',width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'24px'}}>
               <h2 style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',margin:0}}>{tableDetailRow.employee_name}</h2>
               <button onClick={()=>setTableDetailRow(null)} style={{background:'none',border:'none',fontSize:'24px',cursor:'pointer',color:'#64748b'}}>✕</button>
@@ -1802,8 +1801,8 @@ export default function AdminDashboard() {
 
       {/* Suggestion Detail Modal */}
       {selectedSuggestion && (
-        <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'}}>
-          <div style={{background: 'white', borderRadius: '16px', padding: '40px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'}}>
+        <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, padding: '40px 20px 20px', overflowY: 'auto'}}>
+          <div style={{background: 'white', borderRadius: '16px', padding: '40px', maxWidth: '600px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
               <h2 style={{fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: 0}}>💬 Suggestion</h2>
               <button onClick={() => setSelectedSuggestion(null)} style={{background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#64748b'}}>✕</button>
