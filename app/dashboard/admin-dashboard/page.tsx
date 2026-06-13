@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { User } from '@/lib/auth';
+import { User, ALL_REVIEWABLE_USERS } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 
 interface SubmissionRow {
   id: string;
@@ -61,6 +62,11 @@ export default function AdminDashboard() {
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Status overview state
+  const [overviewSelf, setOverviewSelf]       = useState<SubmissionRow[]>([]);
+  const [overviewLeader, setOverviewLeader]   = useState<SubmissionRow[]>([]);
+  const [overviewLoaded, setOverviewLoaded]   = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -171,6 +177,18 @@ export default function AdminDashboard() {
     setTablePersonSel('');
   };
 
+  const fetchOverviewData = async () => {
+    if (overviewLoaded) return;
+    const period = getCurrentReviewPeriod();
+    const [selfRes, leaderRes] = await Promise.all([
+      supabase.from('self_review_submissions').select('*').eq('review_period', period),
+      supabase.from('leader_review_submissions').select('*').eq('review_period', period),
+    ]);
+    if (selfRes.data) setOverviewSelf(selfRes.data.map((r: any) => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data })));
+    if (leaderRes.data) setOverviewLeader(leaderRes.data.map((r: any) => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data })));
+    setOverviewLoaded(true);
+  };
+
   const handleActiveMenuChange = (menu: string) => {
     setActiveMenu(menu);
     setCurrentPage(0);
@@ -180,6 +198,7 @@ export default function AdminDashboard() {
     setFilterYear('');
     setFilterMonth('');
     if (menu === 'table-by-year' || menu === 'table-by-person') fetchTableData();
+    if (menu === 'status-overview') fetchOverviewData();
   };
 
   const fetchSuggestions = async (page: number = 0) => {
@@ -775,6 +794,50 @@ export default function AdminDashboard() {
         {/* Divider */}
         <div style={{borderTop: '1.5px dashed #e2e8f0', margin: '4px 0 20px 0'}} />
 
+        {/* STATUS OVERVIEW section */}
+        <div style={{marginBottom: '20px'}}>
+          {!sidebarCollapsed && (
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'4px',verticalAlign:'middle'}}>
+                <circle cx="6.5" cy="6.5" r="5.5"/>
+                <path d="M4 6.5l1.5 1.5L9 4.5"/>
+              </svg>
+              Status
+            </div>
+          )}
+          <div
+            onClick={() => handleActiveMenuChange('status-overview')}
+            title={sidebarCollapsed ? 'Status Overview' : undefined}
+            style={{
+              padding: sidebarCollapsed ? '10px' : '11px 14px',
+              borderRadius: '10px', cursor: 'pointer',
+              fontSize: '13px', fontWeight: '600',
+              color: activeMenu === 'status-overview' ? '#1e3a5f' : '#64748b',
+              transition: 'all 0.2s',
+              borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+              borderLeftColor: activeMenu === 'status-overview' ? '#7eb8d4' : 'transparent',
+              background: activeMenu === 'status-overview' ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+              display: 'flex', alignItems: 'center',
+              justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+              gap: '10px',
+              whiteSpace: 'nowrap', overflow: 'hidden'
+            }}
+            onMouseEnter={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+            onMouseLeave={(e) => { if (activeMenu !== 'status-overview') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
+          >
+            <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="8" cy="8" r="6"/>
+                <path d="M5.5 8.5l2 2L11 6"/>
+              </svg>
+            </span>
+            {!sidebarCollapsed && 'Status Overview'}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{borderTop: '1.5px dashed #e2e8f0', margin: '4px 0 20px 0'}} />
+
         {/* TABLE section */}
         <div>
           {!sidebarCollapsed && (
@@ -831,14 +894,16 @@ export default function AdminDashboard() {
               : activeMenu === 'leader-reviews' ? 'Leader Review Submissions'
               : activeMenu === 'suggestions' ? 'Suggestion Box'
               : activeMenu === 'table-by-year' ? 'Table View · By Year'
-              : 'Table View · By Person'}
+              : activeMenu === 'table-by-person' ? 'Table View · By Person'
+              : 'Status Overview'}
           </h1>
           <p style={{color: '#64748b', fontSize: '14px'}}>
             {activeMenu === 'self-reviews' ? 'Monitor employee self-review submissions and completion status'
               : activeMenu === 'leader-reviews' ? 'Monitor leader review submissions and completion status'
               : activeMenu === 'suggestions' ? 'All suggestions submitted by team members'
               : activeMenu === 'table-by-year' ? 'View all submissions organised by year and month'
-              : 'View all submissions organised by employee'}
+              : activeMenu === 'table-by-person' ? 'View all submissions organised by employee'
+              : `Current review period — ${formatPeriodDisplay(getCurrentReviewPeriod())}`}
           </p>
         </div>
 
@@ -1118,6 +1183,126 @@ export default function AdminDashboard() {
           );
         })()}
 
+        {/* ───── STATUS OVERVIEW ───── */}
+        {activeMenu === 'status-overview' && (() => {
+          const period = getCurrentReviewPeriod();
+          const selfMap  = new Map(overviewSelf.map(r  => [r.employee_email, r]));
+          const leaderMap = new Map(overviewLeader.map(r => [r.employee_email, r]));
+
+          // Group users by department
+          const byDept = new Map<string, typeof ALL_REVIEWABLE_USERS>();
+          for (const u of ALL_REVIEWABLE_USERS) {
+            const d = u.department || 'Other';
+            if (!byDept.has(d)) byDept.set(d, []);
+            byDept.get(d)!.push(u);
+          }
+
+          const statusBadge = (row: SubmissionRow | undefined, type: 'self'|'leader') => {
+            if (!row) return (
+              <span style={{padding:'3px 10px',borderRadius:'12px',fontSize:'11px',fontWeight:'700',background:'#f1f5f9',color:'#94a3b8'}}>— Pending</span>
+            );
+            if (row.status === 'submitted') return (
+              <span style={{padding:'3px 10px',borderRadius:'12px',fontSize:'11px',fontWeight:'700',background:'#dcfce7',color:'#15803d'}}>✓ Submitted</span>
+            );
+            return (
+              <span style={{padding:'3px 10px',borderRadius:'12px',fontSize:'11px',fontWeight:'700',background:'#fef3c7',color:'#92400e'}}>○ Draft</span>
+            );
+          };
+
+          const submittedCount = ALL_REVIEWABLE_USERS.filter(u => selfMap.get(u.email)?.status === 'submitted').length;
+          const draftCount     = ALL_REVIEWABLE_USERS.filter(u => selfMap.get(u.email)?.status === 'draft').length;
+          const pendingCount   = ALL_REVIEWABLE_USERS.length - submittedCount - draftCount;
+
+          if (!overviewLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading…</div>;
+
+          return (
+            <div>
+              {/* Summary cards */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px',marginBottom:'24px'}}>
+                {[
+                  { label:'Submitted', count:submittedCount, bg:'#dcfce7', color:'#15803d', border:'#bbf7d0' },
+                  { label:'Draft',     count:draftCount,     bg:'#fef3c7', color:'#92400e', border:'#fde68a' },
+                  { label:'Pending',   count:pendingCount,   bg:'#f1f5f9', color:'#64748b', border:'#e2e8f0' },
+                ].map(c => (
+                  <div key={c.label} style={{background:c.bg,border:`1.5px solid ${c.border}`,borderRadius:'12px',padding:'16px 20px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                    <div style={{fontSize:'13px',fontWeight:'700',color:c.color}}>{c.label}</div>
+                    <div style={{fontSize:'24px',fontWeight:'800',color:c.color}}>{c.count}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'16px'}}>
+                <button onClick={()=>{setOverviewLoaded(false);fetchOverviewData();}}
+                  style={{padding:'8px 16px',border:'none',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'linear-gradient(135deg,#1e3a5f,#162d4a)',color:'white'}}>
+                  🔄 Refresh
+                </button>
+              </div>
+
+              {/* Per-department tables */}
+              {[...byDept.entries()].map(([dept, users]) => (
+                <div key={dept} style={{marginBottom:'24px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',overflow:'hidden',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
+                  <div style={{padding:'12px 20px',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                    <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>{dept}</span>
+                    <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{users.length} member{users.length!==1?'s':''}</span>
+                  </div>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px'}}>
+                    <thead>
+                      <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
+                        <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
+                        <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Role</th>
+                        <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Review</th>
+                        <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Review</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u, i) => {
+                        const selfRow   = selfMap.get(u.email);
+                        const leaderRow = leaderMap.get(u.email);
+                        return (
+                          <tr key={u.email} style={{borderBottom: i < users.length-1 ? '1px solid #f1f5f9' : 'none', transition:'background 0.15s'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
+                            onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                          >
+                            <td style={{padding:'12px 16px'}}>
+                              <div style={{fontWeight:'700',color:'#0f172a'}}>{u.name}</div>
+                              <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{u.email}</div>
+                            </td>
+                            <td style={{padding:'12px 16px'}}>
+                              <span style={{padding:'2px 8px',borderRadius:'6px',fontSize:'11px',fontWeight:'700',
+                                background: u.role==='leader' ? 'rgba(16,185,129,0.1)' : '#f1f5f9',
+                                color: u.role==='leader' ? '#065f46' : '#64748b'}}>
+                                {u.role === 'leader' ? 'Leader' : 'Employee'}
+                              </span>
+                            </td>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>
+                              {statusBadge(selfRow, 'self')}
+                              {selfRow?.submitted_at && (
+                                <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(selfRow.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>
+                              )}
+                            </td>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>
+                              {u.role === 'leader' ? (
+                                <>
+                                  {statusBadge(leaderRow, 'leader')}
+                                  {leaderRow?.submitted_at && (
+                                    <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(leaderRow.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>
+                                  )}
+                                </>
+                              ) : (
+                                <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* Suggestion Box View */}
         {activeMenu === 'suggestions' && (
           <div>
@@ -1186,7 +1371,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Toolbar + Table + Pagination (reviews only) */}
-        {activeMenu !== 'suggestions' && activeMenu !== 'table-by-year' && activeMenu !== 'table-by-person' && <>
+        {activeMenu !== 'suggestions' && activeMenu !== 'table-by-year' && activeMenu !== 'table-by-person' && activeMenu !== 'status-overview' && <>
         <div style={{
           display: 'flex',
           gap: '12px',

@@ -41,6 +41,17 @@ const USERS_DATABASE = {
 
 export const PASSWORD = '123456';
 
+// All users who need to submit reviews (non-admin)
+export const ALL_REVIEWABLE_USERS: User[] = Object.entries(USERS_DATABASE)
+  .filter(([, data]) => data.role !== 'admin')
+  .map(([email, data]) => ({
+    id: email,
+    email,
+    name: data.name,
+    role: data.role as UserRole,
+    department: data.department,
+  }));
+
 // 验证登录
 export async function authenticate(email: string, password: string): Promise<User | null> {
   // 简单的密码验证（后续改为 Supabase auth）
