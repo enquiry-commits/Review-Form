@@ -863,22 +863,16 @@ export default function AdminDashboard() {
             const draft = row?.status === 'draft';
             return (
               <td key={Math.random()} onClick={row ? onClick : undefined}
-                style={{borderBottom:'1px solid #f1f5f9', padding:'10px 6px', textAlign:'center', width:'64px',
-                  cursor: row ? 'pointer' : 'default', transition:'background 0.12s'
+                style={{border:'1px solid #e2e8f0', padding:'8px 10px', textAlign:'center', width:'80px', cursor: row ? 'pointer' : 'default',
+                  background: submitted ? 'rgba(220,252,231,0.6)' : draft ? 'rgba(254,249,195,0.6)' : 'transparent',
+                  transition:'background 0.15s'
                 }}
-                onMouseEnter={(e)=>{ if(row) e.currentTarget.style.background='rgba(0,0,0,0.03)'; }}
-                onMouseLeave={(e)=>{ e.currentTarget.style.background='transparent'; }}
+                onMouseEnter={(e)=>{ if(row) e.currentTarget.style.opacity='0.7'; }}
+                onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}
               >
-                {submitted
-                  ? <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'24px',height:'24px',borderRadius:'50%',background:'#dcfce7'}}>
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,6 5,9 10,3"/></svg>
-                    </span>
-                  : draft
-                  ? <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'24px',height:'24px',borderRadius:'50%',background:'#fef9c3',border:'1.5px solid #fde68a'}}>
-                      <span style={{width:'7px',height:'7px',borderRadius:'50%',background:'#f59e0b',display:'block'}}/>
-                    </span>
-                  : <span style={{color:'#e2e8f0',fontSize:'16px',lineHeight:1}}>·</span>
-                }
+                {submitted ? <span style={{color:'#15803d',fontWeight:'700',fontSize:'13px'}}>✓</span>
+                  : draft ? <span style={{color:'#92400e',fontWeight:'700',fontSize:'13px'}}>○</span>
+                  : <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>}
               </td>
             );
           };
@@ -911,52 +905,46 @@ export default function AdminDashboard() {
               </div>
 
               {/* Spreadsheet */}
-              <div style={{background:'white',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06),0 8px 32px rgba(0,0,0,0.06)',overflow:'hidden',border:'1px solid #f1f5f9'}}>
+              <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
+                {/* The spreadsheet table */}
                 <div style={{overflowX:'auto'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
+                    {/* Header row 1: frozen columns + month group headers */}
                     <thead>
-                      {/* Month group headers */}
-                      <tr style={{background:'#fafbfc'}}>
-                        <th rowSpan={2} style={{padding:'14px',textAlign:'center',fontWeight:'500',color:'#cbd5e1',width:'44px',borderRight:'1px solid #f1f5f9',borderBottom:'1px solid #e8ecf0',fontSize:'11px'}}>#</th>
-                        <th rowSpan={2} style={{padding:'14px 18px',textAlign:'left',fontWeight:'700',color:'#0f172a',minWidth:'150px',background:'#fafbfc',position:'sticky',left:'44px',zIndex:2,borderRight:'1px solid #f1f5f9',borderBottom:'1px solid #e8ecf0',fontSize:'12px',letterSpacing:'-0.1px'}}>Employee</th>
-                        <th rowSpan={2} style={{padding:'14px 16px',textAlign:'left',fontWeight:'700',color:'#0f172a',minWidth:'120px',background:'#fafbfc',position:'sticky',left:'194px',zIndex:2,borderRight:'2px solid #e8ecf0',borderBottom:'1px solid #e8ecf0',fontSize:'12px'}}>Department</th>
+                      <tr style={{background:'#f8fafc'}}>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Department</th>
                         {months.map(m => (
-                          <th key={m} colSpan={2} style={{padding:'12px 8px 6px',textAlign:'center',fontWeight:'700',color:'#334155',borderBottom:'none',borderLeft:'1px solid #f1f5f9',fontSize:'11px',letterSpacing:'0.2px',background:'#fafbfc'}}>
-                            {monthNames[parseInt(m)]}
-                            <div style={{width:'20px',height:'2px',background:'#7eb8d4',borderRadius:'2px',margin:'5px auto 0'}}/>
+                          <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
+                            {fullMonthNames[parseInt(m)]}
                           </th>
                         ))}
                       </tr>
-                      {/* Self / Leader sub-headers */}
-                      <tr style={{background:'#fafbfc'}}>
-                        {months.map(m => [
-                          <th key={`${m}-s`} style={{padding:'5px 6px 10px',textAlign:'center',fontWeight:'600',color:'#3b82f6',fontSize:'10px',borderLeft:'1px solid #f1f5f9',borderBottom:'2px solid #e8ecf0',width:'64px',letterSpacing:'0.4px',textTransform:'uppercase'}}>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'3px'}}>
-                              <span style={{width:'5px',height:'5px',borderRadius:'50%',background:'#3b82f6',display:'inline-block',flexShrink:0}}/>Self
-                            </span>
-                          </th>,
-                          <th key={`${m}-l`} style={{padding:'5px 6px 10px',textAlign:'center',fontWeight:'600',color:'#16a34a',fontSize:'10px',borderBottom:'2px solid #e8ecf0',width:'64px',letterSpacing:'0.4px',textTransform:'uppercase'}}>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'3px'}}>
-                              <span style={{width:'5px',height:'5px',borderRadius:'50%',background:'#16a34a',display:'inline-block',flexShrink:0}}/>Ldr
-                            </span>
-                          </th>
-                        ])}
+                      {/* Header row 2: Self / Leader sub-columns */}
+                      <tr style={{background:'#f8fafc'}}>
+                        {months.map(m => (
+                          [
+                            <th key={`${m}-s`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#3b82f6',fontSize:'11px',background:'rgba(219,234,254,0.3)',width:'72px'}}>📝 Self</th>,
+                            <th key={`${m}-l`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#16a34a',fontSize:'11px',background:'rgba(220,252,231,0.3)',width:'72px'}}>👔 Leader</th>
+                          ]
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {employees.length === 0 ? (
                         <tr><td colSpan={3 + months.length*2} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions for {selYear}</td></tr>
                       ) : employees.map((emp, i) => (
-                        <tr key={emp.email}
-                          onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.04)'}}
-                          onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                        <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
+                          onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
+                          onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                         >
-                          <td style={{padding:'12px',textAlign:'center',color:'#e2e8f0',fontWeight:'500',fontSize:'11px',borderBottom:'1px solid #f8fafc',borderRight:'1px solid #f1f5f9'}}>{i+1}</td>
-                          <td style={{padding:'12px 18px',position:'sticky',left:'44px',background:'white',zIndex:1,borderBottom:'1px solid #f8fafc',borderRight:'1px solid #f1f5f9'}}>
-                            <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px',lineHeight:'1.3'}}>{emp.name}</div>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
+                            <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                             <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                           </td>
-                          <td style={{padding:'12px 16px',color:'#64748b',position:'sticky',left:'194px',background:'white',zIndex:1,fontSize:'12px',fontWeight:'500',borderBottom:'1px solid #f8fafc',borderRight:'2px solid #e8ecf0'}}>{emp.dept}</td>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>{emp.dept}</td>
                           {months.map(m => {
                             const period = `${selYear}-${m}`;
                             const selfRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period);
@@ -969,26 +957,16 @@ export default function AdminDashboard() {
                         </tr>
                       ))}
                     </tbody>
+                    {/* Legend footer */}
                     <tfoot>
                       <tr>
-                        <td colSpan={3 + months.length*2} style={{padding:'12px 18px',background:'#fafbfc',borderTop:'1px solid #e8ecf0'}}>
-                          <div style={{display:'flex',gap:'18px',fontSize:'11px',color:'#94a3b8',alignItems:'center'}}>
-                            <span style={{fontWeight:'700',color:'#64748b',textTransform:'uppercase',fontSize:'10px',letterSpacing:'0.5px'}}>Legend</span>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                              <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'18px',height:'18px',borderRadius:'50%',background:'#dcfce7'}}>
-                                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,6 5,9 10,3"/></svg>
-                              </span>
-                              Submitted
-                            </span>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                              <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'18px',height:'18px',borderRadius:'50%',background:'#fef9c3',border:'1.5px solid #fde68a'}}/>
-                              Draft
-                            </span>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                              <span style={{color:'#e2e8f0',fontSize:'18px',lineHeight:1}}>·</span>
-                              Not submitted
-                            </span>
-                            <span style={{marginLeft:'auto',fontStyle:'italic',fontSize:'11px'}}>Click a cell to view details</span>
+                        <td colSpan={3 + months.length*2} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                          <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
+                            <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
+                            <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
+                            <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
+                            <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
+                            <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a cell to view details</span>
                           </div>
                         </td>
                       </tr>
@@ -1018,24 +996,15 @@ export default function AdminDashboard() {
           const periods = selPersonYear ? allPeriods.filter(p => p.startsWith(selPersonYear)) : allPeriods;
 
           const statusCell = (row: SubmissionRow | undefined) => row
-            ? <td style={{borderBottom:'1px solid #f1f5f9',padding:'14px 20px',textAlign:'center',cursor:'pointer',transition:'background 0.12s'}}
+            ? <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:row.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor:'pointer'}}
                 onClick={()=>setTableDetailRow(row)}
-                onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(0,0,0,0.02)'}} onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                onMouseEnter={(e)=>{e.currentTarget.style.opacity='0.75'}} onMouseLeave={(e)=>{e.currentTarget.style.opacity='1'}}
               >
-                <span style={{display:'inline-flex',alignItems:'center',gap:'5px',padding:'4px 12px',borderRadius:'20px',
-                  background:row.status==='submitted'?'#dcfce7':'#fef3c7',
-                  color:row.status==='submitted'?'#15803d':'#92400e'
-                }}>
-                  {row.status==='submitted'
-                    ? <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,6 5,9 10,3"/></svg>
-                    : <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="5" cy="5" r="3.5"/></svg>
-                  }
-                  <span style={{fontSize:'12px',fontWeight:'700'}}>{row.status==='submitted'?'Submitted':'Draft'}</span>
-                </span>
-                {row.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'5px'}}>{new Date(row.submitted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>}
+                <span style={{fontWeight:'700',fontSize:'12px',color:row.status==='submitted'?'#15803d':'#92400e'}}>{row.status==='submitted'?'✓ Submitted':'○ Draft'}</span>
+                <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'2px'}}>{row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
               </td>
-            : <td style={{borderBottom:'1px solid #f1f5f9',padding:'14px 20px',textAlign:'center'}}>
-                <span style={{color:'#e2e8f0',fontSize:'18px',lineHeight:1}}>—</span>
+            : <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:'transparent'}}>
+                <span style={{color:'#e2e8f0',fontSize:'14px'}}>—</span>
               </td>;
 
           if (!tableDataLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading...</div>;
@@ -1074,51 +1043,41 @@ export default function AdminDashboard() {
                 }
               </div>
               {/* Spreadsheet card */}
-              <div style={{background:'white',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06),0 8px 32px rgba(0,0,0,0.06)',overflow:'hidden',border:'1px solid #f1f5f9'}}>
+              <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                 {/* Person info bar */}
                 {person && (
-                  <div style={{padding:'16px 24px',background:'white',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:'16px'}}>
-                    <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#1e3a5f,#2d5a8e)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'15px',fontWeight:'800',color:'white',flexShrink:0,letterSpacing:'-0.5px'}}>
+                  <div style={{padding:'12px 20px',background:'white',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:'16px'}}>
+                    <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'linear-gradient(135deg,#1e3a5f,#162d4a)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',fontWeight:'800',color:'white',flexShrink:0}}>
                       {person.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{fontWeight:'800',fontSize:'14px',color:'#0f172a',letterSpacing:'-0.2px'}}>{person.name}</div>
-                      <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{person.dept} · {person.email}</div>
+                      <div style={{fontWeight:'800',fontSize:'14px',color:'#0f172a'}}>{person.name}</div>
+                      <div style={{fontSize:'11px',color:'#94a3b8'}}>{person.dept} · {person.email}</div>
                     </div>
-                    <div style={{marginLeft:'auto',display:'flex',gap:'32px'}}>
+                    <div style={{marginLeft:'auto',display:'flex',gap:'24px'}}>
                       <div style={{textAlign:'center'}}>
-                        <div style={{fontWeight:'800',fontSize:'20px',color:'#1e3a5f',letterSpacing:'-0.5px'}}>{personSelf.filter(r=>r.status==='submitted').length}<span style={{fontSize:'14px',color:'#94a3b8',fontWeight:'600'}}>/{personSelf.length}</span></div>
-                        <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginTop:'2px'}}>Self Submitted</div>
+                        <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personSelf.filter(r=>r.status==='submitted').length}/{personSelf.length}</div>
+                        <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Submitted</div>
                       </div>
                       {person.isLeader && (
                         <div style={{textAlign:'center'}}>
-                          <div style={{fontWeight:'800',fontSize:'20px',color:'#1e3a5f',letterSpacing:'-0.5px'}}>{personLeader.filter(r=>r.status==='submitted').length}<span style={{fontSize:'14px',color:'#94a3b8',fontWeight:'600'}}>/{personLeader.length}</span></div>
-                          <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px',marginTop:'2px'}}>Leader Submitted</div>
+                          <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personLeader.filter(r=>r.status==='submitted').length}/{personLeader.length}</div>
+                          <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Submitted</div>
                         </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Table */}
+                {/* Spreadsheet */}
                 <div style={{overflowX:'auto'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%'}}>
                     <thead>
-                      <tr style={{background:'#fafbfc'}}>
-                        <th style={{padding:'13px 12px',textAlign:'center',fontWeight:'500',color:'#cbd5e1',width:'44px',borderBottom:'2px solid #e8ecf0',fontSize:'11px'}}>#</th>
-                        <th style={{padding:'13px 20px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'120px',borderBottom:'2px solid #e8ecf0',fontSize:'12px',letterSpacing:'-0.1px'}}>Period</th>
-                        <th style={{padding:'13px 20px',textAlign:'center',fontWeight:'700',minWidth:'220px',borderBottom:'2px solid #3b82f6',fontSize:'12px'}}>
-                          <span style={{display:'inline-flex',alignItems:'center',gap:'6px',color:'#3b82f6'}}>
-                            <span style={{width:'6px',height:'6px',borderRadius:'50%',background:'#3b82f6',display:'inline-block'}}/>
-                            Self Review
-                          </span>
-                        </th>
-                        {person?.isLeader && <th style={{padding:'13px 20px',textAlign:'center',fontWeight:'700',minWidth:'220px',borderBottom:'2px solid #16a34a',fontSize:'12px'}}>
-                          <span style={{display:'inline-flex',alignItems:'center',gap:'6px',color:'#16a34a'}}>
-                            <span style={{width:'6px',height:'6px',borderRadius:'50%',background:'#16a34a',display:'inline-block'}}/>
-                            Leader Review
-                          </span>
-                        </th>}
+                      <tr style={{background:'#f8fafc'}}>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 10px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px'}}>Period</th>
+                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',minWidth:'200px',background:'rgba(219,234,254,0.2)'}}>📝 Self Review</th>
+                        {person?.isLeader && <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',minWidth:'200px',background:'rgba(220,252,231,0.2)'}}>👔 Leader Review</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -1128,12 +1087,12 @@ export default function AdminDashboard() {
                         const selfRow = personSelf.find(r=>r.review_period===period);
                         const leaderRow = personLeader.find(r=>r.review_period===period);
                         return (
-                          <tr key={period}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.04)'}}
-                            onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                          <tr key={period} style={{background: i%2===0?'white':'#fafafa'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
+                            onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
-                            <td style={{padding:'12px',textAlign:'center',color:'#e2e8f0',fontWeight:'500',fontSize:'11px',borderBottom:'1px solid #f8fafc'}}>{i+1}</td>
-                            <td style={{padding:'14px 20px',fontWeight:'700',color:'#1e3a5f',fontSize:'13px',borderBottom:'1px solid #f8fafc',letterSpacing:'-0.1px'}}>{period}</td>
+                            <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                            <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'13px'}}>{period}</td>
                             {statusCell(selfRow)}
                             {person?.isLeader && statusCell(leaderRow)}
                           </tr>
@@ -1142,22 +1101,12 @@ export default function AdminDashboard() {
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colSpan={person?.isLeader?4:3} style={{padding:'12px 20px',background:'#fafbfc',borderTop:'1px solid #e8ecf0'}}>
-                          <div style={{display:'flex',gap:'18px',fontSize:'11px',color:'#94a3b8',alignItems:'center'}}>
-                            <span style={{fontWeight:'700',color:'#64748b',textTransform:'uppercase',fontSize:'10px',letterSpacing:'0.5px'}}>Legend</span>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                              <span style={{display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 10px',borderRadius:'20px',background:'#dcfce7',color:'#15803d',fontWeight:'700'}}>
-                                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2,6 5,9 10,3"/></svg>
-                                Submitted
-                              </span>
-                            </span>
-                            <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                              <span style={{display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 10px',borderRadius:'20px',background:'#fef3c7',color:'#92400e',fontWeight:'700'}}>
-                                <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="5" cy="5" r="3.5"/></svg>
-                                Draft
-                              </span>
-                            </span>
-                            <span style={{fontStyle:'italic',marginLeft:'auto'}}>Click a row to view details</span>
+                        <td colSpan={person?.isLeader?4:3} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                          <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
+                            <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
+                            <span><span style={{color:'#15803d',fontWeight:'800'}}>✓ Submitted</span></span>
+                            <span><span style={{color:'#92400e',fontWeight:'800'}}>○ Draft</span></span>
+                            <span style={{fontStyle:'italic'}}>Click a cell to view details</span>
                           </div>
                         </td>
                       </tr>
