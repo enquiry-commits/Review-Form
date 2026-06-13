@@ -113,27 +113,31 @@ export default function AdminDashboard() {
       { name: 'Irene Yap',    email: 'irene@tassure.com',   dept: 'Corporate Secretarial', isLeader: false },
       { name: 'James Ong',    email: 'james@tassure.com',   dept: 'Internal',              isLeader: true  },
     ];
-    const periods = ['2026-04','2026-05','2026-06'];
-    // Statuses: submitted / draft / null (missing)
+    const periods = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+    // Statuses: submitted / draft / null (missing) — 10 employees × 12 months
     const selfMatrix: (string|null)[][] = [
-      ['submitted','submitted','submitted'],
-      ['submitted','submitted','draft'],
-      ['submitted','submitted',null],
-      ['submitted','submitted','submitted'],
-      ['submitted','draft','submitted'],
-      ['submitted','submitted','submitted'],
-      ['draft','submitted','submitted'],
-      ['submitted',null,'submitted'],
-      ['submitted','submitted',null],
-      ['submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','submitted','draft',    'submitted','submitted',null,       'submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','draft',     'submitted',null      ],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','draft',    'submitted','submitted',null,       'submitted','submitted','draft',    'submitted'],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      ['draft',    'submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted'],
+      ['submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted','submitted',null,       'submitted'],
+      ['submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted','draft'     ],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
     ];
     const leaderMatrix: (string|null)[][] = [
-      [null,null,null],[null,null,null],[null,null,null],
-      ['submitted','submitted','submitted'],
-      ['submitted','draft',null],
-      ['submitted','submitted','submitted'],
-      [null,null,null],[null,null,null],[null,null,null],
-      ['submitted','submitted','draft'],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','draft',    null,       'submitted','submitted','submitted','submitted','draft',    'submitted'],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null,null,null,null,null],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','draft',    'submitted','submitted','submitted','submitted','submitted'],
     ];
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
