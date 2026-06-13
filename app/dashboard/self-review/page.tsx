@@ -139,6 +139,7 @@ export default function SelfReviewForm() {
   const kpiRef        = useRef(kpiData);
   const posRef        = useRef(posData);
   const saveTimer     = useRef<ReturnType<typeof setTimeout>|null>(null);
+  const dirtyRef      = useRef(false); // only true after user actually edits
 
   useEffect(() => { kpiRef.current = kpiData; }, [kpiData]);
   useEffect(() => { posRef.current = posData;  }, [posData]);
@@ -184,9 +185,9 @@ export default function SelfReviewForm() {
       });
   }, [router, currentPeriod]);
 
-  // Auto-save: 2 s after last change
+  // Auto-save: 2 s after user actually edits (not on initial load)
   useEffect(() => {
-    if (!loaded || statusRef.current === 'submitted') return;
+    if (!loaded || !dirtyRef.current || statusRef.current === 'submitted') return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       const u = userRef.current;
@@ -207,7 +208,7 @@ export default function SelfReviewForm() {
       } finally { setSaving(false); }
     }, 2000);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [kpiData, posData, loaded, currentPeriod]);
+  }, [kpiData, posData, currentPeriod]);
 
   const handleFileUpload = async (section: 'kpi'|'pos', id: string, files: FileList) => {
     const links: FileLink[] = [];
@@ -351,8 +352,8 @@ export default function SelfReviewForm() {
                 };
                 return (
                   <KPIItem key={kpiId} id={kpiId} name={META[kpiId].name} question={META[kpiId].question}
-                    data={kpiData[kpiId]} onChange={d=>!isSubmitted&&setKpiData(p=>({...p,[kpiId]:d}))}
-                    onFileUpload={f=>!isSubmitted&&handleFileUpload('kpi',kpiId,f)} />
+                    data={kpiData[kpiId]} onChange={d=>{if(!isSubmitted){dirtyRef.current=true;setKpiData(p=>({...p,[kpiId]:d}));}}}
+                    onFileUpload={f=>{if(!isSubmitted){dirtyRef.current=true;handleFileUpload('kpi',kpiId,f);}}} />
                 );
               })}
             </div>
@@ -383,8 +384,8 @@ export default function SelfReviewForm() {
               {id:'pos_special',name:'Special Contribution / 特别贡献',question:'Contribution clearly beyond job scope, requires manager explanation / 有明显超出岗位职责的贡献，需主管说明'},
             ].map(p=>(
               <PositiveItem key={p.id} id={p.id} name={p.name} question={p.question}
-                data={posData[p.id]} onChange={d=>!isSubmitted&&setPosData(prev=>({...prev,[p.id]:d}))}
-                onFileUpload={f=>!isSubmitted&&handleFileUpload('pos',p.id,f)} />
+                data={posData[p.id]} onChange={d=>{if(!isSubmitted){dirtyRef.current=true;setPosData(prev=>({...prev,[p.id]:d}));}}}
+                onFileUpload={f=>{if(!isSubmitted){dirtyRef.current=true;handleFileUpload('pos',p.id,f);}}} />
             ))}
           </div>
         </div>

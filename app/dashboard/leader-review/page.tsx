@@ -78,6 +78,7 @@ export default function LeaderReviewForm() {
   const posRef        = useRef(posRows);
   const overallRef    = useRef(overall);
   const saveTimer     = useRef<ReturnType<typeof setTimeout>|null>(null);
+  const dirtyRef      = useRef(false);
 
   useEffect(() => { kpiRef.current     = kpiRows;  }, [kpiRows]);
   useEffect(() => { posRef.current     = posRows;  }, [posRows]);
@@ -118,9 +119,9 @@ export default function LeaderReviewForm() {
       });
   }, [router, currentPeriod]);
 
-  // Auto-save: 2s after last change
+  // Auto-save: 2s after user actually edits (not on initial load)
   useEffect(() => {
-    if (!loaded || statusRef.current === 'submitted') return;
+    if (!loaded || !dirtyRef.current || statusRef.current === 'submitted') return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       const u = userRef.current;
@@ -141,7 +142,7 @@ export default function LeaderReviewForm() {
       } finally { setSaving(false); }
     }, 2000);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [kpiRows, posRows, overall, loaded, currentPeriod]);
+  }, [kpiRows, posRows, overall, currentPeriod]);
 
   const uploadFiles = async (files: FileList): Promise<FileLink[]> => {
     const links: FileLink[] = [];
@@ -160,6 +161,7 @@ export default function LeaderReviewForm() {
   };
 
   const handleKpiFileUpload = async (id: string, rowIdx: number, files: FileList) => {
+    dirtyRef.current = true;
     const links = await uploadFiles(files);
     setKpiRows(p => {
       const rows = [...p[id]];
@@ -169,6 +171,7 @@ export default function LeaderReviewForm() {
   };
 
   const handlePosFileUpload = async (id: string, rowIdx: number, files: FileList) => {
+    dirtyRef.current = true;
     const links = await uploadFiles(files);
     setPosRows(p => {
       const rows = [...p[id]];
@@ -178,6 +181,7 @@ export default function LeaderReviewForm() {
   };
 
   const handleOverallFileUpload = async (files: FileList) => {
+    dirtyRef.current = true;
     const links = await uploadFiles(files);
     setOverall(p => ({ ...p, files: [...p.files, ...links] }));
   };
@@ -300,7 +304,7 @@ export default function LeaderReviewForm() {
                           <div style={{flex:1}}>
                             <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Employee / 员工</label>
                             <select value={row.employee} disabled={isSubmitted}
-                              onChange={e=>{const rows=[...kpiRows[item.id]];rows[rowIdx]={...rows[rowIdx],employee:e.target.value};setKpiRows(p=>({...p,[item.id]:rows}));}}
+                              onChange={e=>{dirtyRef.current=true;const rows=[...kpiRows[item.id]];rows[rowIdx]={...rows[rowIdx],employee:e.target.value};setKpiRows(p=>({...p,[item.id]:rows}));}}
                               style={{width:'100%',padding:'10px 12px',border:'1.5px solid #e2e8f0',borderRadius:'10px',fontSize:'13px',color:'#1a1a2e',background:'#fff',fontFamily:'inherit',cursor:isSubmitted?'not-allowed':'pointer'}}>
                               <option value="">-- Select Employee / 选择员工 --</option>
                               {employees.map(emp=><option key={emp} value={emp}>{emp}</option>)}
@@ -315,7 +319,7 @@ export default function LeaderReviewForm() {
                         <div style={{marginBottom:'12px'}}>
                           <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Leader Comment / 主管评语</label>
                           <textarea value={row.comment} disabled={isSubmitted}
-                            onChange={e=>{const rows=[...kpiRows[item.id]];rows[rowIdx]={...rows[rowIdx],comment:e.target.value};setKpiRows(p=>({...p,[item.id]:rows}));}}
+                            onChange={e=>{dirtyRef.current=true;const rows=[...kpiRows[item.id]];rows[rowIdx]={...rows[rowIdx],comment:e.target.value};setKpiRows(p=>({...p,[item.id]:rows}));}}
                             placeholder="Enter your assessment... / 请填写评价"
                             style={{width:'100%',minHeight:'70px',padding:'12px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'13px',fontFamily:'inherit',background:'#fff',resize:'vertical'}} />
                         </div>
@@ -389,7 +393,7 @@ export default function LeaderReviewForm() {
                         <div style={{flex:1}}>
                           <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Leader Comment / 主管评语</label>
                           <textarea value={row.comment} disabled={isSubmitted}
-                            onChange={e=>{const r=[...posRows[pi.id]];r[rowIdx]={...r[rowIdx],comment:e.target.value};setPosRows(p=>({...p,[pi.id]:r}));}}
+                            onChange={e=>{dirtyRef.current=true;const r=[...posRows[pi.id]];r[rowIdx]={...r[rowIdx],comment:e.target.value};setPosRows(p=>({...p,[pi.id]:r}));}}
                             placeholder="Evidence / Event description... / 证据／事件描述"
                             style={{width:'100%',minHeight:'70px',padding:'12px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'13px',fontFamily:'inherit',background:'#fff',resize:'vertical'}} />
                         </div>
@@ -449,7 +453,7 @@ export default function LeaderReviewForm() {
           </div>
           <p style={{fontSize:'13px',color:'#cbd5e1',marginBottom:'16px'}}>Any additional comments or observations for the team this review period. / 本评审周期内对部门的整体补充说明。</p>
           <textarea value={overall.remarks} disabled={isSubmitted}
-            onChange={e=>setOverall(p=>({...p,remarks:e.target.value}))}
+            onChange={e=>{dirtyRef.current=true;setOverall(p=>({...p,remarks:e.target.value}));}}
             placeholder="Enter your overall remarks for the department this period... / 请填写本次对部门的整体评价和补充"
             style={{width:'100%',minHeight:'120px',padding:'14px 16px',border:'none',borderRadius:'12px',fontSize:'14px',fontFamily:'inherit',marginBottom:'16px',background:'#fff',resize:'vertical'}} />
           <div style={{background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'12px',padding:'16px'}}>
