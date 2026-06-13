@@ -723,7 +723,20 @@ export default function AdminDashboard() {
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
             {(['self-reviews', 'leader-reviews', 'suggestions'] as const).map(item => {
-              const icon = item === 'self-reviews' ? '📝' : item === 'leader-reviews' ? '👔' : '💬';
+              const icon = item === 'self-reviews' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="1.5" width="10" height="13" rx="1.5"/>
+                  <line x1="5.5" y1="5.5" x2="10.5" y2="5.5"/>
+                  <line x1="5.5" y1="8" x2="10.5" y2="8"/>
+                  <line x1="5.5" y1="10.5" x2="9" y2="10.5"/>
+                </svg>
+              ) : item === 'leader-reviews' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="8" cy="5" r="2.5"/>
+                  <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+                  <polyline points="10,8.5 11.5,10.5 14,7.5"/>
+                </svg>
+              ) : '💬';
               const label = item === 'self-reviews' ? 'Self Reviews' : item === 'leader-reviews' ? 'Leader Reviews' : 'Suggestion Box';
               return (
                 <div
@@ -747,7 +760,7 @@ export default function AdminDashboard() {
                   onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
                   onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
                 >
-                  <span style={{fontSize: '16px', flexShrink: 0}}>{icon}</span>
+                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
                   {!sidebarCollapsed && label}
                 </div>
               );
@@ -765,7 +778,14 @@ export default function AdminDashboard() {
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
             {(['table-by-year', 'table-by-person'] as const).map(item => {
-              const icon = item === 'table-by-year' ? '📅' : '👤';
+              const icon = item === 'table-by-year' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="12" height="11" rx="1.5"/>
+                  <line x1="2" y1="7" x2="14" y2="7"/>
+                  <line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/>
+                  <line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
+                </svg>
+              ) : '👤';
               const label = item === 'table-by-year' ? 'By Year' : 'By Person';
               return (
                 <div
@@ -789,7 +809,7 @@ export default function AdminDashboard() {
                   onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
                   onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
                 >
-                  <span style={{fontSize: '16px', flexShrink: 0}}>{icon}</span>
+                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
                   {!sidebarCollapsed && label}
                 </div>
               );
