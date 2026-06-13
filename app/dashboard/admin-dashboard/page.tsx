@@ -60,6 +60,7 @@ export default function AdminDashboard() {
   const [tablePersonSel, setTablePersonSel] = useState('');
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -628,7 +629,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{display: 'grid', gridTemplateColumns: '260px 1fr', minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)'}}>
+    <div style={{display: 'grid', gridTemplateColumns: sidebarCollapsed ? '56px 1fr' : '260px 1fr', minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', transition: 'grid-template-columns 0.25s ease'}}>
       {/* Navbar (above everything) */}
       {!isEmbedded && (
         <div style={{gridColumn: '1 / -1', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', borderBottom: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'}}>
@@ -680,33 +681,77 @@ export default function AdminDashboard() {
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         borderRight: '1px solid rgba(30, 58, 95, 0.08)',
-        padding: '32px 24px',
+        padding: sidebarCollapsed ? '32px 8px' : '32px 24px',
         position: 'sticky',
         top: 70,
         height: 'calc(100vh - 70px)',
-        overflowY: 'auto'
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        transition: 'padding 0.25s ease',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
+        {/* Toggle button */}
+        <button
+          onClick={() => setSidebarCollapsed(v => !v)}
+          title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          style={{
+            alignSelf: sidebarCollapsed ? 'center' : 'flex-end',
+            marginBottom: '20px',
+            width: '28px', height: '28px',
+            borderRadius: '8px',
+            border: '1.5px solid #e2e8f0',
+            background: '#f8fafc',
+            color: '#64748b',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: '700',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(30,58,95,0.08)'; e.currentTarget.style.color = '#1e3a5f'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#64748b'; }}
+        >
+          {sidebarCollapsed ? '›' : '‹'}
+        </button>
+
+        {/* DATA section */}
         <div style={{marginBottom: '20px'}}>
-          <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
+          {!sidebarCollapsed && (
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
+          )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['self-reviews', 'leader-reviews', 'suggestions'] as const).map(item => (
-              <div
-                key={item}
-                onClick={() => handleActiveMenuChange(item)}
-                style={{
-                  padding: '11px 14px', borderRadius: '10px', cursor: 'pointer',
-                  fontSize: '13px', fontWeight: '600',
-                  color: activeMenu === item ? '#1e3a5f' : '#64748b',
-                  transition: 'all 0.3s', borderLeft: '3px solid',
-                  borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
-                  background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'
-                }}
-                onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
-              >
-                {item === 'self-reviews' ? 'Self Reviews' : item === 'leader-reviews' ? 'Leader Reviews' : '💬 Suggestion Box'}
-              </div>
-            ))}
+            {(['self-reviews', 'leader-reviews', 'suggestions'] as const).map(item => {
+              const icon = item === 'self-reviews' ? '📝' : item === 'leader-reviews' ? '👔' : '💬';
+              const label = item === 'self-reviews' ? 'Self Reviews' : item === 'leader-reviews' ? 'Leader Reviews' : 'Suggestion Box';
+              return (
+                <div
+                  key={item}
+                  onClick={() => handleActiveMenuChange(item)}
+                  title={sidebarCollapsed ? label : undefined}
+                  style={{
+                    padding: sidebarCollapsed ? '10px' : '11px 14px',
+                    borderRadius: '10px', cursor: 'pointer',
+                    fontSize: '13px', fontWeight: '600',
+                    color: activeMenu === item ? '#1e3a5f' : '#64748b',
+                    transition: 'all 0.2s',
+                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    gap: '10px',
+                    whiteSpace: 'nowrap', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
+                >
+                  <span style={{fontSize: '16px', flexShrink: 0}}>{icon}</span>
+                  {!sidebarCollapsed && label}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -715,26 +760,40 @@ export default function AdminDashboard() {
 
         {/* TABLE section */}
         <div>
-          <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📋 Table View</div>
+          {!sidebarCollapsed && (
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📋 Table View</div>
+          )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['table-by-year', 'table-by-person'] as const).map(item => (
-              <div
-                key={item}
-                onClick={() => handleActiveMenuChange(item)}
-                style={{
-                  padding: '11px 14px', borderRadius: '10px', cursor: 'pointer',
-                  fontSize: '13px', fontWeight: '600',
-                  color: activeMenu === item ? '#1e3a5f' : '#64748b',
-                  transition: 'all 0.3s', borderLeft: '3px solid',
-                  borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
-                  background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'
-                }}
-                onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
-              >
-                {item === 'table-by-year' ? '📅 By Year' : '👤 By Person'}
-              </div>
-            ))}
+            {(['table-by-year', 'table-by-person'] as const).map(item => {
+              const icon = item === 'table-by-year' ? '📅' : '👤';
+              const label = item === 'table-by-year' ? 'By Year' : 'By Person';
+              return (
+                <div
+                  key={item}
+                  onClick={() => handleActiveMenuChange(item)}
+                  title={sidebarCollapsed ? label : undefined}
+                  style={{
+                    padding: sidebarCollapsed ? '10px' : '11px 14px',
+                    borderRadius: '10px', cursor: 'pointer',
+                    fontSize: '13px', fontWeight: '600',
+                    color: activeMenu === item ? '#1e3a5f' : '#64748b',
+                    transition: 'all 0.2s',
+                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    gap: '10px',
+                    whiteSpace: 'nowrap', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
+                >
+                  <span style={{fontSize: '16px', flexShrink: 0}}>{icon}</span>
+                  {!sidebarCollapsed && label}
+                </div>
+              );
+            })}
           </div>
         </div>
 
