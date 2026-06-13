@@ -906,16 +906,6 @@ export default function AdminDashboard() {
 
               {/* Spreadsheet */}
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                {/* Sheet tab bar */}
-                <div style={{background:'#f1f5f9',borderBottom:'1px solid #e2e8f0',padding:'0 16px',display:'flex',alignItems:'center',gap:'2px'}}>
-                  {months.map(m => (
-                    <div key={m} onClick={()=>setTableMonthSel(m===tableMonthSel?'':m)}
-                      style={{padding:'8px 16px',fontSize:'12px',fontWeight:'700',cursor:'pointer',borderBottom: (tableMonthSel||months[0])===m?'2px solid #1e3a5f':'2px solid transparent',
-                        color:(tableMonthSel||months[0])===m?'#1e3a5f':'#64748b',transition:'all 0.2s',marginBottom:'-1px'
-                      }}>{fullMonthNames[parseInt(m)]} {selYear}</div>
-                  ))}
-                </div>
-
                 {/* The spreadsheet table */}
                 <div style={{overflowX:'auto'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
