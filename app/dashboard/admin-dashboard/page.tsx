@@ -1292,8 +1292,8 @@ export default function AdminDashboard() {
                             const selfRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period);
                             const leaderRow = tableAllLeader.find(r => r.employee_email===emp.email && r.review_period===period);
                             return [
-                              cellStyle(selfRow, ()=>setTableDetailRow(selfRow!)),
-                              cellStyle(leaderRow, ()=>setTableDetailRow(leaderRow!))
+                              cellStyle(selfRow, ()=>{ setTableDetailRow(selfRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); }),
+                              cellStyle(leaderRow, ()=>{ setTableDetailRow(leaderRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); })
                             ];
                           })}
                         </tr>
@@ -1339,7 +1339,7 @@ export default function AdminDashboard() {
 
           const statusCell = (row: SubmissionRow | undefined) => row
             ? <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:row.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor:'pointer'}}
-                onClick={()=>setTableDetailRow(row)}
+                onClick={()=>{ setTableDetailRow(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }}
                 onMouseEnter={(e)=>{e.currentTarget.style.opacity='0.75'}} onMouseLeave={(e)=>{e.currentTarget.style.opacity='1'}}
               >
                 <span style={{fontWeight:'700',fontSize:'12px',color:row.status==='submitted'?'#15803d':'#92400e'}}>{row.status==='submitted'?'✓ Submitted':'○ Draft'}</span>
@@ -1633,7 +1633,7 @@ export default function AdminDashboard() {
                       </td>
                       <td style={{padding: '16px 18px'}}>
                         <div style={{display: 'flex', gap: '8px'}}>
-                          <button onClick={() => setSelectedSuggestion(row)} style={{padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'rgba(126,184,212,0.15)', color: '#1e3a5f', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
+                          <button onClick={() => { setSelectedSuggestion(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }} style={{padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'rgba(126,184,212,0.15)', color: '#1e3a5f', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
                             onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126,184,212,0.3)'}}
                             onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126,184,212,0.15)'}}
                           >View</button>
@@ -1851,7 +1851,7 @@ export default function AdminDashboard() {
                     </td>
                     <td style={{padding: '16px 18px'}}>
                       <div style={{display: 'flex', gap: '8px'}}>
-                        <button onClick={() => setSelectedDetail(row)} style={{
+                        <button onClick={() => { setSelectedDetail(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }} style={{
                           padding: '6px 12px',
                           border: 'none',
                           borderRadius: '8px',
