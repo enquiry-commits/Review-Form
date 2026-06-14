@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 import { User, ALL_REVIEWABLE_USERS } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
@@ -308,146 +309,113 @@ export default function AdminDashboard() {
   };
 
   const handleExportAll = async () => {
-    if (activeMenu === 'suggestions') {
-      const { data, error } = await supabase.from('suggestion_submissions').select('*').order('submitted_at', { ascending: false });
-      if (error || !data) { alert('Export failed: ' + error?.message); return; }
-      const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-      const headers = ['Submitted At', 'Name', 'Email', 'Department', 'Suggestion', 'File Count'];
-      let csv = headers.join(',') + '\n';
-      data.forEach((row: any) => {
-        csv += [
-          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
-          esc(row.user_name), esc(row.user_email), esc(row.department),
-          esc(row.suggestion), esc(row.files?.length ?? 0)
-        ].join(',') + '\n';
-      });
-      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `suggestions_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      return;
-    }
+    const period = getCurrentReviewPeriod();
+    const EXCLUDED = ['chelsea@tassure.com', 'esther@tassure.com', 'vincent@tassure.com'];
+    const fmt = (v: any) => v ?? '';
+    const fmtDate = (v: any) => v ? new Date(v).toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
 
-    const tableMap2: Record<string, string> = {
-      'self-reviews': 'self_review_submissions',
-      'leader-reviews': 'leader_review_submissions',
-      'hr-reviews': 'hr_review_submissions',
-      'finance-reviews': 'finance_review_submissions',
-      'marketing-reviews': 'marketing_review_submissions',
-    };
-    const table = tableMap2[activeMenu] || 'self_review_submissions';
-    const { data, error } = await supabase.from(table).select('*').order('submitted_at', { ascending: false });
-    if (error || !data) { alert('Export failed: ' + error?.message); return; }
+    const [selfRes, leaderRes, hrRes, finRes, mktRes, sugRes] = await Promise.all([
+      supabase.from('self_review_submissions').select('*').eq('review_period', period),
+      supabase.from('leader_review_submissions').select('*').eq('review_period', period),
+      supabase.from('hr_review_submissions').select('*').eq('review_period', period),
+      supabase.from('finance_review_submissions').select('*').eq('review_period', period),
+      supabase.from('marketing_review_submissions').select('*').eq('review_period', period),
+      supabase.from('suggestion_submissions').select('*').order('submitted_at', { ascending: false }),
+    ]);
 
-    let csv = '';
+    const kpiKeys = ['client_complaints','client_attrition','minor_delays','serious_delays','minor_errors','serious_errors','communication_issues','team_impact','learning_application'];
+    const posKeys = ['pos_compliment','pos_requested','pos_prevented','pos_recovered','pos_resolved','pos_business','pos_special'];
 
-    if (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu)) {
-      const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-      const headers = ['Submitted At','Name','Email','Department','Period','Status','KPI Issues (JSON)','Positive Contributions (JSON)'];
-      csv = headers.join(',') + '\n';
-      data.forEach((row: any) => {
-        csv += [
-          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
-          esc(row.employee_name), esc(row.employee_email), esc(row.department),
-          esc(row.review_period), esc(row.submitted_at ? 'Submitted' : 'Draft'),
-          esc(JSON.stringify(row.form_data?.kpis || {})),
-          esc(JSON.stringify(row.form_data?.positive_items || {})),
-        ].join(',') + '\n';
-      });
-      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${activeMenu}_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    if (activeMenu === 'self-reviews') {
-      const kpiKeys = ['client_complaints','client_attrition','minor_delays','serious_delays','minor_errors','serious_errors','communication_issues','team_impact','learning_application'];
-      const posKeys = ['pos_compliment','pos_requested','pos_prevented','pos_recovered','pos_resolved','pos_business','pos_special'];
-
-      const headers = [
-        'Submitted At','Name','Email','Department','Period','Status',
-        ...kpiKeys.flatMap(k => [`${k}_count`, `${k}_comment`]),
-        ...posKeys.map(k => `${k}_description`)
-      ];
-      csv = headers.join(',') + '\n';
-
-      data.forEach((row: any) => {
-        const fd = row.form_data || {};
-        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-        const cols = [
-          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
-          esc(row.employee_name), esc(row.employee_email),
-          esc(row.department), esc(row.review_period),
-          esc(row.submitted_at ? 'Submitted' : 'Draft'),
-          ...kpiKeys.flatMap(k => [
-            esc(fd.kpis?.[k]?.count ?? 0),
-            esc(fd.kpis?.[k]?.comment ?? '')
-          ]),
-          ...posKeys.map(k => esc(fd.positive_items?.[k]?.description ?? ''))
+    // ── SELF sheet ──
+    const selfRows = (selfRes.data || []).filter((r: any) => !EXCLUDED.includes(r.employee_email));
+    const selfHeaders = [
+      'Submitted At','Name','Email','Department','Period','Status',
+      ...kpiKeys.flatMap(k => [`${k} Count`, `${k} Comment`]),
+      ...posKeys.map(k => `${k} Description`),
+    ];
+    const selfSheetData = [
+      selfHeaders,
+      ...selfRows.map((r: any) => {
+        const fd = r.form_data || {};
+        return [
+          fmtDate(r.submitted_at), fmt(r.employee_name), fmt(r.employee_email),
+          fmt(r.department), fmt(r.review_period), r.submitted_at ? 'Submitted' : 'Draft',
+          ...kpiKeys.flatMap(k => [fd.kpis?.[k]?.count ?? 0, fmt(fd.kpis?.[k]?.comment)]),
+          ...posKeys.map(k => fmt(fd.positive_items?.[k]?.description)),
         ];
-        csv += cols.join(',') + '\n';
-      });
-    } else {
-      const headers = ['Submitted At','Leader Name','Leader Email','Department','Period','Status','KPI','Employee','Comment','Positive Item','Positive Comment','Overall Remarks'];
-      csv = headers.join(',') + '\n';
+      }),
+    ];
 
-      data.forEach((row: any) => {
-        const fd = row.form_data || {};
-        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-        const base = [
-          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
-          esc(row.employee_name), esc(row.employee_email),
-          esc(row.department), esc(row.review_period),
-          esc(row.submitted_at ? 'Submitted' : 'Draft')
+    // ── LEADER sheet ──
+    const leaderRows = leaderRes.data || [];
+    const leaderHeaders = ['Submitted At','Leader Name','Leader Email','Department','Period','Status','KPI','Employee','Comment','Positive Item','Positive Comment','Overall Remarks'];
+    const leaderSheetData: any[][] = [leaderHeaders];
+    leaderRows.forEach((r: any) => {
+      const fd = r.form_data || {};
+      const base = [fmtDate(r.submitted_at), fmt(r.employee_name), fmt(r.employee_email), fmt(r.department), fmt(r.review_period), r.submitted_at ? 'Submitted' : 'Draft'];
+      const entries: any[][] = [];
+      Object.values(fd.kpis || {}).forEach((kpi: any) => {
+        (kpi.rows || []).forEach((row: any) => {
+          if (row.employee?.trim() || row.comment?.trim())
+            entries.push([...base, kpi.kpi, row.employee, row.comment, '', '', '']);
+        });
+      });
+      Object.values(fd.positive_items || {}).forEach((pos: any) => {
+        (pos.rows || []).forEach((row: any) => {
+          if (row.comment?.trim())
+            entries.push([...base, '', '', '', pos.label, row.comment, '']);
+        });
+      });
+      if (fd.overall_remarks?.remarks?.trim())
+        entries.push([...base, '', '', '', '', '', fd.overall_remarks.remarks]);
+      if (entries.length === 0) leaderSheetData.push([...base, '', '', '', '', '', '']);
+      else entries.forEach((e, i) => leaderSheetData.push(i === 0 ? e : [...base.map(() => ''), ...e.slice(6)]));
+    });
+
+    // ── INTERNAL sheet (HR + Finance + Marketing) ──
+    const internalRows = [
+      ...(hrRes.data || []).map((r: any) => ({...r, review_type: 'HR'})),
+      ...(finRes.data || []).map((r: any) => ({...r, review_type: 'Finance'})),
+      ...(mktRes.data || []).map((r: any) => ({...r, review_type: 'Marketing'})),
+    ];
+    const internalHeaders = ['Type','Submitted At','Name','Email','Department','Period','Status','KPI Issues Summary','Positive Contributions Summary'];
+    const internalSheetData = [
+      internalHeaders,
+      ...internalRows.map((r: any) => {
+        const fd = r.form_data || {};
+        const kpiSummary = Object.entries(fd.kpis || {})
+          .filter(([, v]: any) => (v.count ?? 0) > 0 || v.comment?.trim())
+          .map(([k, v]: any) => `${k}(×${v.count ?? 0})`)
+          .join('; ');
+        const posSummary = Object.entries(fd.positive_items || {})
+          .filter(([, v]: any) => v.description?.trim())
+          .map(([k]: any) => k)
+          .join('; ');
+        return [
+          r.review_type, fmtDate(r.submitted_at), fmt(r.employee_name), fmt(r.employee_email),
+          fmt(r.department), fmt(r.review_period), r.submitted_at ? 'Submitted' : 'Draft',
+          kpiSummary, posSummary,
         ];
+      }),
+    ];
 
-        const kpiEntries: string[][] = [];
-        Object.values(fd.kpis || {}).forEach((kpi: any) => {
-          (kpi.rows || []).forEach((r: any) => {
-            if (r.employee?.trim() || r.comment?.trim()) {
-              kpiEntries.push([esc(kpi.kpi), esc(r.employee), esc(r.comment), esc(''), esc(''), esc('')]);
-            }
-          });
-        });
+    // ── SUGGESTION sheet ──
+    const sugHeaders = ['Submitted At','Name','Email','Department','Suggestion','File Count'];
+    const sugSheetData = [
+      sugHeaders,
+      ...(sugRes.data || []).map((r: any) => [
+        fmtDate(r.submitted_at), fmt(r.user_name), fmt(r.user_email),
+        fmt(r.department), fmt(r.suggestion), r.files?.length ?? 0,
+      ]),
+    ];
 
-        const posEntries: string[][] = [];
-        Object.values(fd.positive_items || {}).forEach((pos: any) => {
-          (pos.rows || []).forEach((r: any) => {
-            if (r.comment?.trim()) {
-              posEntries.push([esc(''), esc(''), esc(''), esc(pos.label), esc(r.comment), esc('')]);
-            }
-          });
-        });
-
-        const remarksRow = fd.overall_remarks?.remarks?.trim()
-          ? [[esc(''), esc(''), esc(''), esc(''), esc(''), esc(fd.overall_remarks.remarks)]]
-          : [];
-
-        const allRows = [...kpiEntries, ...posEntries, ...remarksRow];
-        if (allRows.length === 0) {
-          csv += [...base, esc(''), esc(''), esc(''), esc(''), esc(''), esc('')].join(',') + '\n';
-        } else {
-          allRows.forEach((extra, i) => {
-            csv += [...(i === 0 ? base : base.map(() => esc(''))), ...extra].join(',') + '\n';
-          });
-        }
-      });
-    }
-
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${activeMenu}_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // ── Build workbook ──
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(selfSheetData),     'SELF');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(leaderSheetData),   'LEADER');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(internalSheetData), 'INTERNAL');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sugSheetData),      'SUGGESTION');
+    XLSX.writeFile(wb, `tassure-review-${period}.xlsx`);
   };
 
   const handleLogout = () => {
