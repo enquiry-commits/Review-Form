@@ -15,9 +15,22 @@ interface FormConfig {
   route: string;
 }
 
+interface FormRecord {
+  id: string;
+  submitted_at: string | null;
+  form_data: any;
+}
+
 interface PeriodRow {
   period: string;
   statuses: Record<string, Status>;
+  records: Record<string, FormRecord | null>;
+}
+
+interface DetailTarget {
+  form: FormConfig;
+  period: string;
+  record: FormRecord;
 }
 
 function getFormsForUser(user: User): FormConfig[] {
@@ -58,6 +71,74 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
+function FormDataView({ form_data, formKey }: { form_data: any; formKey: string }) {
+  if (!form_data) return <p style={{ color: '#94a3b8', fontSize: '14px' }}>No form data available.</p>;
+
+  const sections: { title: string; content: string; type: 'kpi' | 'pos' | 'remark' }[] = [];
+
+  // KPI sections
+  const kpis = form_data.kpis || {};
+  Object.entries(kpis).forEach(([, val]: any) => {
+    const title = val?.kpi || val?.label || '';
+    const texts: string[] = [];
+    (val?.rows || []).forEach((row: any) => {
+      if (row?.comment?.trim()) texts.push(row.comment.trim());
+      if (row?.employee?.trim()) texts.push(`— ${row.employee.trim()}`);
+    });
+    if (title || texts.length > 0) {
+      sections.push({ title, content: texts.join('\n') || '(No comment)', type: 'kpi' });
+    }
+  });
+
+  // Positive items
+  const positives = form_data.positive_items || {};
+  Object.entries(positives).forEach(([, val]: any) => {
+    const title = val?.label || '';
+    const texts: string[] = [];
+    (val?.rows || []).forEach((row: any) => {
+      if (row?.comment?.trim()) texts.push(row.comment.trim());
+    });
+    if (title || texts.length > 0) {
+      sections.push({ title, content: texts.join('\n') || '(No comment)', type: 'pos' });
+    }
+  });
+
+  // Overall remarks
+  const remarks = form_data.overall_remarks?.remarks?.trim();
+  if (remarks) {
+    sections.push({ title: 'Overall Remarks', content: remarks, type: 'remark' });
+  }
+
+  if (sections.length === 0) {
+    return <p style={{ color: '#94a3b8', fontSize: '14px' }}>Form was saved with no content.</p>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {sections.map((s, i) => {
+        const colors = {
+          kpi:    { bg: '#f0f7ff', border: '#bfdbfe', accent: '#1d4ed8' },
+          pos:    { bg: '#f0fdf4', border: '#bbf7d0', accent: '#15803d' },
+          remark: { bg: '#fafafa', border: '#e2e8f0', accent: '#64748b' },
+        };
+        const c = colors[s.type];
+        return (
+          <div key={i} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '10px', padding: '12px 14px' }}>
+            {s.title && (
+              <div style={{ fontSize: '12px', fontWeight: '700', color: c.accent, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {s.title}
+              </div>
+            )}
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+              {s.content}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function MySubmissions() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -66,6 +147,7 @@ export default function MySubmissions() {
   const [forms, setForms] = useState<FormConfig[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [detail, setDetail] = useState<DetailTarget | null>(null);
   const currentPeriod = getCurrentReviewPeriod();
 
   const generateDemoRows = (f: FormConfig[]): PeriodRow[] => {
@@ -84,8 +166,17 @@ export default function MySubmissions() {
     };
     return periods.map((period, i) => {
       const statuses: Record<string, Status> = {};
-      f.forEach(fc => { statuses[fc.key] = patterns[fc.key]?.[i] ?? 'submitted'; });
-      return { period, statuses };
+      const records: Record<string, FormRecord | null> = {};
+      f.forEach(fc => {
+        const st = patterns[fc.key]?.[i] ?? 'submitted';
+        statuses[fc.key] = st;
+        records[fc.key] = st !== 'pending' ? {
+          id: `demo-${fc.key}-${i}`,
+          submitted_at: st === 'submitted' ? `${period}-15T09:00:00Z` : null,
+          form_data: null,
+        } : null;
+      });
+      return { period, statuses, records };
     });
   };
 
@@ -105,36 +196,39 @@ export default function MySubmissions() {
         userForms.map(f =>
           supabase
             .from(f.table)
-            .select('review_period, submitted_at')
+            .select('id, review_period, submitted_at, form_data')
             .eq('employee_email', u.email)
             .order('review_period', { ascending: false })
         )
       );
 
-      // Build maps: formKey → Map<period, Status>
-      const maps: Record<string, Map<string, Status>> = {};
+      // Build maps: formKey → Map<period, {status, record}>
+      const statusMaps: Record<string, Map<string, Status>> = {};
+      const recordMaps: Record<string, Map<string, FormRecord>> = {};
+
       userForms.forEach((f, i) => {
         const data = results[i].data || [];
-        maps[f.key] = new Map(
-          data.map((r: { review_period: string; submitted_at: string | null }) => [
-            r.review_period,
-            r.submitted_at ? 'submitted' : 'draft',
-          ])
+        statusMaps[f.key] = new Map(
+          data.map((r: any) => [r.review_period, r.submitted_at ? 'submitted' : 'draft'] as [string, Status])
+        );
+        recordMaps[f.key] = new Map(
+          data.map((r: any) => [r.review_period, { id: r.id, submitted_at: r.submitted_at, form_data: r.form_data }])
         );
       });
 
-      // Collect all unique periods
       const allPeriods = new Set<string>([currentPeriod]);
-      Object.values(maps).forEach(m => m.forEach((_, p) => allPeriods.add(p)));
+      Object.values(statusMaps).forEach(m => m.forEach((_, p) => allPeriods.add(p)));
 
       const sortedPeriods = [...allPeriods].sort().reverse();
 
       const result: PeriodRow[] = sortedPeriods.map(period => {
         const statuses: Record<string, Status> = {};
+        const records: Record<string, FormRecord | null> = {};
         userForms.forEach(f => {
-          statuses[f.key] = maps[f.key].get(period) || 'pending';
+          statuses[f.key] = statusMaps[f.key].get(period) || 'pending';
+          records[f.key] = recordMaps[f.key].get(period) || null;
         });
-        return { period, statuses };
+        return { period, statuses, records };
       });
 
       setRows(result);
@@ -154,30 +248,15 @@ export default function MySubmissions() {
   const displayRows = isDemoMode ? generateDemoRows(forms) : rows;
   const currentRow = displayRows.find(r => r.period === currentPeriod);
   const historyRows = displayRows.filter(r => r.period !== currentPeriod);
-
   const allCurrentSubmitted = forms.length > 0 && forms.every(f => currentRow?.statuses[f.key] === 'submitted');
 
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)',
-      minHeight: '100vh',
-    }}>
-      {/* Header (only when not inside iframe) */}
+    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh' }}>
+
+      {/* Header */}
       {!isEmbedded && (
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderBottom: '1px solid rgba(30, 58, 95, 0.08)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            maxWidth: '960px',
-            margin: '0 auto',
-            padding: '0 32px',
-            height: '70px',
-          }}>
+        <div style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', borderBottom: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '960px', margin: '0 auto', padding: '0 32px', height: '70px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <img src="/tassure-logo.png" alt="Tassure" style={{ height: '45px', width: 'auto' }} />
               <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e3a5f' }}>Tassure Review System</div>
@@ -186,18 +265,7 @@ export default function MySubmissions() {
               <div style={{ fontSize: '14px', color: '#64748b' }}>
                 Welcome, <span style={{ fontWeight: '700', color: '#1e3a5f' }}>{user.name}</span>
               </div>
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#1e3a5f',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
+              <button onClick={handleLogout} style={{ padding: '8px 16px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', background: 'transparent', border: 'none', cursor: 'pointer' }}>
                 Logout
               </button>
             </div>
@@ -210,112 +278,58 @@ export default function MySubmissions() {
         {/* Page Title */}
         <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: '800',
-              color: '#1e3a5f',
-              margin: 0,
-              letterSpacing: '-0.5px',
-            }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1e3a5f', margin: 0, letterSpacing: '-0.5px' }}>
               My Submissions
-              {isDemoMode && <span style={{marginLeft:'12px',fontSize:'13px',fontWeight:'700',background:'#fef3c7',color:'#92400e',padding:'3px 10px',borderRadius:'8px',border:'1px solid #fbbf24',verticalAlign:'middle'}}>Demo</span>}
+              {isDemoMode && <span style={{ marginLeft: '12px', fontSize: '13px', fontWeight: '700', background: '#fef3c7', color: '#92400e', padding: '3px 10px', borderRadius: '8px', border: '1px solid #fbbf24', verticalAlign: 'middle' }}>Demo</span>}
             </h1>
-            <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '14px' }}>
-              Your personal review submission history and current status
-            </p>
+            <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '14px' }}>Your personal review submission history and current status</p>
           </div>
           {isDemoMode
-            ? <button onClick={() => setIsDemoMode(false)} style={{padding:'8px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer',flexShrink:0}}>✕ Exit Demo</button>
-            : <button onClick={() => setIsDemoMode(true)} style={{padding:'8px 16px',background:'rgba(126,184,212,0.08)',color:'#1e3a5f',border:'1.5px dashed #7eb8d4',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer',flexShrink:0}}>👁 Demo Preview</button>
+            ? <button onClick={() => setIsDemoMode(false)} style={{ padding: '8px 16px', background: 'rgba(239,68,68,0.1)', color: '#dc2626', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>✕ Exit Demo</button>
+            : <button onClick={() => setIsDemoMode(true)} style={{ padding: '8px 16px', background: 'rgba(126,184,212,0.08)', color: '#1e3a5f', border: '1.5px dashed #7eb8d4', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>👁 Demo Preview</button>
           }
         </div>
 
         {/* Current Period Card */}
-        <div style={{
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid rgba(30, 58, 95, 0.08)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-          marginBottom: '28px',
-          overflow: 'hidden',
-        }}>
-          {/* Card Header */}
-          <div style={{
-            padding: '20px 28px',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
+        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', marginBottom: '28px', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Current Review Period
-              </div>
-              <div style={{ fontSize: '20px', fontWeight: '800', color: '#1e3a5f' }}>
-                {formatPeriodDisplay(currentPeriod)}
-              </div>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Current Review Period</div>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#1e3a5f' }}>{formatPeriodDisplay(currentPeriod)}</div>
             </div>
-            {loaded && allCurrentSubmitted && (
-              <div style={{
-                padding: '8px 18px',
-                background: '#dcfce7',
-                color: '#15803d',
-                borderRadius: '20px',
-                fontSize: '13px',
-                fontWeight: '700',
-                border: '1px solid #86efac',
-              }}>
+            {(loaded || isDemoMode) && allCurrentSubmitted && (
+              <div style={{ padding: '8px 18px', background: '#dcfce7', color: '#15803d', borderRadius: '20px', fontSize: '13px', fontWeight: '700', border: '1px solid #86efac' }}>
                 All Forms Submitted ✓
               </div>
             )}
           </div>
 
-          {/* Status Grid */}
-          <div style={{
-            padding: '24px 28px',
-            display: 'grid',
-            gridTemplateColumns: `repeat(${Math.min(forms.length, 3)}, 1fr)`,
-            gap: '16px',
-          }}>
+          <div style={{ padding: '24px 28px', display: 'grid', gridTemplateColumns: `repeat(${Math.min(forms.length, 3)}, 1fr)`, gap: '16px' }}>
             {(!loaded && !isDemoMode) ? (
               <div style={{ color: '#94a3b8', fontSize: '14px' }}>Loading...</div>
             ) : forms.map(form => {
               const status = currentRow?.statuses[form.key] || 'pending';
               const isSubmitted = status === 'submitted';
+              const record = currentRow?.records?.[form.key];
               return (
-                <div
-                  key={form.key}
-                  style={{
-                    padding: '20px',
-                    background: isSubmitted ? '#f0fdf4' : '#f8fafc',
-                    borderRadius: '12px',
-                    border: `1px solid ${isSubmitted ? '#bbf7d0' : '#e2e8f0'}`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                  }}
-                >
+                <div key={form.key} style={{ padding: '20px', background: isSubmitted ? '#f0fdf4' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSubmitted ? '#bbf7d0' : '#e2e8f0'}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e3a5f' }}>{form.label}</div>
                   <StatusBadge status={status} />
-                  {!isSubmitted && (
-                    <a
-                      href={form.route}
-                      style={{
-                        display: 'inline-block',
-                        marginTop: '4px',
-                        padding: '7px 14px',
-                        background: '#1e3a5f',
-                        color: '#ffffff',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        textAlign: 'center',
-                      }}
-                    >
-                      {status === 'draft' ? 'Continue Form →' : 'Start Form →'}
-                    </a>
-                  )}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {record && (
+                      <button
+                        onClick={() => setDetail({ form, period: currentPeriod, record })}
+                        style={{ padding: '6px 12px', background: 'rgba(30,58,95,0.06)', color: '#1e3a5f', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        View Details
+                      </button>
+                    )}
+                    {!isSubmitted && (
+                      <a href={form.route} style={{ display: 'inline-block', padding: '6px 12px', background: '#1e3a5f', color: '#ffffff', borderRadius: '8px', fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}>
+                        {status === 'draft' ? 'Continue →' : 'Start Form →'}
+                      </a>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -324,74 +338,57 @@ export default function MySubmissions() {
 
         {/* Submission History */}
         {(loaded || isDemoMode) && historyRows.length > 0 && (
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid rgba(30, 58, 95, 0.08)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-            overflow: 'hidden',
-          }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
             <div style={{ padding: '20px 28px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Submission History
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e3a5f' }}>
-                Past Review Periods
-              </div>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Submission History</div>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e3a5f' }}>Past Review Periods</div>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <colgroup>
+                  <col style={{ width: '180px' }} />
+                  {forms.map(f => <col key={f.key} />)}
+                  <col style={{ width: '100px' }} />
+                </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
-                    <th style={{
-                      padding: '12px 28px',
-                      textAlign: 'left',
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      color: '#94a3b8',
-                      letterSpacing: '0.8px',
-                      textTransform: 'uppercase',
-                      borderBottom: '1px solid #e2e8f0',
-                    }}>Period</th>
+                    <th style={{ padding: '12px 28px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Period</th>
                     {forms.map(f => (
-                      <th key={f.key} style={{
-                        padding: '12px 20px',
-                        textAlign: 'left',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        color: '#94a3b8',
-                        letterSpacing: '0.8px',
-                        textTransform: 'uppercase',
-                        borderBottom: '1px solid #e2e8f0',
-                      }}>{f.label}</th>
+                      <th key={f.key} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
                     ))}
+                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {historyRows.map((row, idx) => (
-                    <tr
-                      key={row.period}
-                      style={{ background: idx % 2 === 0 ? '#ffffff' : '#fafbfc' }}
-                    >
-                      <td style={{
-                        padding: '14px 28px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1e3a5f',
-                        borderBottom: '1px solid #f1f5f9',
-                        whiteSpace: 'nowrap',
-                      }}>
+                    <tr key={row.period} style={{ background: idx % 2 === 0 ? '#ffffff' : '#fafbfc' }}>
+                      <td style={{ padding: '14px 28px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
                         {formatPeriodDisplay(row.period)}
                       </td>
                       {forms.map(f => (
-                        <td key={f.key} style={{
-                          padding: '14px 20px',
-                          borderBottom: '1px solid #f1f5f9',
-                        }}>
+                        <td key={f.key} style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
                           <StatusBadge status={row.statuses[f.key] || 'pending'} />
                         </td>
                       ))}
+                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                        {/* Show View button if any form has a record for this period */}
+                        {forms.some(f => row.records?.[f.key]) && (
+                          <button
+                            onClick={() => {
+                              const firstForm = forms.find(f => row.records?.[f.key]);
+                              if (firstForm && row.records?.[firstForm.key]) {
+                                setDetail({ form: firstForm, period: row.period, record: row.records[firstForm.key]! });
+                              }
+                            }}
+                            style={{ padding: '6px 14px', background: 'transparent', color: '#1e3a5f', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.borderColor = '#7eb8d4'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                          >
+                            View
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -400,22 +397,67 @@ export default function MySubmissions() {
           </div>
         )}
 
-        {/* Empty state for history */}
+        {/* Empty state */}
         {(loaded && !isDemoMode) && historyRows.length === 0 && (
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid rgba(30, 58, 95, 0.08)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-            padding: '40px 28px',
-            textAlign: 'center',
-          }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', padding: '40px 28px', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>📋</div>
             <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e3a5f', marginBottom: '6px' }}>No previous submissions yet</div>
             <div style={{ fontSize: '13px', color: '#94a3b8' }}>Your past submissions will appear here after you complete your first review.</div>
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {detail && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
+          onClick={() => setDetail(null)}
+        >
+          <div
+            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px 20px', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                {detail.form.label}
+              </div>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: '#1e3a5f', marginBottom: '10px' }}>
+                {formatPeriodDisplay(detail.period)}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <StatusBadge status={detail.record.submitted_at ? 'submitted' : 'draft'} />
+                {detail.record.submitted_at && (
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    Submitted {new Date(detail.record.submitted_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
+              {isDemoMode ? (
+                <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8', fontSize: '14px' }}>
+                  Form content not available in demo mode.
+                </div>
+              ) : (
+                <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '16px 28px', borderTop: '1px solid #f1f5f9' }}>
+              <button
+                onClick={() => setDetail(null)}
+                style={{ width: '100%', padding: '11px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#64748b', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
