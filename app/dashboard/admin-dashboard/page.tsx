@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [internalGroupOpen, setInternalGroupOpen] = useState(true);
+  const [internalGroupOpen, setInternalGroupOpen] = useState(false);
 
   // Status overview state
   const [overviewSelf, setOverviewSelf]       = useState<SubmissionRow[]>([]);
