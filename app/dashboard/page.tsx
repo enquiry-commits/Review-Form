@@ -52,11 +52,15 @@ export default function Dashboard() {
     return null;
   }
 
+  const email = user.email;
   const tabs = [
-    { id: 'self-review', label: 'Employee Self Review', allowed: true },
-    { id: 'leader-review', label: 'Leader Review', allowed: hasAccess(user.role, 'leader-review') },
-    { id: 'suggestion-box', label: '💬 Suggestion Box', allowed: true },
-    { id: 'admin-dashboard', label: 'Admin Dashboard', allowed: hasAccess(user.role, 'admin-dashboard') },
+    { id: 'self-review',      label: 'Employee Self Review', allowed: true },
+    { id: 'leader-review',    label: 'Leader Review',        allowed: hasAccess(user.role, 'leader-review') || email === 'chelsea@tassure.com' },
+    { id: 'hr-review',        label: 'HR Review',            allowed: email === 'esther@tassure.com' || email === 'vincent@tassure.com' },
+    { id: 'finance-review',   label: 'Finance Review',       allowed: email === 'chelsea@tassure.com' || email === 'vincent@tassure.com' },
+    { id: 'marketing-review', label: 'Marketing Review',     allowed: email === 'vincent@tassure.com' },
+    { id: 'suggestion-box',   label: '💬 Suggestion Box',   allowed: true },
+    { id: 'admin-dashboard',  label: 'Admin Dashboard',      allowed: hasAccess(user.role, 'admin-dashboard') },
   ];
 
   const visibleTabs = tabs.filter(t => t.allowed);
@@ -194,6 +198,60 @@ export default function Dashboard() {
         {activeTab === 'admin-dashboard' && (
           <iframe
             src="/dashboard/admin-dashboard"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
+        )}
+        {activeTab === 'hr-review' && (
+          <iframe
+            src="/dashboard/hr-review"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
+        )}
+        {activeTab === 'finance-review' && (
+          <iframe
+            src="/dashboard/finance-review"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
+        )}
+        {activeTab === 'marketing-review' && (
+          <iframe
+            src="/dashboard/marketing-review"
             scrolling="no"
             onLoad={(e) => {
               const iframe = e.currentTarget;

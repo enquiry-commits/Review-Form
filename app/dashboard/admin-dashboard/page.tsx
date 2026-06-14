@@ -50,6 +50,12 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalSelfReviews, setTotalSelfReviews] = useState(0);
   const [totalLeaderReviews, setTotalLeaderReviews] = useState(0);
+  const [hrReviews, setHrReviews] = useState<SubmissionRow[]>([]);
+  const [financeReviews, setFinanceReviews] = useState<SubmissionRow[]>([]);
+  const [marketingReviews, setMarketingReviews] = useState<SubmissionRow[]>([]);
+  const [totalHrReviews, setTotalHrReviews] = useState(0);
+  const [totalFinanceReviews, setTotalFinanceReviews] = useState(0);
+  const [totalMarketingReviews, setTotalMarketingReviews] = useState(0);
   const pageSize = 50;
 
   // Table view state
@@ -212,48 +218,43 @@ export default function AdminDashboard() {
     if (dataRes.data) setSuggestions(dataRes.data as SuggestionRow[]);
   };
 
+  const mapRow = (r: any): SubmissionRow => ({
+    id: r.id, user_id: r.user_id, submitted_at: r.submitted_at,
+    status: r.submitted_at ? 'submitted' : 'draft',
+    department: r.department, employee_name: r.employee_name,
+    employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data,
+  });
+
   const fetchAllReviews = async (page: number = 0) => {
     try {
       const start = page * pageSize;
       const end = start + pageSize - 1;
 
-      const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes] = await Promise.all([
+      const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes,
+             hrCountRes, hrDataRes, finCountRes, finDataRes, mktCountRes, mktDataRes] = await Promise.all([
         supabase.from('self_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('self_review_submissions').select('*').range(start, end),
         supabase.from('leader_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('leader_review_submissions').select('*').range(start, end)
+        supabase.from('leader_review_submissions').select('*').range(start, end),
+        supabase.from('hr_review_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('hr_review_submissions').select('*').range(start, end),
+        supabase.from('finance_review_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('finance_review_submissions').select('*').range(start, end),
+        supabase.from('marketing_review_submissions').select('id', { count: 'exact', head: true }),
+        supabase.from('marketing_review_submissions').select('*').range(start, end),
       ]);
 
       setTotalSelfReviews(selfCountRes.count || 0);
       setTotalLeaderReviews(leaderCountRes.count || 0);
+      setTotalHrReviews(hrCountRes.count || 0);
+      setTotalFinanceReviews(finCountRes.count || 0);
+      setTotalMarketingReviews(mktCountRes.count || 0);
 
-      if (selfDataRes.data) {
-        setSelfReviews(selfDataRes.data.map((r: any) => ({
-          id: r.id,
-          user_id: r.user_id,
-          submitted_at: r.submitted_at,
-          status: r.submitted_at ? 'submitted' : 'draft',
-          department: r.department,
-          employee_name: r.employee_name,
-          employee_email: r.employee_email,
-          review_period: r.review_period,
-          form_data: r.form_data
-        })));
-      }
-
-      if (leaderDataRes.data) {
-        setLeaderReviews(leaderDataRes.data.map((r: any) => ({
-          id: r.id,
-          user_id: r.user_id,
-          submitted_at: r.submitted_at,
-          status: r.submitted_at ? 'submitted' : 'draft',
-          department: r.department,
-          employee_name: r.employee_name,
-          employee_email: r.employee_email,
-          review_period: r.review_period,
-          form_data: r.form_data
-        })));
-      }
+      if (selfDataRes.data) setSelfReviews(selfDataRes.data.map(mapRow));
+      if (leaderDataRes.data) setLeaderReviews(leaderDataRes.data.map(mapRow));
+      if (hrDataRes.data) setHrReviews(hrDataRes.data.map(mapRow));
+      if (finDataRes.data) setFinanceReviews(finDataRes.data.map(mapRow));
+      if (mktDataRes.data) setMarketingReviews(mktDataRes.data.map(mapRow));
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
@@ -273,7 +274,14 @@ export default function AdminDashboard() {
 
   const handleDelete = async (row: SubmissionRow) => {
     if (!confirm(`Delete submission by ${row.employee_name}? This cannot be undone.`)) return;
-    const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
+    const tableMap: Record<string, string> = {
+      'self-reviews': 'self_review_submissions',
+      'leader-reviews': 'leader_review_submissions',
+      'hr-reviews': 'hr_review_submissions',
+      'finance-reviews': 'finance_review_submissions',
+      'marketing-reviews': 'marketing_review_submissions',
+    };
+    const table = tableMap[activeMenu] || 'self_review_submissions';
     const { error } = await supabase.from(table).delete().eq('id', row.id);
     if (error) {
       alert('Delete failed: ' + error.message);
@@ -306,11 +314,41 @@ export default function AdminDashboard() {
       return;
     }
 
-    const table = activeMenu === 'self-reviews' ? 'self_review_submissions' : 'leader_review_submissions';
+    const tableMap2: Record<string, string> = {
+      'self-reviews': 'self_review_submissions',
+      'leader-reviews': 'leader_review_submissions',
+      'hr-reviews': 'hr_review_submissions',
+      'finance-reviews': 'finance_review_submissions',
+      'marketing-reviews': 'marketing_review_submissions',
+    };
+    const table = tableMap2[activeMenu] || 'self_review_submissions';
     const { data, error } = await supabase.from(table).select('*').order('submitted_at', { ascending: false });
     if (error || !data) { alert('Export failed: ' + error?.message); return; }
 
     let csv = '';
+
+    if (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu)) {
+      const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const headers = ['Submitted At','Name','Email','Department','Period','Status','KPI Issues (JSON)','Positive Contributions (JSON)'];
+      csv = headers.join(',') + '\n';
+      data.forEach((row: any) => {
+        csv += [
+          esc(row.submitted_at ? new Date(row.submitted_at).toLocaleString() : ''),
+          esc(row.employee_name), esc(row.employee_email), esc(row.department),
+          esc(row.review_period), esc(row.submitted_at ? 'Submitted' : 'Draft'),
+          esc(JSON.stringify(row.form_data?.kpis || {})),
+          esc(JSON.stringify(row.form_data?.positive_items || {})),
+        ].join(',') + '\n';
+      });
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${activeMenu}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
 
     if (activeMenu === 'self-reviews') {
       const kpiKeys = ['client_complaints','client_attrition','minor_delays','serious_delays','minor_errors','serious_errors','communication_issues','team_impact','learning_application'];
@@ -410,7 +448,12 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const displayData = activeMenu === 'self-reviews' ? selfReviews : leaderReviews;
+  const displayData =
+    activeMenu === 'self-reviews'      ? selfReviews :
+    activeMenu === 'leader-reviews'    ? leaderReviews :
+    activeMenu === 'hr-reviews'        ? hrReviews :
+    activeMenu === 'finance-reviews'   ? financeReviews :
+    activeMenu === 'marketing-reviews' ? marketingReviews : [];
   const filteredData = displayData.filter(row => {
     const matchesSearch =
       row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -645,6 +688,58 @@ export default function AdminDashboard() {
     );
   };
 
+  const renderDeptFormData = (form_data: any) => {
+    const kpis = form_data?.kpis || {};
+    const pos  = form_data?.positive_items || {};
+    const filledKpis = Object.entries(kpis).filter(([, v]: any) => hasContent(v));
+    const filledPos  = Object.entries(pos).filter(([, v]: any) => v?.description?.trim() || v?.files?.length > 0);
+    return (
+      <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
+            <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
+            <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>KPI Issues</span>
+          </div>
+          {filledKpis.length > 0 ? (
+            <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+              {filledKpis.map(([key, val]: any) => (
+                <div key={key} style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px',gap:'12px'}}>
+                    <span style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',wordBreak:'break-word'}}>{key.replace(/_/g,' ')}</span>
+                    {(val.count ?? 0) > 0 && <span style={{flexShrink:0,background:'#dbeafe',color:'#1d4ed8',padding:'2px 10px',borderRadius:'6px',fontSize:'12px',fontWeight:'700'}}>×{val.count}</span>}
+                  </div>
+                  {val.comment?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.comment}</p>}
+                  {renderFiles(val.files)}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px',fontSize:'13px',color:'#1d4ed8',fontWeight:'600'}}>✓ No issues reported</div>
+          )}
+        </div>
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
+            <div style={{width:'4px',height:'16px',background:'#16a34a',borderRadius:'2px'}} />
+            <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>Positive Contributions</span>
+          </div>
+          {filledPos.length > 0 ? (
+            <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+              {filledPos.map(([key, val]: any) => (
+                <div key={key} style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'10px',padding:'12px 14px'}}>
+                  <div style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',marginBottom:'4px',wordBreak:'break-word'}}>{key.replace(/_/g,' ')}</div>
+                  {val.description?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.description}</p>}
+                  {renderFiles(val.files)}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:'10px',padding:'12px 14px',fontSize:'13px',color:'#94a3b8'}}>No positive contributions noted</div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const getStatusColor = (status: string) => {
     if (status === 'Completed') return { bg: '#d1fae5', color: '#065f46' };
     if (status === 'Draft') return { bg: '#fef3c7', color: '#92400e' };
@@ -789,7 +884,7 @@ export default function AdminDashboard() {
             <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['self-reviews', 'leader-reviews', 'suggestions'] as const).map(item => {
+            {(['self-reviews', 'leader-reviews', 'hr-reviews', 'finance-reviews', 'marketing-reviews', 'suggestions'] as const).map(item => {
               const icon = item === 'self-reviews' ? (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="1.5" width="10" height="13" rx="1.5"/>
@@ -803,8 +898,13 @@ export default function AdminDashboard() {
                   <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
                   <polyline points="10,8.5 11.5,10.5 14,7.5"/>
                 </svg>
-              ) : '💬';
-              const label = item === 'self-reviews' ? 'Self Reviews' : item === 'leader-reviews' ? 'Leader Reviews' : 'Suggestion Box';
+              ) : item === 'hr-reviews' ? '👥' : item === 'finance-reviews' ? '💼' : item === 'marketing-reviews' ? '📣' : '💬';
+              const label = item === 'self-reviews' ? 'Self Reviews'
+                : item === 'leader-reviews' ? 'Leader Reviews'
+                : item === 'hr-reviews' ? 'HR Reviews'
+                : item === 'finance-reviews' ? 'Finance Reviews'
+                : item === 'marketing-reviews' ? 'Marketing Reviews'
+                : 'Suggestion Box';
               return (
                 <div
                   key={item}
@@ -890,19 +990,25 @@ export default function AdminDashboard() {
       <div style={{padding: '40px', overflowY: 'auto'}}>
         <div style={{marginBottom: '32px'}}>
           <h1 style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>
-            {activeMenu === 'self-reviews' ? 'Self Review Submissions'
-              : activeMenu === 'leader-reviews' ? 'Leader Review Submissions'
-              : activeMenu === 'suggestions' ? 'Suggestion Box'
-              : activeMenu === 'table-by-year' ? 'Table View · By Year'
-              : activeMenu === 'table-by-person' ? 'Table View · By Person'
+            {activeMenu === 'self-reviews'      ? 'Self Review Submissions'
+              : activeMenu === 'leader-reviews'    ? 'Leader Review Submissions'
+              : activeMenu === 'hr-reviews'        ? 'HR Review Submissions'
+              : activeMenu === 'finance-reviews'   ? 'Finance & Admin Review Submissions'
+              : activeMenu === 'marketing-reviews' ? 'Marketing Review Submissions'
+              : activeMenu === 'suggestions'       ? 'Suggestion Box'
+              : activeMenu === 'table-by-year'     ? 'Table View · By Year'
+              : activeMenu === 'table-by-person'   ? 'Table View · By Person'
               : 'Status Overview'}
           </h1>
           <p style={{color: '#64748b', fontSize: '14px'}}>
-            {activeMenu === 'self-reviews' ? 'Monitor employee self-review submissions and completion status'
-              : activeMenu === 'leader-reviews' ? 'Monitor leader review submissions and completion status'
-              : activeMenu === 'suggestions' ? 'All suggestions submitted by team members'
-              : activeMenu === 'table-by-year' ? 'View all submissions organised by year and month'
-              : activeMenu === 'table-by-person' ? 'View all submissions organised by employee'
+            {activeMenu === 'self-reviews'      ? 'Monitor employee self-review submissions and completion status'
+              : activeMenu === 'leader-reviews'    ? 'Monitor leader review submissions and completion status'
+              : activeMenu === 'hr-reviews'        ? 'HR department monthly review submissions (Esther)'
+              : activeMenu === 'finance-reviews'   ? 'Finance & Admin monthly review submissions (Chelsea)'
+              : activeMenu === 'marketing-reviews' ? 'Marketing monthly review submissions (Vincent)'
+              : activeMenu === 'suggestions'       ? 'All suggestions submitted by team members'
+              : activeMenu === 'table-by-year'     ? 'View all submissions organised by year and month'
+              : activeMenu === 'table-by-person'   ? 'View all submissions organised by employee'
               : `Current review period — ${formatPeriodDisplay(getCurrentReviewPeriod())}`}
           </p>
         </div>
@@ -1377,7 +1483,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Toolbar + Table + Pagination (reviews only) */}
-        {activeMenu !== 'suggestions' && activeMenu !== 'table-by-year' && activeMenu !== 'table-by-person' && activeMenu !== 'status-overview' && <>
+        {['self-reviews','leader-reviews','hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) && <>
         <div style={{
           display: 'flex',
           gap: '12px',
@@ -1618,7 +1724,12 @@ export default function AdminDashboard() {
 
         {/* Pagination */}
         {(() => {
-          const totalCount = activeMenu === 'self-reviews' ? totalSelfReviews : totalLeaderReviews;
+          const totalCount =
+            activeMenu === 'self-reviews'      ? totalSelfReviews :
+            activeMenu === 'leader-reviews'    ? totalLeaderReviews :
+            activeMenu === 'hr-reviews'        ? totalHrReviews :
+            activeMenu === 'finance-reviews'   ? totalFinanceReviews :
+            activeMenu === 'marketing-reviews' ? totalMarketingReviews : 0;
           const totalPages = Math.ceil(totalCount / pageSize);
           const hasPrev = currentPage > 0;
           const hasNext = currentPage < totalPages - 1;
@@ -1755,9 +1866,11 @@ export default function AdminDashboard() {
 
             <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
-              {selectedDetail.form_data ? renderFormData(selectedDetail.form_data, activeMenu) : (
-                <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>
-              )}
+              {selectedDetail.form_data ? (
+                ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu)
+                  ? renderDeptFormData(selectedDetail.form_data)
+                  : renderFormData(selectedDetail.form_data, activeMenu)
+              ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
             </div>
 
             <div style={{display: 'flex', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
