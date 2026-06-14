@@ -61,6 +61,7 @@ export default function Dashboard() {
     { id: 'marketing-review', label: 'Marketing Review',     allowed: email === 'vincent@tassure.com' },
     { id: 'suggestion-box',   label: '💬 Suggestion Box',   allowed: true },
     { id: 'admin-dashboard',  label: 'Admin Dashboard',      allowed: hasAccess(user.role, 'admin-dashboard') },
+    { id: 'my-submissions',   label: 'My Submissions',       allowed: user.role !== 'admin' },
   ];
 
   const visibleTabs = tabs.filter(t => t.allowed);
@@ -283,6 +284,24 @@ export default function Dashboard() {
               observer.observe(iframe.contentDocument!.body);
             }}
             style={{width: '100%', height: '700px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
+          />
+        )}
+        {activeTab === 'my-submissions' && (
+          <iframe
+            src="/dashboard/my-submissions"
+            scrolling="no"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              const update = () => {
+                try {
+                  iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px';
+                } catch {}
+              };
+              update();
+              const observer = new ResizeObserver(update);
+              observer.observe(iframe.contentDocument!.body);
+            }}
+            style={{width: '100%', height: '800px', border: 'none', borderRadius: '12px', overflow: 'hidden'}}
           />
         )}
       </div>
