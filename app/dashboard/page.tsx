@@ -18,7 +18,10 @@ export default function Dashboard() {
       router.push('/');
       return;
     }
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+    if (parsedUser.email === 'esther@tassure.com') setActiveTab('hr-review');
+    else if (parsedUser.email === 'chelsea@tassure.com') setActiveTab('finance-review');
     setLoading(false);
   }, [router]);
 
