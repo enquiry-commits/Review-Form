@@ -281,9 +281,10 @@ export default function FinanceReviewForm() {
         if (error) throw error;
       }
       router.push('/dashboard/self-review-success');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Submit failed / 提交失败，请重试');
+      const detail = err?.message || err?.error_description || JSON.stringify(err);
+      alert(`Submit failed: ${detail}`);
     }
   };
 
