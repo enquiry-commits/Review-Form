@@ -65,7 +65,29 @@ export default function MySubmissions() {
   const [rows, setRows] = useState<PeriodRow[]>([]);
   const [forms, setForms] = useState<FormConfig[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const currentPeriod = getCurrentReviewPeriod();
+
+  const generateDemoRows = (f: FormConfig[]): PeriodRow[] => {
+    const periods: string[] = [];
+    let year = parseInt(currentPeriod.split('-')[0]);
+    let month = parseInt(currentPeriod.split('-')[1]);
+    for (let i = 0; i < 12; i++) {
+      periods.push(`${year}-${String(month).padStart(2, '0')}`);
+      month--;
+      if (month === 0) { month = 12; year--; }
+    }
+    const patterns: Record<string, Status[]> = {
+      self:    ['draft','submitted','submitted','submitted','submitted','submitted','draft','submitted','submitted','submitted','submitted','submitted'],
+      leader:  ['pending','submitted','submitted','submitted','draft','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      finance: ['draft','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft','submitted','submitted','submitted'],
+    };
+    return periods.map((period, i) => {
+      const statuses: Record<string, Status> = {};
+      f.forEach(fc => { statuses[fc.key] = patterns[fc.key]?.[i] ?? 'submitted'; });
+      return { period, statuses };
+    });
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem('user');
@@ -129,8 +151,9 @@ export default function MySubmissions() {
 
   if (!user) return null;
 
-  const currentRow = rows.find(r => r.period === currentPeriod);
-  const historyRows = rows.filter(r => r.period !== currentPeriod);
+  const displayRows = isDemoMode ? generateDemoRows(forms) : rows;
+  const currentRow = displayRows.find(r => r.period === currentPeriod);
+  const historyRows = displayRows.filter(r => r.period !== currentPeriod);
 
   const allCurrentSubmitted = forms.length > 0 && forms.every(f => currentRow?.statuses[f.key] === 'submitted');
 
@@ -185,19 +208,26 @@ export default function MySubmissions() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 32px 60px' }}>
 
         {/* Page Title */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '28px',
-            fontWeight: '800',
-            color: '#1e3a5f',
-            margin: 0,
-            letterSpacing: '-0.5px',
-          }}>
-            My Submissions
-          </h1>
-          <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '14px' }}>
-            Your personal review submission history and current status
-          </p>
+        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <h1 style={{
+              fontSize: '28px',
+              fontWeight: '800',
+              color: '#1e3a5f',
+              margin: 0,
+              letterSpacing: '-0.5px',
+            }}>
+              My Submissions
+              {isDemoMode && <span style={{marginLeft:'12px',fontSize:'13px',fontWeight:'700',background:'#fef3c7',color:'#92400e',padding:'3px 10px',borderRadius:'8px',border:'1px solid #fbbf24',verticalAlign:'middle'}}>Demo</span>}
+            </h1>
+            <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '14px' }}>
+              Your personal review submission history and current status
+            </p>
+          </div>
+          {isDemoMode
+            ? <button onClick={() => setIsDemoMode(false)} style={{padding:'8px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer',flexShrink:0}}>✕ Exit Demo</button>
+            : <button onClick={() => setIsDemoMode(true)} style={{padding:'8px 16px',background:'rgba(126,184,212,0.08)',color:'#1e3a5f',border:'1.5px dashed #7eb8d4',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer',flexShrink:0}}>👁 Demo Preview</button>
+          }
         </div>
 
         {/* Current Period Card */}
@@ -247,7 +277,7 @@ export default function MySubmissions() {
             gridTemplateColumns: `repeat(${Math.min(forms.length, 3)}, 1fr)`,
             gap: '16px',
           }}>
-            {!loaded ? (
+            {(!loaded && !isDemoMode) ? (
               <div style={{ color: '#94a3b8', fontSize: '14px' }}>Loading...</div>
             ) : forms.map(form => {
               const status = currentRow?.statuses[form.key] || 'pending';
@@ -293,7 +323,7 @@ export default function MySubmissions() {
         </div>
 
         {/* Submission History */}
-        {loaded && historyRows.length > 0 && (
+        {(loaded || isDemoMode) && historyRows.length > 0 && (
           <div style={{
             background: '#ffffff',
             borderRadius: '16px',
@@ -371,7 +401,7 @@ export default function MySubmissions() {
         )}
 
         {/* Empty state for history */}
-        {loaded && historyRows.length === 0 && (
+        {(loaded && !isDemoMode) && historyRows.length === 0 && (
           <div style={{
             background: '#ffffff',
             borderRadius: '16px',

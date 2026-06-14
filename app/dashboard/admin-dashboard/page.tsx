@@ -164,18 +164,34 @@ export default function AdminDashboard() {
         }
       });
     });
+    const curPeriod = getCurrentReviewPeriod();
     setTableAllSelf(selfRows);
     setTableAllLeader(leaderRows);
+    setSelfReviews(selfRows);
+    setLeaderReviews(leaderRows);
+    setTotalSelfReviews(selfRows.length);
+    setTotalLeaderReviews(leaderRows.length);
+    setOverviewSelf(selfRows.filter(r => r.review_period === curPeriod));
+    setOverviewLeader(leaderRows.filter(r => r.review_period === curPeriod));
+    setOverviewLoaded(true);
     setTableDataLoaded(true);
     setTableDemoMode(true);
     setTableYearSel('2026');
     setTableMonthSel('');
     setTablePersonSel('');
+    setLoading(false);
   };
 
   const clearDemoData = () => {
     setTableAllSelf([]);
     setTableAllLeader([]);
+    setSelfReviews([]);
+    setLeaderReviews([]);
+    setTotalSelfReviews(0);
+    setTotalLeaderReviews(0);
+    setOverviewSelf([]);
+    setOverviewLeader([]);
+    setOverviewLoaded(false);
     setTableDataLoaded(false);
     setTableDemoMode(false);
     setTableYearSel('');
@@ -1007,6 +1023,31 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div style={{padding: '40px', overflowY: 'auto'}}>
+
+        {/* Demo mode banner */}
+        {tableDemoMode && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+            border: '1px solid #fbbf24',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            marginBottom: '24px',
+            gap: '12px',
+          }}>
+            <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+              <span style={{fontSize:'16px'}}>👁</span>
+              <div>
+                <span style={{fontSize:'13px',fontWeight:'800',color:'#92400e'}}>Demo Preview Mode</span>
+                <span style={{fontSize:'12px',color:'#92400e',marginLeft:'8px',opacity:'0.8'}}>— Showing sample data (10 employees × 12 months). No real records.</span>
+              </div>
+            </div>
+            <button onClick={clearDemoData} style={{padding:'6px 14px',background:'#92400e',color:'white',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer',flexShrink:0}}>
+              ✕ Exit Demo
+            </button>
+          </div>
+        )}
+
         <div style={{marginBottom: '32px'}}>
           <h1 style={{fontSize: '32px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', letterSpacing: '-0.5px'}}>
             {activeMenu === 'self-reviews'      ? 'Self Review Submissions'
@@ -1624,6 +1665,11 @@ export default function AdminDashboard() {
           }}>
             🔄 Refresh
           </button>
+
+          {tableDemoMode
+            ? <button onClick={clearDemoData} style={{padding:'10px 16px',border:'none',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'rgba(239,68,68,0.1)',color:'#dc2626',whiteSpace:'nowrap'}}>✕ Exit Demo</button>
+            : <button onClick={loadDemoData} style={{padding:'10px 16px',border:'1.5px dashed #7eb8d4',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'rgba(126,184,212,0.08)',color:'#1e3a5f',whiteSpace:'nowrap'}}>👁 Demo Preview</button>
+          }
 
           <button onClick={handleExportAll} style={{
             padding: '10px 16px',
