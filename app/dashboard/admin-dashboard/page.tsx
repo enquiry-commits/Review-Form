@@ -68,6 +68,7 @@ export default function AdminDashboard() {
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [internalGroupOpen, setInternalGroupOpen] = useState(true);
 
   // Status overview state
   const [overviewSelf, setOverviewSelf]       = useState<SubmissionRow[]>([]);
@@ -902,7 +903,7 @@ export default function AdminDashboard() {
             <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['self-reviews', 'leader-reviews', 'hr-reviews', 'finance-reviews', 'marketing-reviews', 'suggestions'] as const).map(item => {
+            {(['self-reviews', 'leader-reviews'] as const).map(item => {
               const icon = item === 'self-reviews' ? (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="1.5" width="10" height="13" rx="1.5"/>
@@ -910,38 +911,14 @@ export default function AdminDashboard() {
                   <line x1="5.5" y1="8" x2="10.5" y2="8"/>
                   <line x1="5.5" y1="10.5" x2="9" y2="10.5"/>
                 </svg>
-              ) : item === 'leader-reviews' ? (
+              ) : (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="8" cy="5" r="2.5"/>
                   <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
                   <polyline points="10,8.5 11.5,10.5 14,7.5"/>
                 </svg>
-              ) : item === 'hr-reviews' ? (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="6" cy="5" r="2"/>
-                  <path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
-                  <circle cx="12" cy="5.5" r="1.5"/>
-                  <path d="M15 13.5c0-1.93-1.34-3-3-3"/>
-                </svg>
-              ) : item === 'finance-reviews' ? (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="1.5" y="6" width="13" height="8.5" rx="1.5"/>
-                  <path d="M5.5 6V4.5A1.5 1.5 0 0 1 7 3h2A1.5 1.5 0 0 1 10.5 4.5V6"/>
-                  <line x1="1.5" y1="9.5" x2="14.5" y2="9.5"/>
-                </svg>
-              ) : item === 'marketing-reviews' ? (
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3.5 6.5H5l7.5-3.5v10L5 9.5H3.5a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z"/>
-                  <path d="M5 9.5v3"/>
-                  <path d="M14 5.5a3 3 0 0 1 0 5"/>
-                </svg>
-              ) : '💬';
-              const label = item === 'self-reviews' ? 'Self Reviews'
-                : item === 'leader-reviews' ? 'Leader Reviews'
-                : item === 'hr-reviews' ? 'HR Reviews'
-                : item === 'finance-reviews' ? 'Finance Reviews'
-                : item === 'marketing-reviews' ? 'Marketing Reviews'
-                : 'Suggestion Box';
+              );
+              const label = item === 'self-reviews' ? 'Self Reviews' : 'Leader Reviews';
               return (
                 <div
                   key={item}
@@ -969,6 +946,143 @@ export default function AdminDashboard() {
                 </div>
               );
             })}
+
+            {/* Internal Review collapsible group */}
+            {!sidebarCollapsed && (
+              <div
+                onClick={() => setInternalGroupOpen(v => !v)}
+                style={{
+                  padding: '11px 14px',
+                  borderRadius: '10px', cursor: 'pointer',
+                  fontSize: '13px', fontWeight: '700',
+                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8',
+                  transition: 'all 0.2s',
+                  display: 'flex', alignItems: 'center',
+                  gap: '8px',
+                  userSelect: 'none',
+                  marginTop: '4px',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#1e3a5f'; e.currentTarget.style.background = 'rgba(30,58,95,0.04)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{transition: 'transform 0.2s', transform: internalGroupOpen ? 'rotate(90deg)' : 'rotate(0deg)', flexShrink: 0}}>
+                  <polyline points="3,2 9,6 3,10"/>
+                </svg>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                  <rect x="2" y="2" width="5" height="5" rx="1"/>
+                  <rect x="9" y="2" width="5" height="5" rx="1"/>
+                  <rect x="2" y="9" width="5" height="5" rx="1"/>
+                  <rect x="9" y="9" width="5" height="5" rx="1"/>
+                </svg>
+                Internal Review
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <div
+                onClick={() => setInternalGroupOpen(v => !v)}
+                title="Internal Review"
+                style={{
+                  padding: '10px', borderRadius: '10px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8',
+                  background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? 'rgba(126,184,212,0.15)' : 'transparent'; e.currentTarget.style.color = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8'; }}
+              >
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="5" height="5" rx="1"/>
+                  <rect x="9" y="2" width="5" height="5" rx="1"/>
+                  <rect x="2" y="9" width="5" height="5" rx="1"/>
+                  <rect x="9" y="9" width="5" height="5" rx="1"/>
+                </svg>
+              </div>
+            )}
+
+            {/* Internal sub-items */}
+            {internalGroupOpen && (['hr-reviews', 'finance-reviews', 'marketing-reviews'] as const).map(item => {
+              const icon = item === 'hr-reviews' ? (
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="6" cy="5" r="2"/>
+                  <path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+                  <circle cx="12" cy="5.5" r="1.5"/>
+                  <path d="M15 13.5c0-1.93-1.34-3-3-3"/>
+                </svg>
+              ) : item === 'finance-reviews' ? (
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1.5" y="6" width="13" height="8.5" rx="1.5"/>
+                  <path d="M5.5 6V4.5A1.5 1.5 0 0 1 7 3h2A1.5 1.5 0 0 1 10.5 4.5V6"/>
+                  <line x1="1.5" y1="9.5" x2="14.5" y2="9.5"/>
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3.5 6.5H5l7.5-3.5v10L5 9.5H3.5a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z"/>
+                  <path d="M5 9.5v3"/>
+                  <path d="M14 5.5a3 3 0 0 1 0 5"/>
+                </svg>
+              );
+              const label = item === 'hr-reviews' ? 'HR Reviews' : item === 'finance-reviews' ? 'Finance Reviews' : 'Marketing Reviews';
+              return (
+                <div
+                  key={item}
+                  onClick={() => handleActiveMenuChange(item)}
+                  title={sidebarCollapsed ? label : undefined}
+                  style={{
+                    padding: sidebarCollapsed ? '10px' : '9px 14px 9px 32px',
+                    borderRadius: '10px', cursor: 'pointer',
+                    fontSize: '12px', fontWeight: '600',
+                    color: activeMenu === item ? '#1e3a5f' : '#64748b',
+                    transition: 'all 0.2s',
+                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    gap: '8px',
+                    whiteSpace: 'nowrap', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
+                >
+                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
+                  {!sidebarCollapsed && label}
+                </div>
+              );
+            })}
+
+            {/* Suggestion Box */}
+            {(() => {
+              const item = 'suggestions';
+              const label = 'Suggestion Box';
+              return (
+                <div
+                  key={item}
+                  onClick={() => handleActiveMenuChange(item)}
+                  title={sidebarCollapsed ? label : undefined}
+                  style={{
+                    padding: sidebarCollapsed ? '10px' : '11px 14px',
+                    borderRadius: '10px', cursor: 'pointer',
+                    fontSize: '13px', fontWeight: '600',
+                    color: activeMenu === item ? '#1e3a5f' : '#64748b',
+                    transition: 'all 0.2s',
+                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
+                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
+                    display: 'flex', alignItems: 'center',
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    gap: '10px',
+                    whiteSpace: 'nowrap', overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
+                >
+                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>💬</span>
+                  {!sidebarCollapsed && label}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
