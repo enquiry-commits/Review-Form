@@ -898,7 +898,26 @@ export default function AdminDashboard() {
                   <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
                   <polyline points="10,8.5 11.5,10.5 14,7.5"/>
                 </svg>
-              ) : item === 'hr-reviews' ? '👥' : item === 'finance-reviews' ? '💼' : item === 'marketing-reviews' ? '📣' : '💬';
+              ) : item === 'hr-reviews' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="6" cy="5" r="2"/>
+                  <path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+                  <circle cx="12" cy="5.5" r="1.5"/>
+                  <path d="M15 13.5c0-1.93-1.34-3-3-3"/>
+                </svg>
+              ) : item === 'finance-reviews' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1.5" y="6" width="13" height="8.5" rx="1.5"/>
+                  <path d="M5.5 6V4.5A1.5 1.5 0 0 1 7 3h2A1.5 1.5 0 0 1 10.5 4.5V6"/>
+                  <line x1="1.5" y1="9.5" x2="14.5" y2="9.5"/>
+                </svg>
+              ) : item === 'marketing-reviews' ? (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3.5 6.5H5l7.5-3.5v10L5 9.5H3.5a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z"/>
+                  <path d="M5 9.5v3"/>
+                  <path d="M14 5.5a3 3 0 0 1 0 5"/>
+                </svg>
+              ) : '💬';
               const label = item === 'self-reviews' ? 'Self Reviews'
                 : item === 'leader-reviews' ? 'Leader Reviews'
                 : item === 'hr-reviews' ? 'HR Reviews'
