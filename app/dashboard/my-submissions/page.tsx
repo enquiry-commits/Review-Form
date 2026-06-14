@@ -21,10 +21,11 @@ interface PeriodRow {
 }
 
 function getFormsForUser(user: User): FormConfig[] {
-  const forms: FormConfig[] = [
-    { key: 'self', table: 'self_review_submissions', label: 'Self Review', route: '/dashboard/self-review' },
-  ];
-  if (user.role === 'leader' || user.email === 'chelsea@tassure.com') {
+  const forms: FormConfig[] = [];
+  if (user.email !== 'chelsea@tassure.com') {
+    forms.push({ key: 'self', table: 'self_review_submissions', label: 'Self Review', route: '/dashboard/self-review' });
+  }
+  if (user.role === 'leader') {
     forms.push({ key: 'leader', table: 'leader_review_submissions', label: 'Leader Review', route: '/dashboard/leader-review' });
   }
   if (user.email === 'chelsea@tassure.com') {

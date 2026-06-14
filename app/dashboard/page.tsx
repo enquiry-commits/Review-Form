@@ -54,8 +54,8 @@ export default function Dashboard() {
 
   const email = user.email;
   const tabs = [
-    { id: 'self-review',      label: 'Employee Self Review', allowed: true },
-    { id: 'leader-review',    label: 'Leader Review',        allowed: hasAccess(user.role, 'leader-review') || email === 'chelsea@tassure.com' },
+    { id: 'self-review',      label: 'Employee Self Review', allowed: email !== 'chelsea@tassure.com' && email !== 'esther@tassure.com' },
+    { id: 'leader-review',    label: 'Leader Review',        allowed: hasAccess(user.role, 'leader-review') && email !== 'esther@tassure.com' },
     { id: 'hr-review',        label: 'HR Review',            allowed: email === 'esther@tassure.com' || email === 'vincent@tassure.com' },
     { id: 'finance-review',   label: 'Finance Review',       allowed: email === 'chelsea@tassure.com' || email === 'vincent@tassure.com' },
     { id: 'marketing-review', label: 'Marketing Review',     allowed: email === 'vincent@tassure.com' },
