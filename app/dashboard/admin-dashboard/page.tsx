@@ -470,7 +470,9 @@ export default function AdminDashboard() {
     activeMenu === 'hr-reviews'        ? hrReviews :
     activeMenu === 'finance-reviews'   ? financeReviews :
     activeMenu === 'marketing-reviews' ? marketingReviews : [];
+  const EXCLUDED_FROM_SELF_REVIEW = ['chelsea@tassure.com', 'esther@tassure.com', 'vincent@tassure.com'];
   const filteredData = displayData.filter(row => {
+    if (activeMenu === 'self-reviews' && EXCLUDED_FROM_SELF_REVIEW.includes(row.employee_email)) return false;
     const matchesSearch =
       row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.employee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
