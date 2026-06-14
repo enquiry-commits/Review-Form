@@ -873,8 +873,7 @@ export default function AdminDashboard() {
               fontSize: '13px', fontWeight: '600',
               color: activeMenu === 'status-overview' ? '#1e3a5f' : '#64748b',
               transition: 'all 0.2s',
-              borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-              borderLeftColor: activeMenu === 'status-overview' ? '#7eb8d4' : 'transparent',
+              boxShadow: !sidebarCollapsed && activeMenu === 'status-overview' ? 'inset 3px 0 0 #7eb8d4' : 'none',
               background: activeMenu === 'status-overview' ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
               display: 'flex', alignItems: 'center',
               justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
@@ -930,8 +929,7 @@ export default function AdminDashboard() {
                     fontSize: '13px', fontWeight: '600',
                     color: activeMenu === item ? '#1e3a5f' : '#64748b',
                     transition: 'all 0.2s',
-                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    boxShadow: !sidebarCollapsed && activeMenu === item ? 'inset 3px 0 0 #7eb8d4' : 'none',
                     background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
                     display: 'flex', alignItems: 'center',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
@@ -939,7 +937,7 @@ export default function AdminDashboard() {
                     whiteSpace: 'nowrap', overflow: 'hidden'
                   }}
                   onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
                 >
                   <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
                   {!sidebarCollapsed && label}
@@ -1035,8 +1033,7 @@ export default function AdminDashboard() {
                     fontSize: '12px', fontWeight: '600',
                     color: activeMenu === item ? '#1e3a5f' : '#64748b',
                     transition: 'all 0.2s',
-                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    boxShadow: !sidebarCollapsed && activeMenu === item ? 'inset 3px 0 0 #7eb8d4' : 'none',
                     background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
                     display: 'flex', alignItems: 'center',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
@@ -1067,8 +1064,7 @@ export default function AdminDashboard() {
                     fontSize: '13px', fontWeight: '600',
                     color: activeMenu === item ? '#1e3a5f' : '#64748b',
                     transition: 'all 0.2s',
-                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    boxShadow: !sidebarCollapsed && activeMenu === item ? 'inset 3px 0 0 #7eb8d4' : 'none',
                     background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
                     display: 'flex', alignItems: 'center',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
@@ -1116,8 +1112,7 @@ export default function AdminDashboard() {
                     fontSize: '13px', fontWeight: '600',
                     color: activeMenu === item ? '#1e3a5f' : '#64748b',
                     transition: 'all 0.2s',
-                    borderLeft: sidebarCollapsed ? 'none' : '3px solid',
-                    borderLeftColor: activeMenu === item ? '#7eb8d4' : 'transparent',
+                    boxShadow: !sidebarCollapsed && activeMenu === item ? 'inset 3px 0 0 #7eb8d4' : 'none',
                     background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
                     display: 'flex', alignItems: 'center',
                     justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
@@ -1125,7 +1120,7 @@ export default function AdminDashboard() {
                     whiteSpace: 'nowrap', overflow: 'hidden'
                   }}
                   onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent'; e.currentTarget.style.color = activeMenu === item ? '#1e3a5f' : '#64748b'; }}}
+                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
                 >
                   <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
                   {!sidebarCollapsed && label}
