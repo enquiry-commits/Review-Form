@@ -682,8 +682,10 @@ export default function AdminDashboard() {
   const renderDeptFormData = (form_data: any) => {
     const kpis = form_data?.kpis || {};
     const pos  = form_data?.positive_items || {};
+    const overallRemarks = form_data?.overall_remarks;
     const filledKpis = Object.entries(kpis).filter(([, v]: any) => hasContent(v));
     const filledPos  = Object.entries(pos).filter(([, v]: any) => v?.description?.trim() || v?.files?.length > 0);
+    const hasRemarks = overallRemarks?.remarks?.trim() || overallRemarks?.files?.length > 0;
     return (
       <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
         <div>
@@ -727,6 +729,18 @@ export default function AdminDashboard() {
             <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:'10px',padding:'12px 14px',fontSize:'13px',color:'#94a3b8'}}>No positive contributions noted</div>
           )}
         </div>
+        {hasRemarks && (
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
+              <div style={{width:'4px',height:'16px',background:'#1e3a5f',borderRadius:'2px'}} />
+              <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>Overall Remarks</span>
+            </div>
+            <div style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
+              {overallRemarks.remarks?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:0,lineHeight:'1.6'}}>{overallRemarks.remarks}</p>}
+              {renderFiles(overallRemarks.files)}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

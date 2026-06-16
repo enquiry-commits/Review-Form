@@ -163,6 +163,7 @@ export default function HRReviewForm() {
   const [user, setUser] = useState<User | null>(null);
   const [kpiData, setKpiData] = useState<Record<string, KPIData>>(emptyKPIs());
   const [posData, setPosData]  = useState<Record<string, PosData>>(emptyPos());
+  const [remarksData, setRemarksData] = useState<{remarks:string;files:FileLink[]}>({remarks:'',files:[]});
   const [isEmbedded, setIsEmbedded] = useState(false);
   const [status, setStatus]   = useState<'pending'|'draft'|'submitted'>('pending');
   const [saving, setSaving]   = useState(false);
@@ -174,11 +175,13 @@ export default function HRReviewForm() {
   const statusRef     = useRef<'pending'|'draft'|'submitted'>('pending');
   const kpiRef        = useRef(kpiData);
   const posRef        = useRef(posData);
+  const remarksRef    = useRef(remarksData);
   const saveTimer     = useRef<ReturnType<typeof setTimeout>|null>(null);
   const dirtyRef      = useRef(false);
 
   useEffect(() => { kpiRef.current = kpiData; }, [kpiData]);
   useEffect(() => { posRef.current = posData;  }, [posData]);
+  useEffect(() => { remarksRef.current = remarksData; }, [remarksData]);
 
   useEffect(() => {
     const raw = localStorage.getItem('user');
@@ -215,6 +218,10 @@ export default function HRReviewForm() {
             }
             setPosData(next);
           }
+          if (data.form_data?.overall_remarks) {
+            const r = data.form_data.overall_remarks;
+            setRemarksData({ remarks: r.remarks ?? '', files: r.files ?? [] });
+          }
         }
         setLoaded(true);
       });
@@ -227,7 +234,7 @@ export default function HRReviewForm() {
       const u = userRef.current;
       if (!u) return;
       setSaving(true);
-      const payload = { kpis: kpiRef.current, positive_items: posRef.current };
+      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current };
       try {
         if (existingIdRef.current) {
           await supabase.from(TABLE).update({ form_data: payload }).eq('id', existingIdRef.current);
@@ -242,9 +249,9 @@ export default function HRReviewForm() {
       } finally { setSaving(false); }
     }, 2000);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [kpiData, posData, currentPeriod]);
+  }, [kpiData, posData, remarksData, currentPeriod]);
 
-  const handleFileUpload = async (section: 'kpi'|'pos', id: string, files: FileList) => {
+  const handleFileUpload = async (section: 'kpi'|'pos'|'remarks', id: string, files: FileList) => {
     const links: FileLink[] = [];
     for (const file of Array.from(files)) {
       const ext  = file.name.split('.').pop();
@@ -259,14 +266,15 @@ export default function HRReviewForm() {
     }
     dirtyRef.current = true;
     if (section === 'kpi') setKpiData(p => ({ ...p, [id]: { ...p[id], files: [...p[id].files, ...links] } }));
-    else                   setPosData(p => ({ ...p, [id]: { ...p[id], files: [...p[id].files, ...links] } }));
+    else if (section === 'pos') setPosData(p => ({ ...p, [id]: { ...p[id], files: [...p[id].files, ...links] } }));
+    else setRemarksData(p => ({ ...p, files: [...p.files, ...links] }));
   };
 
   const handleSubmit = async () => {
     if (!user || statusRef.current === 'submitted') return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     try {
-      const payload = { kpis: kpiRef.current, positive_items: posRef.current };
+      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current };
       if (existingIdRef.current) {
         const { error } = await supabase.from(TABLE)
           .update({ form_data: payload, submitted_at: new Date().toISOString(), is_locked: true })
@@ -396,10 +404,55 @@ export default function HRReviewForm() {
           </div>
         </div>
 
+        {/* Section Divider */}
+        <div style={{display:'flex',alignItems:'center',gap:'20px',margin:'60px 0 40px'}}>
+          <div style={{flex:1,height:'1px',background:'#cbd5e1'}}/>
+          <div style={{color:'#334155',fontSize:'12px',fontWeight:'700',letterSpacing:'2px',textTransform:'uppercase',whiteSpace:'nowrap',background:'rgba(217,226,236,0.8)',padding:'0 20px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>— SECTION 3 — OVERALL REMARKS —</div>
+          <div style={{flex:1,height:'1px',background:'#cbd5e1'}}/>
+        </div>
+
+        {/* ── SECTION 3: Overall Remarks ── */}
+        <div style={{marginBottom:'40px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',padding:'24px',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'24px'}}>
+            <span style={{display:'inline-flex',padding:'6px 14px',background:'#1e3a5f',color:'white',borderRadius:'8px',fontSize:'11px',fontWeight:'800',letterSpacing:'0.4px',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'}}>★ Remarks</span>
+            <span style={{fontSize:'18px',fontWeight:'800',color:'#0f172a',letterSpacing:'-0.3px'}}>Overall Remarks / 整体补充说明</span>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+            <textarea value={remarksData.remarks}
+              onChange={e=>{if(!isSubmitted){dirtyRef.current=true;setRemarksData(p=>({...p,remarks:e.target.value}));}}}
+              placeholder="Any additional comments, context, or overall summary for this review period... / 请填写本评审期的任何补充说明、背景信息或整体总结..."
+              style={{width:'100%',minHeight:'120px',padding:'14px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'13px',fontFamily:'inherit',resize:'vertical',background:'#fff',lineHeight:'1.7'}} />
+            <div style={{background:'rgba(126,184,212,0.04)',border:'1.5px solid #e2e8f0',borderRadius:'12px',padding:'14px'}}>
+              <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'10px',display:'block'}}>Upload Supporting Files / 上传支持文件</label>
+              <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.06)',cursor:'pointer',transition:'all 0.3s'}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.12)';}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+                onClick={()=>document.getElementById('file_remarks_hr')?.click()}>
+                <input type="file" id="file_remarks_hr" multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={e=>{if(e.target.files&&!isSubmitted)handleFileUpload('remarks','',e.target.files);}} />
+                <div style={{fontSize:'13px',color:'#7eb8d4',fontWeight:'700'}}>📁 Click or drag files to upload / 点击或拖拽文件上传</div>
+                <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'6px'}}>Supports images, PDF, Word, Excel / 支持图片、PDF、Word、Excel</div>
+              </div>
+              {remarksData.files.length>0&&(
+                <div style={{marginTop:'10px',display:'flex',flexDirection:'column',gap:'6px'}}>
+                  {remarksData.files.map((f,i)=>(
+                    <div key={i} style={{fontSize:'12px',color:'#0f172a',background:'rgba(126,184,212,0.08)',padding:'8px 12px',borderRadius:'6px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <span>📄 {f.name}</span>
+                      <button onClick={()=>{if(!isSubmitted)setRemarksData(p=>({...p,files:p.files.filter((_,j)=>j!==i)}));}}
+                        style={{background:'none',border:'none',color:'#7eb8d4',cursor:'pointer',fontSize:'14px',padding:'0 4px'}}
+                        onMouseEnter={e=>{e.currentTarget.style.color='#5a9bc4';}} onMouseLeave={e=>{e.currentTarget.style.color='#7eb8d4';}}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Form Actions */}
         <div style={{display:'flex',justifyContent:'flex-end',gap:'12px',marginTop:'48px',paddingTop:'32px',borderTop:'1px solid rgba(30,58,95,0.08)'}}>
           {!isSubmitted && (
-            <button onClick={()=>{setKpiData(emptyKPIs());setPosData(emptyPos());}}
+            <button onClick={()=>{setKpiData(emptyKPIs());setPosData(emptyPos());setRemarksData({remarks:'',files:[]});}}
               style={{padding:'13px 32px',background:'linear-gradient(135deg,#f1f5f9,#e2e8f0)',color:'#334155',border:'1.5px solid #cbd5e1',borderRadius:'12px',fontWeight:'700',cursor:'pointer',fontSize:'14px',letterSpacing:'0.3px',transition:'all 0.3s'}}
               onMouseEnter={e=>{e.currentTarget.style.background='linear-gradient(135deg,#e2e8f0,#cbd5e1)';e.currentTarget.style.transform='translateY(-1px)';}}
               onMouseLeave={e=>{e.currentTarget.style.background='linear-gradient(135deg,#f1f5f9,#e2e8f0)';e.currentTarget.style.transform='none';}}>
