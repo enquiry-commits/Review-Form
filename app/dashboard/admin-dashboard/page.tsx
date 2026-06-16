@@ -305,6 +305,10 @@ export default function AdminDashboard() {
       alert('Delete failed: ' + error.message);
     } else {
       fetchAllReviews(currentPage);
+      // Invalidate table view cache so it re-fetches with latest data
+      setTableDataLoaded(false);
+      setTableAllSelf([]);
+      setTableAllLeader([]);
     }
   };
 
@@ -1182,12 +1186,14 @@ export default function AdminDashboard() {
           const selYear = tableYearSel || years[0] || '';
           const rowsInYear = allRows.filter(r => r.review_period?.startsWith(selYear));
           const months = [...new Set(rowsInYear.map(r => r.review_period?.split('-')[1]).filter(Boolean))].sort();
-          // All unique employees across all months of this year
+          // All unique employees across all months of this year (exclude internal-only reviewers)
           const emailSet = new Set(rowsInYear.map(r => r.employee_email));
-          const employees = [...emailSet].map(email => {
-            const ref = rowsInYear.find(r => r.employee_email === email)!;
-            return { email, name: ref.employee_name, dept: ref.department };
-          }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+          const employees = [...emailSet]
+            .filter(email => !EXCLUDED_FROM_SELF_REVIEW.includes(email))
+            .map(email => {
+              const ref = rowsInYear.find(r => r.employee_email === email)!;
+              return { email, name: ref.employee_name, dept: ref.department };
+            }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
           const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           const fullMonthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -1316,7 +1322,7 @@ export default function AdminDashboard() {
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
           tableAllSelf.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:false}); });
           tableAllLeader.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:true}); else personMap.get(r.employee_email)!.isLeader = true; });
-          const people = [...personMap.values()].sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+          const people = [...personMap.values()].filter(p => !EXCLUDED_FROM_SELF_REVIEW.includes(p.email)).sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
           const selEmail = tablePersonSel || people[0]?.email || '';
           const person = personMap.get(selEmail);
           const personSelf = tableAllSelf.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
