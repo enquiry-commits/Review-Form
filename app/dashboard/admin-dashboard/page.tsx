@@ -867,7 +867,14 @@ export default function AdminDashboard() {
         {/* DATA section */}
         <div style={{marginBottom: '20px'}}>
           {!sidebarCollapsed && (
-            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📊 Data</div>
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase', display:'flex', alignItems:'center', gap:'5px'}}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="7" width="2.5" height="5" rx="0.5"/>
+                <rect x="5" y="4" width="2.5" height="8" rx="0.5"/>
+                <rect x="9.5" y="1" width="2.5" height="11" rx="0.5"/>
+              </svg>
+              Data
+            </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
             {(['self-reviews', 'leader-reviews'] as const).map(item => {
@@ -1056,7 +1063,14 @@ export default function AdminDashboard() {
         {/* TABLE section */}
         <div>
           {!sidebarCollapsed && (
-            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>📋 Table View</div>
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase', display:'flex', alignItems:'center', gap:'5px'}}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="1" width="11" height="11" rx="1.5"/>
+                <line x1="1" y1="4.5" x2="12" y2="4.5"/>
+                <line x1="5" y1="4.5" x2="5" y2="12"/>
+              </svg>
+              Table View
+            </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
             {(['table-by-year', 'table-by-person'] as const).map(item => {
@@ -1067,7 +1081,12 @@ export default function AdminDashboard() {
                   <line x1="5.5" y1="1.5" x2="5.5" y2="4.5"/>
                   <line x1="10.5" y1="1.5" x2="10.5" y2="4.5"/>
                 </svg>
-              ) : '👤';
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="8" cy="5.5" r="2.5"/>
+                  <path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
+                </svg>
+              );
               const label = item === 'table-by-year' ? 'By Year' : 'By Person';
               return (
                 <div
