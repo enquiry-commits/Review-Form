@@ -1049,7 +1049,11 @@ export default function AdminDashboard() {
                   onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
                   onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
                 >
-                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>💬</span>
+                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4l2 2 2-2h4a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/>
+                    </svg>
+                  </span>
                   {!sidebarCollapsed && label}
                 </div>
               );
