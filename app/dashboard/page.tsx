@@ -114,6 +114,7 @@ export default function Dashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
+    if (tabId === 'admin-dashboard') setSidebarCollapsed(true);
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
