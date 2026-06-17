@@ -89,6 +89,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('self-review');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [adminMenu, setAdminMenu] = useState('status-overview');
+  const [adminStatusOpen, setAdminStatusOpen] = useState(false);
+  const [adminDataOpen, setAdminDataOpen] = useState(false);
+  const [adminTableOpen, setAdminTableOpen] = useState(false);
   const [adminInternalOpen, setAdminInternalOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const adminIframeRef = useRef<HTMLIFrameElement>(null);
@@ -276,44 +279,55 @@ export default function Dashboard() {
                 {label}
               </div>
             );
-            const groupHeader = (title: string, showDivider = true) => (
+            const groupHeader = (title: string, isOpen: boolean, onToggle: () => void, showDivider = true) => (
               <div key={`hdr-${title}`}>
                 {showDivider && <div style={{ borderTop: '1px dashed #e2e8f0', margin: '8px 0 4px' }} />}
-                <div style={{ fontSize: '11px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.6px', textTransform: 'uppercase', padding: '4px 14px 4px 28px', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
+                <div onClick={onToggle} style={{ fontSize: '11px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.6px', textTransform: 'uppercase', padding: '5px 14px 5px 28px', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7, cursor: 'pointer', borderRadius: '8px', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(30,58,95,0.04)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}>
+                  <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'none', flexShrink: 0 }}>›</span>
                   {title}
                 </div>
               </div>
             );
             return (
               <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                {groupHeader('Status', false)}
-                {subItem('status-overview', 'Status Overview')}
+                {groupHeader('Status', adminStatusOpen, () => setAdminStatusOpen(v => !v), false)}
+                {adminStatusOpen && subItem('status-overview', 'Status Overview')}
 
-                {groupHeader('Data')}
-                {subItem('self-reviews', 'Self Reviews')}
-                {subItem('leader-reviews', 'Leader Reviews')}
-                <div onClick={() => setAdminInternalOpen(v => !v)}
-                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
-                    background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
-                    display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
-                  onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                  <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
-                  Internal Review
-                </div>
-                {adminInternalOpen && (
+                {groupHeader('Data', adminDataOpen, () => setAdminDataOpen(v => !v))}
+                {adminDataOpen && (
                   <>
-                    {subItem('hr-reviews', 'HR Review', true)}
-                    {subItem('finance-reviews', 'Finance Review', true)}
-                    {subItem('marketing-reviews', 'Marketing Review', true)}
+                    {subItem('self-reviews', 'Self Reviews')}
+                    {subItem('leader-reviews', 'Leader Reviews')}
+                    <div onClick={() => setAdminInternalOpen(v => !v)}
+                      style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                        color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
+                        background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
+                        display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
+                      onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                      <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
+                      Internal Review
+                    </div>
+                    {adminInternalOpen && (
+                      <>
+                        {subItem('hr-reviews', 'HR Review', true)}
+                        {subItem('finance-reviews', 'Finance Review', true)}
+                        {subItem('marketing-reviews', 'Marketing Review', true)}
+                      </>
+                    )}
+                    {subItem('suggestion-box', 'Suggestion Box')}
                   </>
                 )}
-                {subItem('suggestion-box', 'Suggestion Box')}
 
-                {groupHeader('Table View')}
-                {subItem('table-by-year', 'By Year')}
-                {subItem('table-by-person', 'By Person')}
+                {groupHeader('Table View', adminTableOpen, () => setAdminTableOpen(v => !v))}
+                {adminTableOpen && (
+                  <>
+                    {subItem('table-by-year', 'By Year')}
+                    {subItem('table-by-person', 'By Person')}
+                  </>
+                )}
               </div>
             );
           })()}
