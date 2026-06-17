@@ -263,105 +263,60 @@ export default function Dashboard() {
           {navItems.map(t => navItem(t.id, t.label))}
 
           {/* Admin sub-menu — shown below Admin Dashboard when active */}
-          {activeTab === 'admin-dashboard' && !sidebarCollapsed && (
-            <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              {/* STATUS */}
-              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Status</div>
-              {[{ id: 'status-overview', label: 'Status Overview' }].map(({ id, label }) => (
-                <div key={id} onClick={() => handleAdminMenuClick(id)}
-                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
-                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
-                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                  {label}
-                </div>
-              ))}
-
-              {/* DATA */}
-              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Data</div>
-              {([
-                { id: 'self-reviews', label: 'Self Reviews' },
-                { id: 'leader-reviews', label: 'Leader Reviews' },
-              ] as const).map(({ id, label }) => (
-                <div key={id} onClick={() => handleAdminMenuClick(id)}
-                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
-                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
-                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                  {label}
-                </div>
-              ))}
-
-              {/* Internal Review collapsible */}
-              <div onClick={() => setAdminInternalOpen(v => !v)}
-                style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
-                  background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
-                  display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
-                onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                <span style={{ fontSize: '10px', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
-                Internal Review
+          {activeTab === 'admin-dashboard' && !sidebarCollapsed && (() => {
+            const subItem = (id: string, label: string, indent = false) => (
+              <div key={id} onClick={() => handleAdminMenuClick(id)}
+                style={{ padding: `9px 14px 9px ${indent ? '42px' : '28px'}`, borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                  color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                  background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                  boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                  whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                {label}
               </div>
-              {adminInternalOpen && (
-                <>
-                  {([
-                    { id: 'hr-reviews', label: 'HR Review' },
-                    { id: 'finance-reviews', label: 'Finance Review' },
-                    { id: 'marketing-reviews', label: 'Marketing Review' },
-                  ] as const).map(({ id, label }) => (
-                    <div key={id} onClick={() => handleAdminMenuClick(id)}
-                      style={{ padding: '9px 14px 9px 42px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                        color: adminMenu === id ? '#1e3a5f' : '#64748b',
-                        background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
-                        boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                        whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                      onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                      {label}
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {[{ id: 'suggestion-box', label: 'Suggestion Box' }].map(({ id, label }) => (
-                <div key={id} onClick={() => handleAdminMenuClick(id)}
-                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
-                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
-                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                  {label}
+            );
+            const groupHeader = (title: string, showDivider = true) => (
+              <div key={`hdr-${title}`}>
+                {showDivider && <div style={{ borderTop: '1px dashed #e2e8f0', margin: '8px 0 4px' }} />}
+                <div style={{ fontSize: '11px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.6px', textTransform: 'uppercase', padding: '4px 14px 4px 28px', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7 }}>
+                  {title}
                 </div>
-              ))}
+              </div>
+            );
+            return (
+              <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                {groupHeader('Status', false)}
+                {subItem('status-overview', 'Status Overview')}
 
-              {/* TABLE VIEW */}
-              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Table View</div>
-              {([
-                { id: 'table-by-year', label: 'By Year' },
-                { id: 'table-by-person', label: 'By Person' },
-              ] as const).map(({ id, label }) => (
-                <div key={id} onClick={() => handleAdminMenuClick(id)}
+                {groupHeader('Data')}
+                {subItem('self-reviews', 'Self Reviews')}
+                {subItem('leader-reviews', 'Leader Reviews')}
+                <div onClick={() => setAdminInternalOpen(v => !v)}
                   style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
-                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
-                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                  {label}
+                    color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
+                    background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
+                    display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
+                  onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                  <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
+                  Internal Review
                 </div>
-              ))}
-            </div>
-          )}
+                {adminInternalOpen && (
+                  <>
+                    {subItem('hr-reviews', 'HR Review', true)}
+                    {subItem('finance-reviews', 'Finance Review', true)}
+                    {subItem('marketing-reviews', 'Marketing Review', true)}
+                  </>
+                )}
+                {subItem('suggestion-box', 'Suggestion Box')}
+
+                {groupHeader('Table View')}
+                {subItem('table-by-year', 'By Year')}
+                {subItem('table-by-person', 'By Person')}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Content */}
