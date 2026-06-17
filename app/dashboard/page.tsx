@@ -88,7 +88,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('self-review');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [adminMenu, setAdminMenu] = useState('status-overview');
+  const [adminInternalOpen, setAdminInternalOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const adminIframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -114,7 +117,13 @@ export default function Dashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    if (tabId === 'admin-dashboard') setSidebarCollapsed(true);
+    if (tabId === 'admin-dashboard') setSidebarCollapsed(false);
+    contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAdminMenuClick = (menu: string) => {
+    setAdminMenu(menu);
+    adminIframeRef.current?.contentWindow?.postMessage({ type: 'setAdminMenu', menu }, '*');
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -252,6 +261,107 @@ export default function Dashboard() {
           </button>
 
           {navItems.map(t => navItem(t.id, t.label))}
+
+          {/* Admin sub-menu — shown below Admin Dashboard when active */}
+          {activeTab === 'admin-dashboard' && !sidebarCollapsed && (
+            <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              {/* STATUS */}
+              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Status</div>
+              {[{ id: 'status-overview', label: 'Status Overview' }].map(({ id, label }) => (
+                <div key={id} onClick={() => handleAdminMenuClick(id)}
+                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                  {label}
+                </div>
+              ))}
+
+              {/* DATA */}
+              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Data</div>
+              {([
+                { id: 'self-reviews', label: 'Self Reviews' },
+                { id: 'leader-reviews', label: 'Leader Reviews' },
+              ] as const).map(({ id, label }) => (
+                <div key={id} onClick={() => handleAdminMenuClick(id)}
+                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                  {label}
+                </div>
+              ))}
+
+              {/* Internal Review collapsible */}
+              <div onClick={() => setAdminInternalOpen(v => !v)}
+                style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
+                  background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
+                  display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
+                onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                <span style={{ fontSize: '10px', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
+                Internal Review
+              </div>
+              {adminInternalOpen && (
+                <>
+                  {([
+                    { id: 'hr-reviews', label: 'HR Review' },
+                    { id: 'finance-reviews', label: 'Finance Review' },
+                    { id: 'marketing-reviews', label: 'Marketing Review' },
+                  ] as const).map(({ id, label }) => (
+                    <div key={id} onClick={() => handleAdminMenuClick(id)}
+                      style={{ padding: '9px 14px 9px 42px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                        color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                        background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                        boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                        whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                      onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                      onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                      {label}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {[{ id: 'suggestion-box', label: 'Suggestion Box' }].map(({ id, label }) => (
+                <div key={id} onClick={() => handleAdminMenuClick(id)}
+                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                  {label}
+                </div>
+              ))}
+
+              {/* TABLE VIEW */}
+              <div style={{ fontSize: '10px', fontWeight: '800', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', padding: '8px 14px 3px 28px' }}>Table View</div>
+              {([
+                { id: 'table-by-year', label: 'By Year' },
+                { id: 'table-by-person', label: 'By Person' },
+              ] as const).map(({ id, label }) => (
+                <div key={id} onClick={() => handleAdminMenuClick(id)}
+                  style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
+                    color: adminMenu === id ? '#1e3a5f' : '#64748b',
+                    background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
+                    boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
+                    whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
+                  onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
+                  {label}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -265,7 +375,23 @@ export default function Dashboard() {
           {activeTab === 'finance-review'   && <IframePanel src="/dashboard/finance-review" />}
           {activeTab === 'marketing-review' && <IframePanel src="/dashboard/marketing-review" />}
           {activeTab === 'suggestion-box'   && <IframePanel src="/dashboard/suggestion-box" defaultHeight={700} />}
-          {activeTab === 'admin-dashboard'  && <IframePanel src="/dashboard/admin-dashboard" />}
+          {activeTab === 'admin-dashboard'  && (
+            <iframe
+              ref={adminIframeRef}
+              src="/dashboard/admin-dashboard"
+              scrolling="no"
+              onLoad={(e) => {
+                const iframe = e.currentTarget;
+                const update = () => {
+                  try { iframe.style.height = iframe.contentDocument!.documentElement.scrollHeight + 'px'; } catch {}
+                };
+                update();
+                const observer = new ResizeObserver(update);
+                observer.observe(iframe.contentDocument!.body);
+              }}
+              style={{ width: '100%', height: '1200px', border: 'none', borderRadius: '12px', overflow: 'hidden' }}
+            />
+          )}
           {activeTab === 'my-submissions'   && <IframePanel src="/dashboard/my-submissions" defaultHeight={800} />}
         </div>
       </div>

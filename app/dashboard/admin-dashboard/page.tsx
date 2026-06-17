@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
@@ -213,6 +213,8 @@ export default function AdminDashboard() {
     setOverviewLoaded(true);
   };
 
+  const handleActiveMenuChangeRef = useRef<(menu: string) => void>(() => {});
+
   const handleActiveMenuChange = (menu: string) => {
     setActiveMenu(menu);
     setCurrentPage(0);
@@ -224,6 +226,15 @@ export default function AdminDashboard() {
     if (menu === 'table-by-year' || menu === 'table-by-person') fetchTableData();
     if (menu === 'status-overview') fetchOverviewData();
   };
+  handleActiveMenuChangeRef.current = handleActiveMenuChange;
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'setAdminMenu') handleActiveMenuChangeRef.current(e.data.menu);
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
   const fetchSuggestions = async (page: number = 0) => {
     const start = page * pageSize;
@@ -752,7 +763,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={{display: 'grid', gridTemplateColumns: sidebarCollapsed ? '56px 1fr' : '260px 1fr', minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', transition: 'grid-template-columns 0.25s ease'}}>
+    <div style={{display: 'grid', gridTemplateColumns: isEmbedded ? '1fr' : (sidebarCollapsed ? '56px 1fr' : '260px 1fr'), minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', transition: 'grid-template-columns 0.25s ease'}}>
       {/* Navbar (above everything) */}
       {!isEmbedded && (
         <div style={{gridColumn: '1 / -1', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)', borderBottom: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)'}}>
@@ -799,8 +810,8 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Sidebar */}
-      <div style={{
+      {/* Sidebar — hidden when embedded (parent dashboard handles nav) */}
+      {!isEmbedded && <div style={{
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         borderRight: '1px solid rgba(30, 58, 95, 0.08)',
@@ -1139,7 +1150,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-      </div>
+      </div>}
 
       {/* Main Content */}
       <div style={{padding: '40px', overflowY: 'auto'}}>
