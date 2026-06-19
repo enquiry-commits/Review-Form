@@ -1676,7 +1676,9 @@ export default function AdminDashboard() {
             <option value="Corporate Secretarial">Corporate Secretarial</option>
             <option value="Accounting">Accounting</option>
             <option value="Tax">Tax</option>
-            <option value="Internal">Internal</option>
+            <option value="Internal-HR">Internal-HR</option>
+            <option value="Internal-Finance">Internal-Finance</option>
+            <option value="Internal-Marketing">Internal-Marketing</option>
           </select>
 
           <select
