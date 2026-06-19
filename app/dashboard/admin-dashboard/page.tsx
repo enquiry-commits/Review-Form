@@ -101,22 +101,26 @@ export default function AdminDashboard() {
 
   const fetchTableData = async () => {
     if (tableDataLoaded) return;
-    const [selfRes, leaderRes] = await Promise.all([
+    const [selfRes, leaderRes, hrRes, finRes, mktRes] = await Promise.all([
       supabase.from('self_review_submissions').select('*').order('review_period', { ascending: true }),
-      supabase.from('leader_review_submissions').select('*').order('review_period', { ascending: true })
+      supabase.from('leader_review_submissions').select('*').order('review_period', { ascending: true }),
+      supabase.from('hr_review_submissions').select('*').order('review_period', { ascending: true }),
+      supabase.from('finance_review_submissions').select('*').order('review_period', { ascending: true }),
+      supabase.from('marketing_review_submissions').select('*').order('review_period', { ascending: true }),
     ]);
-    if (selfRes.data) setTableAllSelf(selfRes.data.map((r: any) => ({
+    const toRow = (r: any, srcTable: string): SubmissionRow => ({
       id: r.id, user_id: r.user_id, submitted_at: r.submitted_at,
       status: r.submitted_at ? 'submitted' : 'draft',
       department: r.department, employee_name: r.employee_name,
-      employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data
-    })));
-    if (leaderRes.data) setTableAllLeader(leaderRes.data.map((r: any) => ({
-      id: r.id, user_id: r.user_id, submitted_at: r.submitted_at,
-      status: r.submitted_at ? 'submitted' : 'draft',
-      department: r.department, employee_name: r.employee_name,
-      employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data
-    })));
+      employee_email: r.employee_email, review_period: r.review_period,
+      form_data: r.form_data, source_table: srcTable,
+    });
+    const selfRows = (selfRes.data || []).map((r: any) => toRow(r, 'self_review_submissions'));
+    const hrRows   = (hrRes.data   || []).map((r: any) => toRow(r, 'hr_review_submissions'));
+    const finRows  = (finRes.data  || []).map((r: any) => toRow(r, 'finance_review_submissions'));
+    const mktRows  = (mktRes.data  || []).map((r: any) => toRow(r, 'marketing_review_submissions'));
+    setTableAllSelf([...selfRows, ...hrRows, ...finRows, ...mktRows]);
+    if (leaderRes.data) setTableAllLeader(leaderRes.data.map((r: any) => toRow(r, 'leader_review_submissions')));
     setTableDataLoaded(true);
   };
 
@@ -1328,20 +1332,45 @@ export default function AdminDashboard() {
 
         {/* ───── TABLE BY PERSON (Google Sheets style) ───── */}
         {activeMenu === 'table-by-person' && (() => {
+          const INTERNAL_FORM_MAP: Record<string, string[]> = {
+            'esther@tassure.com':  ['hr_review_submissions', 'finance_review_submissions'],
+            'chelsea@tassure.com': ['finance_review_submissions'],
+            'vincent@tassure.com': ['marketing_review_submissions'],
+          };
+          const INTERNAL_EMAILS_SET = new Set(Object.keys(INTERNAL_FORM_MAP));
+          const SRC_LABEL: Record<string, string> = {
+            'hr_review_submissions':        '🏢 HR Review',
+            'finance_review_submissions':   '💰 Finance Review',
+            'marketing_review_submissions': '📣 Marketing Review',
+          };
+
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
-          tableAllSelf.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:false}); });
-          tableAllLeader.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:true}); else personMap.get(r.employee_email)!.isLeader = true; });
+          tableAllSelf.forEach(r => {
+            if (!personMap.has(r.employee_email)) {
+              const dept = INTERNAL_EMAILS_SET.has(r.employee_email) ? 'Internal' : r.department;
+              personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept,isLeader:false});
+            }
+          });
+          tableAllLeader.forEach(r => {
+            if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:true});
+            else personMap.get(r.employee_email)!.isLeader = true;
+          });
           const people = [...personMap.values()].sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
           const selEmail = tablePersonSel || people[0]?.email || '';
           const person = personMap.get(selEmail);
           const personSelf = tableAllSelf.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
           const personLeader = tableAllLeader.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
+          // Detect internal user
+          const isInternal = !!person && INTERNAL_EMAILS_SET.has(person.email);
+          const internalSrcs = isInternal ? (INTERNAL_FORM_MAP[person!.email] || []) : [];
           // All unique years across all data
           const allYears = [...new Set([...tableAllSelf, ...tableAllLeader].map(r=>r.review_period?.split('-')[0]).filter(Boolean))].sort().reverse();
           const selPersonYear = tableYearSel || allYears[0] || '';
           // All unique periods for this person, filtered by year
           const allPeriods = [...new Set([...personSelf, ...personLeader].map(r=>r.review_period))].sort().reverse();
           const periods = selPersonYear ? allPeriods.filter(p => p.startsWith(selPersonYear)) : allPeriods;
+          // Total column count for colSpan
+          const totalCols = 2 + (isInternal ? internalSrcs.length : (1 + (person?.isLeader ? 1 : 0)));
 
           const statusCell = (row: SubmissionRow | undefined) => row
             ? <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',background:row.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor:'pointer'}}
@@ -1374,7 +1403,7 @@ export default function AdminDashboard() {
                     <span style={{fontSize:'12px',fontWeight:'700',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.5px'}}>Employee:</span>
                     <select value={selEmail} onChange={e=>setTablePersonSel(e.target.value)}
                       style={{padding:'8px 14px',border:'1.5px solid #e2e8f0',borderRadius:'8px',fontWeight:'700',fontSize:'13px',cursor:'pointer',background:'white',color:'#1e3a5f',fontFamily:'inherit',minWidth:'160px'}}>
-                      {people.map(p => <option key={p.email} value={p.email}>{p.isLeader?'👔':'👤'} {p.name} ({p.dept})</option>)}
+                      {people.map(p => <option key={p.email} value={p.email}>{p.isLeader?'👔':INTERNAL_EMAILS_SET.has(p.email)?'🏢':'👤'} {p.name} ({p.dept})</option>)}
                     </select>
                   </div>
                   <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
@@ -1403,15 +1432,28 @@ export default function AdminDashboard() {
                       <div style={{fontSize:'11px',color:'#94a3b8'}}>{person.dept} · {person.email}</div>
                     </div>
                     <div style={{marginLeft:'auto',display:'flex',gap:'24px'}}>
-                      <div style={{textAlign:'center'}}>
-                        <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personSelf.filter(r=>r.status==='submitted').length}/{personSelf.length}</div>
-                        <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Submitted</div>
-                      </div>
-                      {person.isLeader && (
-                        <div style={{textAlign:'center'}}>
-                          <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personLeader.filter(r=>r.status==='submitted').length}/{personLeader.length}</div>
-                          <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Submitted</div>
-                        </div>
+                      {isInternal ? internalSrcs.map(src => {
+                        const rows = personSelf.filter(r => r.source_table === src);
+                        const shortLabel = src === 'hr_review_submissions' ? 'HR' : src === 'finance_review_submissions' ? 'Finance' : 'Marketing';
+                        return (
+                          <div key={src} style={{textAlign:'center'}}>
+                            <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{rows.filter(r=>r.status==='submitted').length}/{rows.length}</div>
+                            <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>{shortLabel} Submitted</div>
+                          </div>
+                        );
+                      }) : (
+                        <>
+                          <div style={{textAlign:'center'}}>
+                            <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personSelf.filter(r=>r.status==='submitted').length}/{personSelf.length}</div>
+                            <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Submitted</div>
+                          </div>
+                          {person.isLeader && (
+                            <div style={{textAlign:'center'}}>
+                              <div style={{fontWeight:'800',fontSize:'18px',color:'#1e3a5f'}}>{personLeader.filter(r=>r.status==='submitted').length}/{personLeader.length}</div>
+                              <div style={{fontSize:'10px',color:'#94a3b8',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Submitted</div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -1424,15 +1466,24 @@ export default function AdminDashboard() {
                       <tr style={{background:'#f8fafc'}}>
                         <th style={{border:'1px solid #e2e8f0',padding:'10px 10px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
                         <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px'}}>Period</th>
-                        <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',minWidth:'200px',background:'rgba(219,234,254,0.2)'}}>📝 Self Review</th>
-                        {person?.isLeader && <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',minWidth:'200px',background:'rgba(220,252,231,0.2)'}}>👔 Leader Review</th>}
+                        {isInternal
+                          ? internalSrcs.map(src => (
+                              <th key={src} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',minWidth:'200px',background:'rgba(126,184,212,0.08)'}}>
+                                {SRC_LABEL[src] || src}
+                              </th>
+                            ))
+                          : <>
+                              <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',minWidth:'200px',background:'rgba(219,234,254,0.2)'}}>📝 Self Review</th>
+                              {person?.isLeader && <th style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',minWidth:'200px',background:'rgba(220,252,231,0.2)'}}>👔 Leader Review</th>}
+                            </>
+                        }
                       </tr>
                     </thead>
                     <tbody>
                       {periods.length === 0 ? (
-                        <tr><td colSpan={person?.isLeader?4:3} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions yet</td></tr>
+                        <tr><td colSpan={totalCols} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions yet</td></tr>
                       ) : periods.map((period, i) => {
-                        const selfRow = personSelf.find(r=>r.review_period===period);
+                        const selfRow = personSelf.find(r=>r.review_period===period && !isInternal);
                         const leaderRow = personLeader.find(r=>r.review_period===period);
                         return (
                           <tr key={period} style={{background: i%2===0?'white':'#fafafa'}}
@@ -1441,15 +1492,17 @@ export default function AdminDashboard() {
                           >
                             <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
                             <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'13px'}}>{period}</td>
-                            {statusCell(selfRow)}
-                            {person?.isLeader && statusCell(leaderRow)}
+                            {isInternal
+                              ? internalSrcs.map(src => statusCell(personSelf.find(r=>r.review_period===period && r.source_table===src)))
+                              : <>{statusCell(selfRow)}{person?.isLeader && statusCell(leaderRow)}</>
+                            }
                           </tr>
                         );
                       })}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td colSpan={person?.isLeader?4:3} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                        <td colSpan={totalCols} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
                           <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
                             <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
                             <span><span style={{color:'#15803d',fontWeight:'800'}}>✓ Submitted</span></span>
