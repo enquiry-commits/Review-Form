@@ -312,7 +312,7 @@ export default function MySubmissions() {
               const status = currentRow?.statuses[form.key] || 'pending';
               const isSubmitted = status === 'submitted';
               const record = currentRow?.records?.[form.key];
-              const directorComment = record?.director_comment || '';
+              const directorComment = form.key === 'self' ? (record?.director_comment || '') : '';
               return (
                 <div key={form.key} style={{ padding: '20px', background: isSubmitted ? '#f0fdf4' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSubmitted ? '#bbf7d0' : '#e2e8f0'}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e3a5f' }}>{form.label}</div>
@@ -376,6 +376,7 @@ export default function MySubmissions() {
                   {historyRows.map((row, idx) => {
                     // Collect all director comments across forms for this period
                     const comments = forms
+                      .filter(f => f.key === 'self')
                       .map(f => ({ label: f.label, comment: row.records?.[f.key]?.director_comment || '' }))
                       .filter(x => x.comment.trim());
                     return (
