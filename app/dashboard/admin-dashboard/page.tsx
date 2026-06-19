@@ -1819,10 +1819,10 @@ export default function AdminDashboard() {
                     </div>
                     <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed'}}>
                       <colgroup>
-                        <col style={{width:'34%'}} />
-                        <col style={{width:'22%'}} />
-                        <col style={{width:'22%'}} />
-                        <col style={{width:'22%'}} />
+                        <col style={{width:'38%'}} />
+                        <col style={{width:'21%'}} />
+                        <col style={{width:'21%'}} />
+                        <col style={{width:'20%'}} />
                       </colgroup>
                       <thead>
                         <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
