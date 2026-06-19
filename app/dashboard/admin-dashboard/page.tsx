@@ -1789,14 +1789,14 @@ export default function AdminDashboard() {
           <table style={{width: '100%', borderCollapse: 'collapse'}}>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Submitted</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Department</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Name</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase', minWidth: '200px'}}>Director Comment</th>
-                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Submitted</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Department</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Name</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase', minWidth: '200px'}}>Director Comment</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '11px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -1812,12 +1812,12 @@ export default function AdminDashboard() {
                     onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}}
                     onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
                   >
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{submittedDate}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.department}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.employee_name}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.employee_email}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px', color: '#475569'}}>{row.review_period}</td>
-                    <td style={{padding: '16px 18px', fontSize: '13px'}}>
+                    <td style={{padding: '16px 18px', fontSize: '12px', color: '#475569'}}>{submittedDate}</td>
+                    <td style={{padding: '16px 18px', fontSize: '12px', color: '#475569'}}>{row.department}</td>
+                    <td style={{padding: '16px 18px', fontSize: '12px', color: '#475569'}}>{row.employee_name}</td>
+                    <td style={{padding: '16px 18px', fontSize: '12px', color: '#475569'}}>{row.employee_email}</td>
+                    <td style={{padding: '16px 18px', fontSize: '12px', color: '#475569'}}>{row.review_period}</td>
+                    <td style={{padding: '16px 18px', fontSize: '12px'}}>
                       <span style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -1832,7 +1832,7 @@ export default function AdminDashboard() {
                         {row.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                       </span>
                     </td>
-                    <td style={{padding: '12px 18px', fontSize: '13px', minWidth: '200px', maxWidth: '300px'}}>
+                    <td style={{padding: '12px 18px', fontSize: '12px', minWidth: '200px', maxWidth: '300px'}}>
                       {isEditingThis ? (
                         <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                           <textarea
@@ -1862,7 +1862,7 @@ export default function AdminDashboard() {
                         <div style={{display: 'flex', alignItems: 'flex-start', gap: '8px'}}>
                           <span style={{
                             color: row.director_comment ? '#1e3a5f' : '#94a3b8',
-                            fontSize: '13px',
+                            fontSize: '12px',
                             lineHeight: '1.5',
                             flex: 1,
                             wordBreak: 'break-word'
