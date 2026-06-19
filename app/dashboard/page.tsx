@@ -303,7 +303,7 @@ export default function Dashboard() {
                   <>
                     {subItem('self-reviews', 'Self Reviews')}
                     {subItem('leader-reviews', 'Leader Reviews')}
-                    {subItem('suggestion-box', 'Suggestion Box')}
+                    {subItem('suggestions', 'Suggestion Box')}
                   </>
                 )}
 
