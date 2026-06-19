@@ -93,6 +93,7 @@ export default function AdminDashboard() {
     setIsEmbedded(window.self !== window.top);
     fetchAllReviews(currentPage);
     fetchSuggestions(currentPage);
+    fetchOverviewData();
   }, [router, currentPage]);
 
   const fetchTableData = async () => {
