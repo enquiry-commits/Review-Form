@@ -77,6 +77,9 @@ export default function AdminDashboard() {
   const [overviewSelf, setOverviewSelf]       = useState<SubmissionRow[]>([]);
   const [overviewLeader, setOverviewLeader]   = useState<SubmissionRow[]>([]);
   const [overviewLoaded, setOverviewLoaded]   = useState(false);
+  const [overviewEstherHr, setOverviewEstherHr]           = useState<SubmissionRow | null>(null);
+  const [overviewEstherFinance, setOverviewEstherFinance] = useState<SubmissionRow | null>(null);
+  const [overviewVincentMkt, setOverviewVincentMkt]       = useState<SubmissionRow | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -139,6 +142,7 @@ export default function AdminDashboard() {
       { name: 'Victoria Yap', email: 'victoriayap@tassure.com',dept: 'Tax',                   isLeader: false, srcTable: 'self_review_submissions'    },
       // Internal
       { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-HR',           isLeader: false, srcTable: 'hr_review_submissions'      },
+      { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
       { name: 'Chelsea Ang',  email: 'chelsea@tassure.com',    dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
       { name: 'Vincent',      email: 'vincent@tassure.com',    dept: 'Internal-Marketing',    isLeader: false, srcTable: 'marketing_review_submissions'},
     ];
@@ -166,7 +170,8 @@ export default function AdminDashboard() {
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Quinnie Tan
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     'submitted','submitted','submitted', null      ], // Victoria Yap
       // Internal
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Esther
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Esther (HR)
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Esther (Finance)
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Chelsea Ang
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Vincent
     ];
@@ -186,7 +191,8 @@ export default function AdminDashboard() {
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'], // Clarence
       [null,null,null,null,null,null,null,null,null,null,null,null], // Quinnie Tan
       [null,null,null,null,null,null,null,null,null,null,null,null], // Victoria Yap
-      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther (HR)
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther (Finance)
       [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
       [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
@@ -212,6 +218,12 @@ export default function AdminDashboard() {
     setTotalLeaderReviews(leaderRows.length);
     setOverviewSelf(selfRows.filter(r => r.review_period === curPeriod));
     setOverviewLeader(leaderRows.filter(r => r.review_period === curPeriod));
+    const demoEstherHr = selfRows.find(r => r.employee_email === 'esther@tassure.com' && r.department === 'Internal-HR' && r.review_period === curPeriod) || null;
+    const demoEstherFin = selfRows.find(r => r.employee_email === 'esther@tassure.com' && r.department === 'Internal-Finance' && r.review_period === curPeriod) || null;
+    const demoVincentMkt = selfRows.find(r => r.employee_email === 'vincent@tassure.com' && r.review_period === curPeriod) || null;
+    setOverviewEstherHr(demoEstherHr);
+    setOverviewEstherFinance(demoEstherFin);
+    setOverviewVincentMkt(demoVincentMkt);
     setOverviewLoaded(true);
     setTableDataLoaded(true);
     setTableDemoMode(true);
@@ -231,6 +243,9 @@ export default function AdminDashboard() {
     setOverviewSelf([]);
     setOverviewLeader([]);
     setOverviewLoaded(false);
+    setOverviewEstherHr(null);
+    setOverviewEstherFinance(null);
+    setOverviewVincentMkt(null);
     setTableDataLoaded(false);
     setTableDemoMode(false);
     setTableYearSel('');
@@ -242,15 +257,21 @@ export default function AdminDashboard() {
     if (overviewLoaded) return;
     const period = getCurrentReviewPeriod();
     const toRow = (r: any): SubmissionRow => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data });
-    const [selfRes, leaderRes, chelseaRes] = await Promise.all([
+    const [selfRes, leaderRes, chelseaRes, estherHrRes, estherFinRes, vincentMktRes] = await Promise.all([
       supabase.from('self_review_submissions').select('*').eq('review_period', period),
       supabase.from('leader_review_submissions').select('*').eq('review_period', period),
       supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'chelsea@tassure.com'),
+      supabase.from('hr_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com'),
+      supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com'),
+      supabase.from('marketing_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'vincent@tassure.com'),
     ]);
     const selfRows = (selfRes.data || []).map(toRow);
     const chelseaRows = (chelseaRes.data || []).map(toRow);
     setOverviewSelf([...selfRows, ...chelseaRows]);
     if (leaderRes.data) setOverviewLeader(leaderRes.data.map(toRow));
+    setOverviewEstherHr(estherHrRes.data?.[0] ? toRow(estherHrRes.data[0]) : null);
+    setOverviewEstherFinance(estherFinRes.data?.[0] ? toRow(estherFinRes.data[0]) : null);
+    setOverviewVincentMkt(vincentMktRes.data?.[0] ? toRow(vincentMktRes.data[0]) : null);
     setOverviewLoaded(true);
   };
 
@@ -293,10 +314,10 @@ export default function AdminDashboard() {
     'chelsea@tassure.com': 'Internal-Finance',
     'vincent@tassure.com': 'Internal-Marketing',
   };
-  const mapRow = (r: any, sourceTable?: string): SubmissionRow => ({
+  const mapRow = (r: any, sourceTable?: string, deptOverride?: string): SubmissionRow => ({
     id: r.id, user_id: r.user_id, submitted_at: r.submitted_at,
     status: r.submitted_at ? 'submitted' : 'draft',
-    department: INTERNAL_DEPT_MAP[r.employee_email] ?? r.department,
+    department: deptOverride ?? INTERNAL_DEPT_MAP[r.employee_email] ?? r.department,
     employee_name: r.employee_name,
     employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data,
     director_comment: r.director_comment || '',
@@ -310,7 +331,7 @@ export default function AdminDashboard() {
 
       const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes,
              hrCountRes, finCountRes, mktCountRes,
-             hrInternalRes, finInternalRes, mktInternalRes] = await Promise.all([
+             hrInternalRes, finInternalRes, mktInternalRes, estherFinanceRes] = await Promise.all([
         supabase.from('self_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('self_review_submissions').select('*').range(start, end),
         supabase.from('leader_review_submissions').select('id', { count: 'exact', head: true }),
@@ -321,6 +342,7 @@ export default function AdminDashboard() {
         supabase.from('hr_review_submissions').select('*').eq('employee_email', 'esther@tassure.com'),
         supabase.from('finance_review_submissions').select('*').eq('employee_email', 'chelsea@tassure.com'),
         supabase.from('marketing_review_submissions').select('*').eq('employee_email', 'vincent@tassure.com'),
+        supabase.from('finance_review_submissions').select('*').eq('employee_email', 'esther@tassure.com'),
       ]);
 
       setTotalSelfReviews(selfCountRes.count || 0);
@@ -333,7 +355,8 @@ export default function AdminDashboard() {
       const hrInternal = (hrInternalRes.data || []).map((r: any) => mapRow(r, 'hr_review_submissions'));
       const finInternal = (finInternalRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions'));
       const mktInternal = (mktInternalRes.data || []).map((r: any) => mapRow(r, 'marketing_review_submissions'));
-      const mergedSelf = [...selfRows, ...hrInternal, ...finInternal, ...mktInternal]
+      const estherFinance = (estherFinanceRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions', 'Internal-Finance'));
+      const mergedSelf = [...selfRows, ...hrInternal, ...finInternal, ...mktInternal, ...estherFinance]
         .sort((a, b) => {
           const ta = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
           const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
@@ -1565,6 +1588,70 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               ))}
+
+              {/* Internal Reviewers section */}
+              <div style={{marginBottom:'24px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',overflow:'hidden',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
+                <div style={{padding:'12px 20px',background:'linear-gradient(135deg,#f0f7fb,#e8f4f8)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                  <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>Internal Reviewers</span>
+                  <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>2 members</span>
+                </div>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed'}}>
+                  <colgroup>
+                    <col style={{width:'35%'}} />
+                    <col style={{width:'22%'}} />
+                    <col style={{width:'22%'}} />
+                    <col style={{width:'21%'}} />
+                  </colgroup>
+                  <thead>
+                    <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
+                      <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
+                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>HR Review</th>
+                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Finance Review</th>
+                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Marketing Review</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: 'Esther', email: 'esther@tassure.com', hr: overviewEstherHr, finance: overviewEstherFinance, marketing: null },
+                      { name: 'Vincent', email: 'vincent@tassure.com', hr: null, finance: null, marketing: overviewVincentMkt },
+                    ].map((person, i) => (
+                      <tr key={person.email} style={{borderBottom: i === 0 ? '1px solid #f1f5f9' : 'none', transition:'background 0.15s'}}
+                        onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
+                        onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                      >
+                        <td style={{padding:'12px 16px'}}>
+                          <div style={{fontWeight:'700',color:'#0f172a'}}>{person.name}</div>
+                          <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{person.email}</div>
+                        </td>
+                        <td style={{padding:'12px 16px',textAlign:'center'}}>
+                          {person.hr !== undefined ? (
+                            <>
+                              {statusBadge(person.hr ?? undefined, 'self')}
+                              {person.hr?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.hr.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
+                            </>
+                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
+                        </td>
+                        <td style={{padding:'12px 16px',textAlign:'center'}}>
+                          {person.finance !== undefined ? (
+                            <>
+                              {statusBadge(person.finance ?? undefined, 'self')}
+                              {person.finance?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.finance.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
+                            </>
+                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
+                        </td>
+                        <td style={{padding:'12px 16px',textAlign:'center'}}>
+                          {person.marketing !== undefined ? (
+                            <>
+                              {statusBadge(person.marketing ?? undefined, 'self')}
+                              {person.marketing?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.marketing.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
+                            </>
+                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           );
         })()}

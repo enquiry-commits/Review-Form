@@ -148,7 +148,7 @@ export default function Dashboard() {
     { id: 'self-review',      label: 'Self Review',      allowed: email !== 'chelsea@tassure.com' && email !== 'esther@tassure.com' },
     { id: 'leader-review',    label: 'Leader Review',    allowed: hasAccess(user.role, 'leader-review') && email !== 'esther@tassure.com' },
     { id: 'hr-review',        label: 'HR Review',        allowed: email === 'esther@tassure.com' || email === 'vincent@tassure.com' },
-    { id: 'finance-review',   label: 'Finance Review',   allowed: email === 'chelsea@tassure.com' || email === 'vincent@tassure.com' },
+    { id: 'finance-review',   label: 'Finance Review',   allowed: email === 'chelsea@tassure.com' || email === 'vincent@tassure.com' || email === 'esther@tassure.com' },
     { id: 'marketing-review', label: 'Marketing Review', allowed: email === 'vincent@tassure.com' },
     { id: 'suggestion-box',   label: 'Suggestion Box',   allowed: true },
     { id: 'admin-dashboard',  label: 'Admin Dashboard',  allowed: hasAccess(user.role, 'admin-dashboard') },
