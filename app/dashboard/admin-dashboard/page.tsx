@@ -1787,7 +1787,17 @@ export default function AdminDashboard() {
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08)',
           border: '1px solid rgba(255, 255, 255, 0.8)'
         }}>
-          <table style={{width: '100%', borderCollapse: 'collapse'}}>
+          <table style={{width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed'}}>
+            <colgroup>
+              <col style={{width: '13%'}} />
+              <col style={{width: '13%'}} />
+              <col style={{width: '9%'}} />
+              <col style={{width: '17%'}} />
+              <col style={{width: '7%'}} />
+              <col style={{width: '10%'}} />
+              <col style={{width: '18%'}} />
+              <col style={{width: '13%'}} />
+            </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Submitted</th>
@@ -1796,7 +1806,7 @@ export default function AdminDashboard() {
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
-                <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase', minWidth: '200px'}}>Director Comment</th>
+                <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Director Comment</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
               </tr>
             </thead>
@@ -1813,11 +1823,11 @@ export default function AdminDashboard() {
                     onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}}
                     onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
                   >
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569'}}>{submittedDate}</td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569'}}>{row.department}</td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569'}}>{row.employee_name}</td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569'}}>{row.employee_email}</td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569'}}>{row.review_period}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{submittedDate}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.department}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.employee_name}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.employee_email}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.review_period}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px'}}>
                       <span style={{
                         display: 'inline-flex',
