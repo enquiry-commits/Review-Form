@@ -1392,7 +1392,7 @@ export default function AdminDashboard() {
                                 hrRow !== undefined
                                   ? cellStyle(hrRow, ()=>{ setTableDetailRow(hrRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); })
                                   : <td key={`${period}-hr-na`} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
-                                      <span style={{color:'#e2e8f0',fontSize:'12px',fontStyle:'italic'}}>N/A</span>
+                                      <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
                                     </td>,
                               ];
                             })}
@@ -1406,8 +1406,7 @@ export default function AdminDashboard() {
                               <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
                               <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
                               <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
-                              <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
-                              <span style={{fontStyle:'italic',color:'#e2e8f0'}}>N/A</span><span style={{color:'#94a3b8',fontStyle:'italic'}}>= does not fill this form</span>
+                              <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted / N/A</span>
                             </div>
                           </td>
                         </tr>
@@ -1462,7 +1461,7 @@ export default function AdminDashboard() {
                               return [
                                 cellStyle(mktRow, ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); }),
                                 <td key={`${period}-na`} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
-                                  <span style={{color:'#e2e8f0',fontSize:'12px',fontStyle:'italic'}}>N/A</span>
+                                  <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
                                 </td>,
                               ];
                             })}
