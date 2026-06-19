@@ -1521,8 +1521,8 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Per-department tables */}
-              {[...byDept.entries()].map(([dept, users]) => (
+              {/* Per-department tables (skip Internal — handled separately below) */}
+              {[...byDept.entries()].filter(([dept]) => dept !== 'Internal').map(([dept, users]) => (
                 <div key={dept} style={{marginBottom:'24px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',overflow:'hidden',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
                   <div style={{padding:'12px 20px',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                     <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>{dept}</span>
@@ -1589,69 +1589,59 @@ export default function AdminDashboard() {
                 </div>
               ))}
 
-              {/* Internal Reviewers section */}
-              <div style={{marginBottom:'24px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',overflow:'hidden',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
-                <div style={{padding:'12px 20px',background:'linear-gradient(135deg,#f0f7fb,#e8f4f8)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                  <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>Internal Reviewers</span>
-                  <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>2 members</span>
-                </div>
-                <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed'}}>
-                  <colgroup>
-                    <col style={{width:'35%'}} />
-                    <col style={{width:'22%'}} />
-                    <col style={{width:'22%'}} />
-                    <col style={{width:'21%'}} />
-                  </colgroup>
-                  <thead>
-                    <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
-                      <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
-                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>HR Review</th>
-                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Finance Review</th>
-                      <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Marketing Review</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { name: 'Esther', email: 'esther@tassure.com', hr: overviewEstherHr, finance: overviewEstherFinance, marketing: null },
-                      { name: 'Vincent', email: 'vincent@tassure.com', hr: null, finance: null, marketing: overviewVincentMkt },
-                    ].map((person, i) => (
-                      <tr key={person.email} style={{borderBottom: i === 0 ? '1px solid #f1f5f9' : 'none', transition:'background 0.15s'}}
-                        onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
-                        onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
-                      >
-                        <td style={{padding:'12px 16px'}}>
-                          <div style={{fontWeight:'700',color:'#0f172a'}}>{person.name}</div>
-                          <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{person.email}</div>
-                        </td>
-                        <td style={{padding:'12px 16px',textAlign:'center'}}>
-                          {person.hr !== undefined ? (
-                            <>
-                              {statusBadge(person.hr ?? undefined, 'self')}
-                              {person.hr?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.hr.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
-                            </>
-                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
-                        </td>
-                        <td style={{padding:'12px 16px',textAlign:'center'}}>
-                          {person.finance !== undefined ? (
-                            <>
-                              {statusBadge(person.finance ?? undefined, 'self')}
-                              {person.finance?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.finance.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
-                            </>
-                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
-                        </td>
-                        <td style={{padding:'12px 16px',textAlign:'center'}}>
-                          {person.marketing !== undefined ? (
-                            <>
-                              {statusBadge(person.marketing ?? undefined, 'self')}
-                              {person.marketing?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(person.marketing.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}
-                            </>
-                          ) : <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {/* Unified Internal section — Esther (HR+Finance), Chelsea (Finance), Vincent (Marketing) */}
+              {(() => {
+                const na = <span style={{fontSize:'11px',color:'#e2e8f0',fontStyle:'italic'}}>N/A</span>;
+                const cell = (row: SubmissionRow | null | undefined) => row !== undefined ? (
+                  <>{statusBadge(row ?? undefined, 'self')}{row?.submitted_at && <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'3px'}}>{new Date(row.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>}</>
+                ) : na;
+                const people = [
+                  { name: 'Esther',      email: 'esther@tassure.com',   hr: overviewEstherHr,            finance: overviewEstherFinance,              marketing: undefined },
+                  { name: 'Chelsea Ang', email: 'chelsea@tassure.com',  hr: undefined,                    finance: selfMap.get('chelsea@tassure.com') ?? null, marketing: undefined },
+                  { name: 'Vincent',     email: 'vincent@tassure.com',  hr: undefined,                    finance: undefined,                          marketing: overviewVincentMkt },
+                ];
+                return (
+                  <div style={{marginBottom:'24px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',overflow:'hidden',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
+                    <div style={{padding:'12px 20px',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <span style={{fontWeight:'800',fontSize:'14px',color:'#1e3a5f'}}>Internal</span>
+                      <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>3 members</span>
+                    </div>
+                    <table style={{width:'100%',borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed'}}>
+                      <colgroup>
+                        <col style={{width:'34%'}} />
+                        <col style={{width:'22%'}} />
+                        <col style={{width:'22%'}} />
+                        <col style={{width:'22%'}} />
+                      </colgroup>
+                      <thead>
+                        <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
+                          <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
+                          <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>HR Review</th>
+                          <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Finance Review</th>
+                          <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#7eb8d4',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Marketing Review</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {people.map((p, i) => (
+                          <tr key={p.email} style={{borderBottom: i < people.length-1 ? '1px solid #f1f5f9' : 'none', transition:'background 0.15s'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
+                            onMouseLeave={(e)=>{e.currentTarget.style.background='transparent'}}
+                          >
+                            <td style={{padding:'12px 16px'}}>
+                              <div style={{fontWeight:'700',color:'#0f172a'}}>{p.name}</div>
+                              <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{p.email}</div>
+                            </td>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>{cell(p.hr)}</td>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>{cell(p.finance)}</td>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>{cell(p.marketing)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
+
             </div>
           );
         })()}
