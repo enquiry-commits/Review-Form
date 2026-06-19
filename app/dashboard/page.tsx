@@ -119,7 +119,11 @@ export default function Dashboard() {
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    if (tabId === 'admin-dashboard') setSidebarCollapsed(false);
+    if (tabId === 'admin-dashboard') {
+      setSidebarCollapsed(false);
+      setAdminMenu('status-overview');
+      adminIframeRef.current?.contentWindow?.postMessage({ type: 'setAdminMenu', menu: 'status-overview' }, '*');
+    }
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

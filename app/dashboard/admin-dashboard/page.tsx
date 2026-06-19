@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('self-reviews');
+  const [activeMenu, setActiveMenu] = useState('status-overview');
   const [selfReviews, setSelfReviews] = useState<SubmissionRow[]>([]);
   const [leaderReviews, setLeaderReviews] = useState<SubmissionRow[]>([]);
   const [suggestions, setSuggestions] = useState<SuggestionRow[]>([]);
