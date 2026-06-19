@@ -1795,8 +1795,8 @@ export default function AdminDashboard() {
               <col style={{width: '17%'}} />
               <col style={{width: '7%'}} />
               <col style={{width: '10%'}} />
-              <col style={{width: '18%'}} />
-              <col style={{width: '13%'}} />
+              {activeMenu === 'self-reviews' && <col style={{width: '18%'}} />}
+              <col style={{width: activeMenu === 'self-reviews' ? '13%' : '31%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
@@ -1806,7 +1806,7 @@ export default function AdminDashboard() {
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
-                <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Director Comment</th>
+                {activeMenu === 'self-reviews' && <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Director Comment</th>}
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
               </tr>
             </thead>
@@ -1843,7 +1843,7 @@ export default function AdminDashboard() {
                         {row.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                       </span>
                     </td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', minWidth: '200px', maxWidth: '300px'}}>
+                    {activeMenu === 'self-reviews' && <td style={{padding: '11px 14px', fontSize: '11px', minWidth: '200px', maxWidth: '300px'}}>
                       {isEditingThis ? (
                         <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
                           <textarea
@@ -1893,7 +1893,7 @@ export default function AdminDashboard() {
                           )}
                         </div>
                       )}
-                    </td>
+                    </td>}
                     <td style={{padding: '11px 14px'}}>
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button onClick={() => { setSelectedDetail(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }} style={{
