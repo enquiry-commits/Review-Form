@@ -241,12 +241,16 @@ export default function AdminDashboard() {
   const fetchOverviewData = async () => {
     if (overviewLoaded) return;
     const period = getCurrentReviewPeriod();
-    const [selfRes, leaderRes] = await Promise.all([
+    const toRow = (r: any): SubmissionRow => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data });
+    const [selfRes, leaderRes, chelseaRes] = await Promise.all([
       supabase.from('self_review_submissions').select('*').eq('review_period', period),
       supabase.from('leader_review_submissions').select('*').eq('review_period', period),
+      supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'chelsea@tassure.com'),
     ]);
-    if (selfRes.data) setOverviewSelf(selfRes.data.map((r: any) => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data })));
-    if (leaderRes.data) setOverviewLeader(leaderRes.data.map((r: any) => ({ id:r.id, user_id:r.user_id, submitted_at:r.submitted_at, status:r.submitted_at?'submitted':'draft', department:r.department, employee_name:r.employee_name, employee_email:r.employee_email, review_period:r.review_period, form_data:r.form_data })));
+    const selfRows = (selfRes.data || []).map(toRow);
+    const chelseaRows = (chelseaRes.data || []).map(toRow);
+    setOverviewSelf([...selfRows, ...chelseaRows]);
+    if (leaderRes.data) setOverviewLeader(leaderRes.data.map(toRow));
     setOverviewLoaded(true);
   };
 
