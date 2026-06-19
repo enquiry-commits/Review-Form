@@ -92,7 +92,6 @@ export default function Dashboard() {
   const [adminStatusOpen, setAdminStatusOpen] = useState(false);
   const [adminDataOpen, setAdminDataOpen] = useState(false);
   const [adminTableOpen, setAdminTableOpen] = useState(false);
-  const [adminInternalOpen, setAdminInternalOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const adminIframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -300,23 +299,6 @@ export default function Dashboard() {
                   <>
                     {subItem('self-reviews', 'Self Reviews')}
                     {subItem('leader-reviews', 'Leader Reviews')}
-                    <div onClick={() => setAdminInternalOpen(v => !v)}
-                      style={{ padding: '9px 14px 9px 28px', borderRadius: '10px', cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                        color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? '#1e3a5f' : '#64748b',
-                        background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
-                        display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
-                      onMouseLeave={e => { if (!['hr-reviews','finance-reviews','marketing-reviews'].includes(adminMenu)) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
-                      <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: adminInternalOpen ? 'rotate(90deg)' : 'none' }}>›</span>
-                      Internal Review
-                    </div>
-                    {adminInternalOpen && (
-                      <>
-                        {subItem('hr-reviews', 'HR Review', true)}
-                        {subItem('finance-reviews', 'Finance Review', true)}
-                        {subItem('marketing-reviews', 'Marketing Review', true)}
-                      </>
-                    )}
                     {subItem('suggestion-box', 'Suggestion Box')}
                   </>
                 )}

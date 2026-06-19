@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
-import { User, ALL_REVIEWABLE_USERS } from '@/lib/auth';
+import { User, ALL_REVIEWABLE_USERS, DIRECTOR_EMAILS } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 
@@ -18,6 +18,8 @@ interface SubmissionRow {
   employee_email: string;
   review_period: string;
   form_data?: any;
+  director_comment?: string;
+  source_table?: string;
 }
 
 interface SuggestionRow {
@@ -69,7 +71,7 @@ export default function AdminDashboard() {
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [internalGroupOpen, setInternalGroupOpen] = useState(false);
+  const [editingComment, setEditingComment] = useState<{id: string; value: string} | null>(null);
 
   // Status overview state
   const [overviewSelf, setOverviewSelf]       = useState<SubmissionRow[]>([]);
@@ -116,42 +118,76 @@ export default function AdminDashboard() {
 
   const loadDemoData = () => {
     const employees = [
-      { name: 'Alice Tan',    email: 'alice@tassure.com',   dept: 'Accounting',            isLeader: false },
-      { name: 'Bob Lee',      email: 'bob@tassure.com',     dept: 'Tax',                   isLeader: false },
-      { name: 'Carol Wong',   email: 'carol@tassure.com',   dept: 'Corporate Secretarial', isLeader: false },
-      { name: 'David Chen',   email: 'david@tassure.com',   dept: 'Accounting',            isLeader: true  },
-      { name: 'Emily Lim',    email: 'emily@tassure.com',   dept: 'Tax',                   isLeader: true  },
-      { name: 'Frank Ng',     email: 'frank@tassure.com',   dept: 'Corporate Secretarial', isLeader: true  },
-      { name: 'Grace Koh',    email: 'grace@tassure.com',   dept: 'Accounting',            isLeader: false },
-      { name: 'Henry Teo',    email: 'henry@tassure.com',   dept: 'Tax',                   isLeader: false },
-      { name: 'Irene Yap',    email: 'irene@tassure.com',   dept: 'Corporate Secretarial', isLeader: false },
-      { name: 'James Ong',    email: 'james@tassure.com',   dept: 'Internal',              isLeader: true  },
+      // Corporate Secretarial
+      { name: 'Hoe Chyi',     email: 'hoechyi@tassure.com',    dept: 'Corporate Secretarial', isLeader: true,  srcTable: 'self_review_submissions'    },
+      { name: 'Seng Xin',     email: 'sengxin@tassure.com',    dept: 'Corporate Secretarial', isLeader: true,  srcTable: 'self_review_submissions'    },
+      { name: 'Jenny Lai',    email: 'jennylai@tassure.com',   dept: 'Corporate Secretarial', isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Chin Kah Ye', email: 'kahye@tassure.com',      dept: 'Corporate Secretarial', isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Ang Shi Ming', email: 'shiming@tassure.com',   dept: 'Corporate Secretarial', isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Tey Shemin',   email: 'shemin@tassure.com',     dept: 'Corporate Secretarial', isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Tan Min Quan', email: 'minquan@tassure.com',   dept: 'Corporate Secretarial', isLeader: false, srcTable: 'self_review_submissions'    },
+      // Accounting
+      { name: 'Jay',          email: 'jaytay@tassure.com',     dept: 'Accounting',            isLeader: true,  srcTable: 'self_review_submissions'    },
+      { name: 'Jing Fei',     email: 'jingfei@tassure.com',    dept: 'Accounting',            isLeader: true,  srcTable: 'self_review_submissions'    },
+      { name: 'Tee Yu Heng',  email: 'yuheng@tassure.com',     dept: 'Accounting',            isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Vernice Chai', email: 'vernice@tassure.com',    dept: 'Accounting',            isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Chee Wei En',  email: 'weien@tassure.com',      dept: 'Accounting',            isLeader: false, srcTable: 'self_review_submissions'    },
+      // Tax
+      { name: 'Clarence',     email: 'clarencesaw@tassure.com',dept: 'Tax',                   isLeader: true,  srcTable: 'self_review_submissions'    },
+      { name: 'Quinnie Tan',  email: 'quinnietan@tassure.com', dept: 'Tax',                   isLeader: false, srcTable: 'self_review_submissions'    },
+      { name: 'Victoria Yap', email: 'victoriayap@tassure.com',dept: 'Tax',                   isLeader: false, srcTable: 'self_review_submissions'    },
+      // Internal
+      { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-HR',           isLeader: false, srcTable: 'hr_review_submissions'      },
+      { name: 'Chelsea Ang',  email: 'chelsea@tassure.com',    dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
+      { name: 'Vincent',      email: 'vincent@tassure.com',    dept: 'Internal-Marketing',    isLeader: false, srcTable: 'marketing_review_submissions'},
     ];
-    const periods = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
-    // Statuses: submitted / draft / null (missing) — 10 employees × 12 months
+    // Last 12 months up to current period (2026-06)
+    const periods = ['2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+    // Statuses: submitted / draft / null — 18 employees × 12 months
+    // pi:           0           1           2           3           4           5           6           7           8           9          10          11
     const selfMatrix: (string|null)[][] = [
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
-      ['submitted','submitted','submitted','submitted','submitted','draft',    'submitted','submitted',null,       'submitted','submitted','submitted'],
-      ['submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','draft',     'submitted',null      ],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
-      ['submitted','submitted','submitted','submitted','draft',    'submitted','submitted',null,       'submitted','submitted','draft',    'submitted'],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
-      ['draft',    'submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted'],
-      ['submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted','submitted',null,       'submitted'],
-      ['submitted','submitted','submitted','submitted','submitted',null,       'submitted','submitted','submitted','submitted','submitted','draft'     ],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
+      // Corporate Secretarial
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Hoe Chyi
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Seng Xin
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Jenny Lai
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     'submitted', null      ], // Chin Kah Ye
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Ang Shi Ming
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     'submitted','submitted', null      ], // Tey Shemin
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Tan Min Quan
+      // Accounting
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'], // Jay
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Jing Fei
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Tee Yu Heng
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     null      ], // Vernice Chai
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Chee Wei En
+      // Tax
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Clarence
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Quinnie Tan
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     'submitted','submitted','submitted', null      ], // Victoria Yap
+      // Internal
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Esther
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Chelsea Ang
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Vincent
     ];
     const leaderMatrix: (string|null)[][] = [
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
-      ['submitted','submitted','submitted','submitted','draft',    null,       'submitted','submitted','submitted','submitted','draft',    'submitted'],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'],
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null,null,null,null,null],
-      ['submitted','submitted','submitted','submitted','submitted','submitted','draft',    'submitted','submitted','submitted','submitted','submitted'],
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Hoe Chyi
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Seng Xin
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Jenny Lai
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Chin Kah Ye
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Ang Shi Ming
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Tey Shemin
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Tan Min Quan
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'], // Jay
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Jing Fei
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Tee Yu Heng
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Vernice Chai
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Chee Wei En
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted'], // Clarence
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Quinnie Tan
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Victoria Yap
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
@@ -159,10 +195,10 @@ export default function AdminDashboard() {
     employees.forEach((emp, ei) => {
       periods.forEach((period, pi) => {
         const sStatus = selfMatrix[ei][pi];
-        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`2026-${period.split('-')[1]}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null });
+        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null, source_table: emp.srcTable });
         if (emp.isLeader) {
           const lStatus = leaderMatrix[ei][pi];
-          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`2026-${period.split('-')[1]}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null });
+          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null, source_table: 'leader_review_submissions' });
         }
       });
     });
@@ -179,7 +215,7 @@ export default function AdminDashboard() {
     setTableDataLoaded(true);
     setTableDemoMode(true);
     setTableYearSel('2026');
-    setTableMonthSel('');
+    setTableMonthSel('06');
     setTablePersonSel('');
     setLoading(false);
   };
@@ -247,11 +283,19 @@ export default function AdminDashboard() {
     if (dataRes.data) setSuggestions(dataRes.data as SuggestionRow[]);
   };
 
-  const mapRow = (r: any): SubmissionRow => ({
+  const INTERNAL_DEPT_MAP: Record<string, string> = {
+    'esther@tassure.com': 'Internal-HR',
+    'chelsea@tassure.com': 'Internal-Finance',
+    'vincent@tassure.com': 'Internal-Marketing',
+  };
+  const mapRow = (r: any, sourceTable?: string): SubmissionRow => ({
     id: r.id, user_id: r.user_id, submitted_at: r.submitted_at,
     status: r.submitted_at ? 'submitted' : 'draft',
-    department: r.department, employee_name: r.employee_name,
+    department: INTERNAL_DEPT_MAP[r.employee_email] ?? r.department,
+    employee_name: r.employee_name,
     employee_email: r.employee_email, review_period: r.review_period, form_data: r.form_data,
+    director_comment: r.director_comment || '',
+    source_table: sourceTable,
   });
 
   const fetchAllReviews = async (page: number = 0) => {
@@ -260,17 +304,18 @@ export default function AdminDashboard() {
       const end = start + pageSize - 1;
 
       const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes,
-             hrCountRes, hrDataRes, finCountRes, finDataRes, mktCountRes, mktDataRes] = await Promise.all([
+             hrCountRes, finCountRes, mktCountRes,
+             hrInternalRes, finInternalRes, mktInternalRes] = await Promise.all([
         supabase.from('self_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('self_review_submissions').select('*').range(start, end),
         supabase.from('leader_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('leader_review_submissions').select('*').range(start, end),
         supabase.from('hr_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('hr_review_submissions').select('*').range(start, end),
         supabase.from('finance_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('finance_review_submissions').select('*').range(start, end),
         supabase.from('marketing_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('marketing_review_submissions').select('*').range(start, end),
+        supabase.from('hr_review_submissions').select('*').eq('employee_email', 'esther@tassure.com'),
+        supabase.from('finance_review_submissions').select('*').eq('employee_email', 'chelsea@tassure.com'),
+        supabase.from('marketing_review_submissions').select('*').eq('employee_email', 'vincent@tassure.com'),
       ]);
 
       setTotalSelfReviews(selfCountRes.count || 0);
@@ -279,11 +324,19 @@ export default function AdminDashboard() {
       setTotalFinanceReviews(finCountRes.count || 0);
       setTotalMarketingReviews(mktCountRes.count || 0);
 
-      if (selfDataRes.data) setSelfReviews(selfDataRes.data.map(mapRow));
-      if (leaderDataRes.data) setLeaderReviews(leaderDataRes.data.map(mapRow));
-      if (hrDataRes.data) setHrReviews(hrDataRes.data.map(mapRow));
-      if (finDataRes.data) setFinanceReviews(finDataRes.data.map(mapRow));
-      if (mktDataRes.data) setMarketingReviews(mktDataRes.data.map(mapRow));
+      const selfRows = (selfDataRes.data || []).map((r: any) => mapRow(r, 'self_review_submissions'));
+      const hrInternal = (hrInternalRes.data || []).map((r: any) => mapRow(r, 'hr_review_submissions'));
+      const finInternal = (finInternalRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions'));
+      const mktInternal = (mktInternalRes.data || []).map((r: any) => mapRow(r, 'marketing_review_submissions'));
+      const mergedSelf = [...selfRows, ...hrInternal, ...finInternal, ...mktInternal]
+        .sort((a, b) => {
+          const ta = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+          const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+          return tb - ta;
+        });
+      setSelfReviews(mergedSelf);
+
+      if (leaderDataRes.data) setLeaderReviews(leaderDataRes.data.map((r: any) => mapRow(r, 'leader_review_submissions')));
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
@@ -306,11 +359,8 @@ export default function AdminDashboard() {
     const tableMap: Record<string, string> = {
       'self-reviews': 'self_review_submissions',
       'leader-reviews': 'leader_review_submissions',
-      'hr-reviews': 'hr_review_submissions',
-      'finance-reviews': 'finance_review_submissions',
-      'marketing-reviews': 'marketing_review_submissions',
     };
-    const table = tableMap[activeMenu] || 'self_review_submissions';
+    const table = row.source_table || tableMap[activeMenu] || 'self_review_submissions';
     const { error } = await supabase.from(table).delete().eq('id', row.id);
     if (error) {
       alert('Delete failed: ' + error.message);
@@ -320,6 +370,21 @@ export default function AdminDashboard() {
       setTableDataLoaded(false);
       setTableAllSelf([]);
       setTableAllLeader([]);
+    }
+  };
+
+  const handleSaveComment = async (row: SubmissionRow, comment: string) => {
+    const tableMap: Record<string, string> = {
+      'self-reviews': 'self_review_submissions',
+      'leader-reviews': 'leader_review_submissions',
+    };
+    const table = row.source_table || tableMap[activeMenu] || 'self_review_submissions';
+    const { error } = await supabase.from(table).update({ director_comment: comment }).eq('id', row.id);
+    if (error) {
+      alert('Save failed: ' + error.message);
+    } else {
+      setEditingComment(null);
+      fetchAllReviews(currentPage);
     }
   };
 
@@ -449,14 +514,9 @@ export default function AdminDashboard() {
   }
 
   const displayData =
-    activeMenu === 'self-reviews'      ? selfReviews :
-    activeMenu === 'leader-reviews'    ? leaderReviews :
-    activeMenu === 'hr-reviews'        ? hrReviews :
-    activeMenu === 'finance-reviews'   ? financeReviews :
-    activeMenu === 'marketing-reviews' ? marketingReviews : [];
-  const EXCLUDED_FROM_SELF_REVIEW = ['chelsea@tassure.com', 'esther@tassure.com', 'vincent@tassure.com'];
+    activeMenu === 'self-reviews'   ? selfReviews :
+    activeMenu === 'leader-reviews' ? leaderReviews : [];
   const filteredData = displayData.filter(row => {
-    if (activeMenu === 'self-reviews' && EXCLUDED_FROM_SELF_REVIEW.includes(row.employee_email)) return false;
     const matchesSearch =
       row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       row.employee_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -949,109 +1009,6 @@ export default function AdminDashboard() {
               );
             })}
 
-            {/* Internal Review collapsible group */}
-            {!sidebarCollapsed && (
-              <div
-                onClick={() => setInternalGroupOpen(v => !v)}
-                style={{
-                  padding: '11px 14px',
-                  borderRadius: '10px', cursor: 'pointer',
-                  fontSize: '13px', fontWeight: '700',
-                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8',
-                  transition: 'all 0.2s',
-                  display: 'flex', alignItems: 'center',
-                  gap: '8px',
-                  userSelect: 'none',
-                  marginTop: '4px',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#1e3a5f'; e.currentTarget.style.background = 'rgba(30,58,95,0.04)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  style={{transition: 'transform 0.2s', transform: internalGroupOpen ? 'rotate(90deg)' : 'rotate(0deg)', flexShrink: 0}}>
-                  <polyline points="3,2 9,6 3,10"/>
-                </svg>
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-                  <rect x="2" y="2" width="5" height="5" rx="1"/>
-                  <rect x="9" y="2" width="5" height="5" rx="1"/>
-                  <rect x="2" y="9" width="5" height="5" rx="1"/>
-                  <rect x="9" y="9" width="5" height="5" rx="1"/>
-                </svg>
-                Internal Review
-              </div>
-            )}
-            {sidebarCollapsed && (
-              <div
-                onClick={() => setInternalGroupOpen(v => !v)}
-                title="Internal Review"
-                style={{
-                  padding: '10px', borderRadius: '10px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8',
-                  background: ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? 'rgba(126,184,212,0.15)' : 'transparent',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? 'rgba(126,184,212,0.15)' : 'transparent'; e.currentTarget.style.color = ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) ? '#1e3a5f' : '#94a3b8'; }}
-              >
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="5" height="5" rx="1"/>
-                  <rect x="9" y="2" width="5" height="5" rx="1"/>
-                  <rect x="2" y="9" width="5" height="5" rx="1"/>
-                  <rect x="9" y="9" width="5" height="5" rx="1"/>
-                </svg>
-              </div>
-            )}
-
-            {/* Internal sub-items */}
-            {internalGroupOpen && (['hr-reviews', 'finance-reviews', 'marketing-reviews'] as const).map(item => {
-              const icon = item === 'hr-reviews' ? (
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="6" cy="5" r="2"/>
-                  <path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5"/>
-                  <circle cx="12" cy="5.5" r="1.5"/>
-                  <path d="M15 13.5c0-1.93-1.34-3-3-3"/>
-                </svg>
-              ) : item === 'finance-reviews' ? (
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="1.5" y="6" width="13" height="8.5" rx="1.5"/>
-                  <path d="M5.5 6V4.5A1.5 1.5 0 0 1 7 3h2A1.5 1.5 0 0 1 10.5 4.5V6"/>
-                  <line x1="1.5" y1="9.5" x2="14.5" y2="9.5"/>
-                </svg>
-              ) : (
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3.5 6.5H5l7.5-3.5v10L5 9.5H3.5a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z"/>
-                  <path d="M5 9.5v3"/>
-                  <path d="M14 5.5a3 3 0 0 1 0 5"/>
-                </svg>
-              );
-              const label = item === 'hr-reviews' ? 'HR Reviews' : item === 'finance-reviews' ? 'Finance Reviews' : 'Marketing Reviews';
-              return (
-                <div
-                  key={item}
-                  onClick={() => handleActiveMenuChange(item)}
-                  title={sidebarCollapsed ? label : undefined}
-                  style={{
-                    padding: sidebarCollapsed ? '10px' : '9px 14px 9px 32px',
-                    borderRadius: '10px', cursor: 'pointer',
-                    fontSize: '12px', fontWeight: '600',
-                    color: activeMenu === item ? '#1e3a5f' : '#64748b',
-                    transition: 'all 0.2s',
-                    boxShadow: !sidebarCollapsed && activeMenu === item ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                    background: activeMenu === item ? 'rgba(126, 184, 212, 0.15)' : 'transparent',
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                    gap: '8px',
-                    whiteSpace: 'nowrap', overflow: 'hidden'
-                  }}
-                  onMouseEnter={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
-                  onMouseLeave={(e) => { if (activeMenu !== item) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}
-                >
-                  <span style={{flexShrink: 0, display: 'flex', alignItems: 'center'}}>{icon}</span>
-                  {!sidebarCollapsed && label}
-                </div>
-              );
-            })}
 
             {/* Suggestion Box */}
             {(() => {
@@ -1214,7 +1171,6 @@ export default function AdminDashboard() {
           // All unique employees across all months of this year (exclude internal-only reviewers)
           const emailSet = new Set(rowsInYear.map(r => r.employee_email));
           const employees = [...emailSet]
-            .filter(email => !EXCLUDED_FROM_SELF_REVIEW.includes(email))
             .map(email => {
               const ref = rowsInYear.find(r => r.employee_email === email)!;
               return { email, name: ref.employee_name, dept: ref.department };
@@ -1347,7 +1303,7 @@ export default function AdminDashboard() {
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
           tableAllSelf.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:false}); });
           tableAllLeader.forEach(r => { if (!personMap.has(r.employee_email)) personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept:r.department,isLeader:true}); else personMap.get(r.employee_email)!.isLeader = true; });
-          const people = [...personMap.values()].filter(p => !EXCLUDED_FROM_SELF_REVIEW.includes(p.email)).sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
+          const people = [...personMap.values()].sort((a,b) => (b.isLeader?1:0)-(a.isLeader?1:0) || a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
           const selEmail = tablePersonSel || people[0]?.email || '';
           const person = personMap.get(selEmail);
           const personSelf = tableAllSelf.filter(r => r.employee_email===selEmail).sort((a,b)=>(b.review_period||'').localeCompare(a.review_period||''));
@@ -1837,6 +1793,7 @@ export default function AdminDashboard() {
                 <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
                 <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
+                <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase', minWidth: '200px'}}>Director Comment</th>
                 <th style={{padding: '16px 18px', textAlign: 'left', fontWeight: '700', fontSize: '12px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
               </tr>
             </thead>
@@ -1844,6 +1801,8 @@ export default function AdminDashboard() {
               {filteredData.length > 0 ? filteredData.map((row, idx) => {
                 const statusColor = getStatusColor(row.status === 'submitted' ? 'Completed' : 'Draft');
                 const submittedDate = row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-';
+                const canEditComment = user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
+                const isEditingThis = editingComment?.id === row.id;
                 return (
                   <tr
                     key={row.id}
@@ -1870,6 +1829,57 @@ export default function AdminDashboard() {
                       }}>
                         {row.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                       </span>
+                    </td>
+                    <td style={{padding: '12px 18px', fontSize: '13px', minWidth: '200px', maxWidth: '300px'}}>
+                      {isEditingThis ? (
+                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                          <textarea
+                            value={editingComment.value}
+                            onChange={(e) => setEditingComment({id: row.id, value: e.target.value})}
+                            rows={3}
+                            style={{
+                              width: '100%', padding: '8px', fontSize: '13px',
+                              border: '1px solid #7eb8d4', borderRadius: '6px',
+                              resize: 'vertical', outline: 'none', fontFamily: 'inherit',
+                              color: '#1e3a5f', background: '#f0f7fb'
+                            }}
+                            autoFocus
+                          />
+                          <div style={{display: 'flex', gap: '6px'}}>
+                            <button
+                              onClick={() => handleSaveComment(row, editingComment.value)}
+                              style={{padding: '4px 10px', border: 'none', borderRadius: '6px', background: '#1e3a5f', color: '#fff', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
+                            >Save</button>
+                            <button
+                              onClick={() => setEditingComment(null)}
+                              style={{padding: '4px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: '12px'}}
+                            >Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{display: 'flex', alignItems: 'flex-start', gap: '8px'}}>
+                          <span style={{
+                            color: row.director_comment ? '#1e3a5f' : '#94a3b8',
+                            fontSize: '13px',
+                            lineHeight: '1.5',
+                            flex: 1,
+                            wordBreak: 'break-word'
+                          }}>
+                            {row.director_comment || '—'}
+                          </span>
+                          {canEditComment && (
+                            <button
+                              onClick={() => setEditingComment({id: row.id, value: row.director_comment || ''})}
+                              title="Edit comment"
+                              style={{
+                                flexShrink: 0, padding: '3px 7px', border: '1px solid #e2e8f0',
+                                borderRadius: '6px', background: 'rgba(126,184,212,0.12)',
+                                color: '#7eb8d4', cursor: 'pointer', fontSize: '12px', lineHeight: 1
+                              }}
+                            >✎</button>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td style={{padding: '16px 18px'}}>
                       <div style={{display: 'flex', gap: '8px'}}>
@@ -1911,7 +1921,7 @@ export default function AdminDashboard() {
                 );
               }) : (
                 <tr>
-                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                  <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
                   </td>
                 </tr>
@@ -1923,11 +1933,8 @@ export default function AdminDashboard() {
         {/* Pagination */}
         {(() => {
           const totalCount =
-            activeMenu === 'self-reviews'      ? totalSelfReviews :
-            activeMenu === 'leader-reviews'    ? totalLeaderReviews :
-            activeMenu === 'hr-reviews'        ? totalHrReviews :
-            activeMenu === 'finance-reviews'   ? totalFinanceReviews :
-            activeMenu === 'marketing-reviews' ? totalMarketingReviews : 0;
+            activeMenu === 'self-reviews'   ? totalSelfReviews :
+            activeMenu === 'leader-reviews' ? totalLeaderReviews : 0;
           const totalPages = Math.ceil(totalCount / pageSize);
           const hasPrev = currentPage > 0;
           const hasNext = currentPage < totalPages - 1;

@@ -41,6 +41,12 @@ const USERS_DATABASE = {
 
 export const PASSWORD = '123456';
 
+export const DIRECTOR_EMAILS = [
+  'cindyzhang@tassure.com',
+  'samuellng@tassure.com',
+  'yeesoon@tassure.com',
+];
+
 // All users who need to submit reviews (non-admin)
 export const ALL_REVIEWABLE_USERS: User[] = Object.entries(USERS_DATABASE)
   .filter(([, data]) => data.role !== 'admin')

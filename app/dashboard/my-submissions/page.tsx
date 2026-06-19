@@ -19,6 +19,7 @@ interface FormRecord {
   id: string;
   submitted_at: string | null;
   form_data: any;
+  director_comment?: string;
 }
 
 interface PeriodRow {
@@ -196,7 +197,7 @@ export default function MySubmissions() {
         userForms.map(f =>
           supabase
             .from(f.table)
-            .select('id, review_period, submitted_at, form_data')
+            .select('id, review_period, submitted_at, form_data, director_comment')
             .eq('employee_email', u.email)
             .order('review_period', { ascending: false })
         )
@@ -212,7 +213,7 @@ export default function MySubmissions() {
           data.map((r: any) => [r.review_period, r.submitted_at ? 'submitted' : 'draft'] as [string, Status])
         );
         recordMaps[f.key] = new Map(
-          data.map((r: any) => [r.review_period, { id: r.id, submitted_at: r.submitted_at, form_data: r.form_data }])
+          data.map((r: any) => [r.review_period, { id: r.id, submitted_at: r.submitted_at, form_data: r.form_data, director_comment: r.director_comment || '' }])
         );
       });
 
@@ -311,10 +312,19 @@ export default function MySubmissions() {
               const status = currentRow?.statuses[form.key] || 'pending';
               const isSubmitted = status === 'submitted';
               const record = currentRow?.records?.[form.key];
+              const directorComment = record?.director_comment || '';
               return (
                 <div key={form.key} style={{ padding: '20px', background: isSubmitted ? '#f0fdf4' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSubmitted ? '#bbf7d0' : '#e2e8f0'}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e3a5f' }}>{form.label}</div>
                   <StatusBadge status={status} />
+                  {directorComment && (
+                    <div>
+                      <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Director Comment</div>
+                      <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#1e3a5f', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                        {directorComment}
+                      </div>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {record && (
                       <button
@@ -347,9 +357,10 @@ export default function MySubmissions() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <colgroup>
-                  <col style={{ width: '180px' }} />
-                  {forms.map(f => <col key={f.key} />)}
-                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '160px' }} />
+                  {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
+                  <col style={{ minWidth: '200px' }} />
+                  <col style={{ width: '90px' }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
@@ -357,11 +368,17 @@ export default function MySubmissions() {
                     {forms.map(f => (
                       <th key={f.key} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
                     ))}
+                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7eb8d4', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Director Comment</th>
                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {historyRows.map((row, idx) => (
+                  {historyRows.map((row, idx) => {
+                    // Collect all director comments across forms for this period
+                    const comments = forms
+                      .map(f => ({ label: f.label, comment: row.records?.[f.key]?.director_comment || '' }))
+                      .filter(x => x.comment.trim());
+                    return (
                     <tr key={row.period} style={{ background: idx % 2 === 0 ? '#ffffff' : '#fafbfc' }}>
                       <td style={{ padding: '14px 28px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
                         {formatPeriodDisplay(row.period)}
@@ -371,6 +388,30 @@ export default function MySubmissions() {
                           <StatusBadge status={row.statuses[f.key] || 'pending'} />
                         </td>
                       ))}
+                      <td style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' }}>
+                        {comments.length === 0 ? (
+                          <span style={{ color: '#cbd5e1', fontSize: '13px' }}>—</span>
+                        ) : comments.map((c, ci) => (
+                          <div key={ci} style={{ marginBottom: ci < comments.length - 1 ? '8px' : 0 }}>
+                            {comments.length > 1 && (
+                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>{c.label}</div>
+                            )}
+                            <div style={{
+                              background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)',
+                              border: '1px solid #bfdbfe',
+                              borderLeft: '3px solid #7eb8d4',
+                              borderRadius: '6px',
+                              padding: '8px 12px',
+                              fontSize: '13px',
+                              color: '#1e3a5f',
+                              lineHeight: '1.5',
+                              whiteSpace: 'pre-wrap',
+                            }}>
+                              {c.comment}
+                            </div>
+                          </div>
+                        ))}
+                      </td>
                       <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
                         {/* Show View button if any form has a record for this period */}
                         {forms.some(f => row.records?.[f.key]) && (
@@ -390,7 +431,8 @@ export default function MySubmissions() {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
