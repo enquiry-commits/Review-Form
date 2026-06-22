@@ -50,7 +50,7 @@ const DEPT_EMPLOYEES: Record<string, string[]> = {
   'CORPORATE SECRETARIAL': ['Jenny Lai','Chin Kah Ye','Ang Shi Ming','Tey Shemin','Tan Min Quan'],
   'ACCOUNTING':            ['Tee Yu Heng','Vernice Chai','Chee Wei En'],
   'TAX':                   ['Quinnie Tan','Victoria Yap'],
-  'Internal':              ['Chelsea Ang'],
+  'INTERNAL':              ['Chelsea Ang'],
 };
 
 const emptyKpiRows = (): Record<string, KPIRow[]> =>
@@ -216,7 +216,7 @@ export default function LeaderReviewForm() {
   if (!user) return null;
 
   const isSubmitted = status === 'submitted';
-  const employees   = user.department ? (DEPT_EMPLOYEES[user.department] || []) : [];
+  const employees   = user.department ? (DEPT_EMPLOYEES[user.department.toUpperCase()] || []) : [];
 
   return (
     <div style={{background:'linear-gradient(135deg,#f0f4f8 0%,#d9e2ec 100%)',minHeight:'100vh'}}>
