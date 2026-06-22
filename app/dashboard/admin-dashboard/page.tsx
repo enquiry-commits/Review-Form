@@ -200,39 +200,40 @@ export default function AdminDashboard() {
       [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
       [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
-    // Generate realistic demo form data
+    // Generate realistic demo form data with actual questions
     const demoSelfFormData = {
       kpis: {
-        kpi_1: { count: 1, comment: 'Met timeline targets for Q2 deliverables with minor delays in documentation', files: [] },
-        kpi_2: { count: 2, comment: 'Achieved 95% accuracy rate in all submissions', files: [] },
-        kpi_3: { count: 0, comment: '', files: [] },
+        client_complaints: { count: 1, comment: 'One minor complaint regarding response time on 2026-05-20, resolved within 24 hours', files: [] },
+        minor_delays: { count: 2, comment: 'Was chased twice for late submissions, both due to client scope changes', files: [] },
+        minor_errors: { count: 0, comment: '', files: [] },
       },
       positive_items: {
-        item_1: { description: 'Led successful cross-functional collaboration with Finance team on budget reconciliation', files: [] },
-        item_2: { description: 'Proactively identified and resolved process inefficiencies, saving 6 hours per week', files: [] },
-        item_3: { description: '', files: [] },
+        pos_compliment: { description: 'Received written thank you email from client Acme Corp for exceptional service and proactive communication', files: [] },
+        pos_recovered: { description: 'Successfully retained XYZ Ltd who was considering switching providers; regained their trust through improved service delivery', files: [] },
+        pos_resolved: { description: '', files: [] },
       }
     };
 
     const demoLeaderFormData = {
       kpis: {
-        kpi_1: { kpi: 'Deliverables on Time', rows: [
-          { employee: 'Hoe Chyi', comment: 'Consistently delivers on schedule with quality output', files: [] }
+        client_complaints: { kpi: 'Client Complaints / Issues', rows: [
+          { employee: 'Hoe Chyi', comment: 'No complaints logged. Maintains excellent client relationships and proactively addresses concerns', files: [] },
+          { employee: 'Jay', comment: 'One minor complaint resolved satisfactorily. Overall client feedback is positive', files: [] }
         ] },
-        kpi_2: { kpi: 'Quality of Work', rows: [
-          { employee: 'Jay', comment: 'Excellent attention to detail, minimal revisions needed', files: [] }
+        minor_delays: { kpi: 'Chased / Minor Delays', rows: [
+          { employee: 'Seng Xin', comment: 'Occasionally delayed on routine items, but prioritizes urgent matters well', files: [] }
         ] },
       },
       positive_items: {
-        item_1: { label: 'Team Collaboration', rows: [
-          { comment: 'Demonstrates strong teamwork and mentors junior staff effectively', files: [] }
+        pos_compliment: { label: 'Written Client Compliment', rows: [
+          { comment: 'Received explicit praise from 2 clients this period for going above and beyond', files: [] }
         ] },
-        item_2: { label: 'Initiative & Innovation', rows: [
-          { comment: 'Proposed and implemented 3 process improvements this quarter', files: [] }
+        pos_requested: { label: 'Client Requested Same Staff', rows: [
+          { comment: 'Client specifically requested Hoe Chyi for all future engagements due to consistency and expertise', files: [] }
         ] },
       },
       overall_remarks: {
-        remarks: 'Overall strong performance this period. Continue to focus on stakeholder communication and strategic planning.',
+        remarks: 'Strong performance this review period. Excellent client management skills and consistent delivery. Focus area: timely communication on project delays. Continue leading by example and mentoring junior team members.',
         files: []
       }
     };
