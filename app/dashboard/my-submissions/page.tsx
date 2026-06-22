@@ -91,38 +91,11 @@ function extractAnswers(val: any): { text: string; employee?: string }[] {
   return out;
 }
 
-// Card tones: blue for KPI, green for Positive, blue for Remarks
-const TONES = {
-  kpi:    { cardBg: '#f0f7ff', cardBorder: '#bfdbfe', boxBorder: '#dbeafe' },
-  pos:    { cardBg: '#f0fdf4', cardBorder: '#bbf7d0', boxBorder: '#bbf7d0' },
-  remark: { cardBg: '#f0f7ff', cardBorder: '#bfdbfe', boxBorder: '#dbeafe' },
-} as const;
-type Tone = keyof typeof TONES;
-
-// One field block: Title (bold) + Question (gray italic) + Answer (white box)
-function FieldBlock({ name, question, answers, tone }: { name: string; question: string; answers: { text: string; employee?: string }[]; tone: Tone }) {
-  const t = TONES[tone];
-  return (
-    <div style={{ background: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: '14px', padding: '16px 18px' }}>
-      {name && <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px', lineHeight: '1.4' }}>{name}</div>}
-      {question && <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', lineHeight: '1.6', marginBottom: '12px' }}>{question}</div>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {answers.length > 0 ? answers.map((a, i) => (
-          <div key={i} style={{ background: '#ffffff', border: `1px solid ${t.boxBorder}`, borderRadius: '10px', padding: '12px 14px' }}>
-            {a.employee && (
-              <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '6px' }}>{a.employee}</span>
-            )}
-            <div style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{a.text || <span style={{ color: '#cbd5e1' }}>—</span>}</div>
-          </div>
-        )) : (
-          <div style={{ background: '#ffffff', border: `1px solid ${t.boxBorder}`, borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#cbd5e1' }}>—</div>
-        )}
-      </div>
-    </div>
-  );
+function humanize(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// Section header with colored accent bar
+// Section header with colored accent bar (matches Admin Dashboard)
 function SectionHeader({ label, color }: { label: string; color: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
@@ -132,10 +105,14 @@ function SectionHeader({ label, color }: { label: string; color: string }) {
   );
 }
 
-function humanize(key: string): string {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+// Translucent-white answer box inside a colored card (matches Admin Dashboard)
+function AnswerText({ text }: { text: string }) {
+  return (
+    <p style={{ fontSize: '13px', color: '#475569', margin: '6px 0 0 0', lineHeight: '1.6', background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px', whiteSpace: 'pre-line' }}>{text}</p>
+  );
 }
 
+// View Details body — visually identical to Admin Dashboard's Self Review detail
 function FormDataView({ form_data }: { form_data: any; formKey: string }) {
   if (!form_data) return <p style={{ color: '#94a3b8', fontSize: '14px' }}>No form data available.</p>;
 
@@ -143,10 +120,9 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
   const positives = form_data.positive_items || {};
   const remarks = form_data.overall_remarks?.remarks?.trim();
 
-  // Only show fields that have an answer
   const kpiBlocks = Object.entries(kpis)
-    .map(([key, val]: any) => ({ key, answers: extractAnswers(val), meta: KPI_META[key] }))
-    .filter(b => b.answers.length > 0);
+    .map(([key, val]: any) => ({ key, answers: extractAnswers(val), count: (val && !Array.isArray(val) && typeof val.count === 'number') ? val.count : 0, meta: KPI_META[key] }))
+    .filter(b => b.answers.length > 0 || b.count > 0);
   const posBlocks = Object.entries(positives)
     .map(([key, val]: any) => ({ key, answers: extractAnswers(val), meta: POS_META[key] }))
     .filter(b => b.answers.length > 0);
@@ -157,30 +133,78 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {kpiBlocks.length > 0 && (
-        <div>
-          <SectionHeader label="KPI Performance" color="#7eb8d4" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Review Details</div>
+
+      {/* KPI Performance */}
+      <div>
+        <SectionHeader label="KPI Performance" color="#7eb8d4" />
+        {kpiBlocks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {kpiBlocks.map(b => (
-              <FieldBlock key={b.key} name={b.meta?.name || humanize(b.key)} question={b.meta?.question || ''} answers={b.answers} tone="kpi" />
+              <div key={b.key} style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{b.meta?.name || humanize(b.key)}</span>
+                  {b.count > 0 && (
+                    <span style={{ flexShrink: 0, background: '#dbeafe', color: '#1d4ed8', padding: '2px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>×{b.count}</span>
+                  )}
+                </div>
+                {b.meta?.question && (
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic' }}>{b.meta.question}</p>
+                )}
+                {b.answers.map((a, i) => (
+                  <div key={i}>
+                    {a.employee && (
+                      <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', margin: '6px 0 0 0' }}>{a.employee}</span>
+                    )}
+                    {a.text && <AnswerText text={a.text} />}
+                  </div>
+                ))}
+              </div>
             ))}
           </div>
-        </div>
-      )}
-      {posBlocks.length > 0 && (
-        <div>
-          <SectionHeader label="Positive Contributions" color="#16a34a" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        ) : (
+          <div style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#1d4ed8', fontWeight: '600' }}>
+            ✓ No issues reported
+          </div>
+        )}
+      </div>
+
+      {/* Positive Contributions */}
+      <div>
+        <SectionHeader label="Positive Contributions" color="#16a34a" />
+        {posBlocks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {posBlocks.map(b => (
-              <FieldBlock key={b.key} name={b.meta?.name || humanize(b.key)} question={b.meta?.question || ''} answers={b.answers} tone="pos" />
+              <div key={b.key} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>{b.meta?.name || humanize(b.key)}</div>
+                {b.meta?.question && (
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic' }}>{b.meta.question}</p>
+                )}
+                {b.answers.map((a, i) => (
+                  <div key={i}>
+                    {a.employee && (
+                      <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', margin: '6px 0 0 0' }}>{a.employee}</span>
+                    )}
+                    {a.text && <AnswerText text={a.text} />}
+                  </div>
+                ))}
+              </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#94a3b8' }}>
+            No positive contributions noted
+          </div>
+        )}
+      </div>
+
+      {/* Overall Remarks */}
       {remarks && (
         <div>
           <SectionHeader label="Overall Remarks" color="#7eb8d4" />
-          <FieldBlock name="" question="" answers={[{ text: remarks }]} tone="remark" />
+          <div style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
+            <AnswerText text={remarks} />
+          </div>
         </div>
       )}
     </div>
