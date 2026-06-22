@@ -150,8 +150,8 @@ export default function AdminDashboard() {
       { name: 'Chelsea Ang',  email: 'chelsea@tassure.com',    dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
       { name: 'Vincent',      email: 'vincent@tassure.com',    dept: 'Internal-Marketing',    isLeader: false, srcTable: 'marketing_review_submissions'},
     ];
-    // Last 12 months up to current period (2026-06)
-    const periods = ['2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+    // Full year 2025: 12 months (Jan-Dec)
+    const periods = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12'];
     // Statuses: submitted / draft / null — 18 employees × 12 months
     // pi:           0           1           2           3           4           5           6           7           8           9          10          11
     const selfMatrix: (string|null)[][] = [
@@ -276,8 +276,8 @@ export default function AdminDashboard() {
     setOverviewLoaded(true);
     setTableDataLoaded(true);
     setTableDemoMode(true);
-    setTableYearSel('2026');
-    setTableMonthSel('06');
+    setTableYearSel('2025');
+    setTableMonthSel('12');
     setTablePersonSel('');
     setLoading(false);
   };
