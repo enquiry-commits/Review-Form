@@ -1816,7 +1816,7 @@ export default function AdminDashboard() {
                               <div style={{fontWeight:'700',color:'#0f172a'}}>{u.name}</div>
                               <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'1px'}}>{u.email}</div>
                             </td>
-                            <td style={{padding:'12px 16px'}}>
+                            <td style={{padding:'12px 16px',textAlign:'center'}}>
                               <span style={{padding:'2px 8px',borderRadius:'6px',fontSize:'11px',fontWeight:'700',
                                 background: u.role==='leader' ? 'rgba(16,185,129,0.1)' : '#f1f5f9',
                                 color: u.role==='leader' ? '#065f46' : '#64748b'}}>
