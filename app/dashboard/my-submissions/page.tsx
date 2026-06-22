@@ -293,7 +293,7 @@ export default function MySubmissions() {
         </div>
       )}
 
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 32px 60px' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '40px 32px 60px' }}>
 
         {/* Page Title */}
         <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
