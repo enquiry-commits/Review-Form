@@ -167,6 +167,7 @@ function PositiveItem({ id, name, question, data, onChange, onFileUpload }: PosI
 export default function FinanceReviewForm() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [kpiData, setKpiData] = useState<Record<string, KPIData>>(emptyKPIs());
   const [posData, setPosData]  = useState<Record<string, PosData>>(emptyPos());
   const [remarksData, setRemarksData] = useState<{remarks:string;files:FileLink[]}>({remarks:'',files:[]});
@@ -193,7 +194,13 @@ export default function FinanceReviewForm() {
     const raw = localStorage.getItem('user');
     if (!raw) { router.push('/'); return; }
     const u: User = JSON.parse(raw);
-    if (!ALLOWED_EMAILS.includes(u.email)) { router.push('/dashboard'); return; }
+    if (!ALLOWED_EMAILS.includes(u.email)) {
+      // When embedded in the dashboard iframe, redirecting to /dashboard would
+      // re-render the shell inside the iframe and loop forever. Show an access
+      // notice instead; only redirect when loaded as a top-level page.
+      if (window.self !== window.top) { setAccessDenied(true); return; }
+      router.push('/dashboard'); return;
+    }
     setUser(u);
     userRef.current = u;
     setIsEmbedded(window.self !== window.top);
@@ -304,6 +311,15 @@ export default function FinanceReviewForm() {
 
   const handleLogout = () => { localStorage.removeItem('user'); router.push('/'); };
 
+  if (accessDenied) return (
+    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+      <div style={{ background: '#fff', border: '1px solid #fee2e2', borderRadius: '14px', padding: '32px 36px', textAlign: 'center', maxWidth: '420px', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+        <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e3a5f', marginBottom: '6px' }}>No access to this form</div>
+        <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.6' }}>You don&apos;t have permission to view this review. / 你没有权限查看此评审表。</div>
+      </div>
+    </div>
+  );
   if (!user) return null;
   const isSubmitted = status === 'submitted';
 
