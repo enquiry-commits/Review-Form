@@ -450,7 +450,7 @@ export default function LeaderReviewForm() {
                       <button onClick={()=>setPosRows(p=>({...p,[pi.id]:[...p[pi.id],{employee:'',comment:'',files:[]}]}))}
                         style={{width:'100%',padding:'12px 24px',background:'#1e3a5f',color:'white',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',transition:'all 0.3s'}}
                         onMouseEnter={e=>{e.currentTarget.style.background='#152840';}} onMouseLeave={e=>{e.currentTarget.style.background='#1e3a5f';}}>
-                        + Add another item / 增加另一个项目
+                        + Add another employee / 增加另一个员工
                       </button>
                     </div>
                   )}
