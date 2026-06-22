@@ -200,43 +200,42 @@ export default function AdminDashboard() {
       [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
       [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
-    // Generate realistic demo form data with actual questions
-    const demoSelfFormData = {
+    // Generate realistic demo form data - unique for each submission
+    const generateSelfFormData = (name: string) => ({
       kpis: {
-        client_complaints: { count: 1, comment: 'One minor complaint regarding response time on 2026-05-20, resolved within 24 hours', files: [] },
-        minor_delays: { count: 2, comment: 'Was chased twice for late submissions, both due to client scope changes', files: [] },
+        client_complaints: { count: Math.random() > 0.7 ? 1 : 0, comment: Math.random() > 0.7 ? 'One minor client inquiry, handled and resolved' : '', files: [] },
+        minor_delays: { count: Math.random() > 0.8 ? 1 : 0, comment: Math.random() > 0.8 ? 'Occasional delays on routine tasks, but prioritized urgent matters' : '', files: [] },
         minor_errors: { count: 0, comment: '', files: [] },
       },
       positive_items: {
-        pos_compliment: { description: 'Received written thank you email from client Acme Corp for exceptional service and proactive communication', files: [] },
-        pos_recovered: { description: 'Successfully retained XYZ Ltd who was considering switching providers; regained their trust through improved service delivery', files: [] },
-        pos_resolved: { description: '', files: [] },
+        pos_compliment: { description: Math.random() > 0.6 ? `Positive feedback from clients regarding ${name}'s professional approach` : '', files: [] },
+        pos_resolved: { description: Math.random() > 0.7 ? `Successfully resolved complex issue, contributing to team efficiency` : '', files: [] },
+        pos_prevented: { description: '', files: [] },
       }
-    };
+    });
 
-    const demoLeaderFormData = {
+    const generateLeaderFormData = (leaderName: string, subordinateName: string) => ({
       kpis: {
         client_complaints: { kpi: 'Client Complaints / Issues', rows: [
-          { employee: 'Hoe Chyi', comment: 'No complaints logged. Maintains excellent client relationships and proactively addresses concerns', files: [] },
-          { employee: 'Jay', comment: 'One minor complaint resolved satisfactorily. Overall client feedback is positive', files: [] }
+          { employee: subordinateName, comment: Math.random() > 0.5 ? `Good client management. Minimal issues reported.` : `One minor issue, handled appropriately.`, files: [] }
         ] },
         minor_delays: { kpi: 'Chased / Minor Delays', rows: [
-          { employee: 'Seng Xin', comment: 'Occasionally delayed on routine items, but prioritizes urgent matters well', files: [] }
+          { employee: subordinateName, comment: Math.random() > 0.7 ? `Occasionally delayed but generally on schedule` : `Timely deliverables`, files: [] }
         ] },
       },
       positive_items: {
         pos_compliment: { label: 'Written Client Compliment', rows: [
-          { comment: 'Received explicit praise from 2 clients this period for going above and beyond', files: [] }
+          { comment: Math.random() > 0.6 ? `Received positive client feedback this period` : ``, files: [] }
         ] },
         pos_requested: { label: 'Client Requested Same Staff', rows: [
-          { comment: 'Client specifically requested Hoe Chyi for all future engagements due to consistency and expertise', files: [] }
+          { comment: Math.random() > 0.7 ? `Clients value ${subordinateName}'s consistent service` : ``, files: [] }
         ] },
       },
       overall_remarks: {
-        remarks: 'Strong performance this review period. Excellent client management skills and consistent delivery. Focus area: timely communication on project delays. Continue leading by example and mentoring junior team members.',
+        remarks: `${subordinateName} demonstrates solid performance this period. Good attention to detail and client focus. Continue to improve communication on project timelines.`,
         files: []
       }
-    };
+    });
 
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
@@ -244,10 +243,18 @@ export default function AdminDashboard() {
     employees.forEach((emp, ei) => {
       periods.forEach((period, pi) => {
         const sStatus = selfMatrix[ei][pi];
-        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: sStatus==='submitted' ? demoSelfFormData : null, source_table: emp.srcTable });
+        if (sStatus) {
+          const selfData = sStatus==='submitted' ? generateSelfFormData(emp.name) : null;
+          selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: selfData, source_table: emp.srcTable });
+        }
         if (emp.isLeader) {
           const lStatus = leaderMatrix[ei][pi];
-          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: lStatus==='submitted' ? demoLeaderFormData : null, source_table: 'leader_review_submissions' });
+          if (lStatus) {
+            // For leader review, find first non-leader subordinate to use as example
+            const subordinate = employees.find((e, i) => !e.isLeader && e.dept === emp.dept);
+            const leaderData = lStatus==='submitted' && subordinate ? generateLeaderFormData(emp.name, subordinate.name) : null;
+            leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: 'leader_review_submissions' });
+          }
         }
       });
     });
