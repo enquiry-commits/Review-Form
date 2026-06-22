@@ -351,6 +351,12 @@ export default function MySubmissions() {
     fetchAll();
   }, [router, currentPeriod]);
 
+  // When the detail modal opens, scroll the page to the top so the modal
+  // (anchored near the top) is fully in view.
+  useEffect(() => {
+    if (detail) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [detail]);
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     router.push('/');
@@ -565,7 +571,7 @@ export default function MySubmissions() {
       {/* Detail Modal */}
       {detail && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 24px 24px', overflowY: 'auto' }}
           onClick={() => setDetail(null)}
         >
           <div
