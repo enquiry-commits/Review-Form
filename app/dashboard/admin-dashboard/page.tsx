@@ -200,16 +200,53 @@ export default function AdminDashboard() {
       [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
       [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
+    // Generate realistic demo form data
+    const demoSelfFormData = {
+      kpis: {
+        kpi_1: { count: 1, comment: 'Met timeline targets for Q2 deliverables with minor delays in documentation', files: [] },
+        kpi_2: { count: 2, comment: 'Achieved 95% accuracy rate in all submissions', files: [] },
+        kpi_3: { count: 0, comment: '', files: [] },
+      },
+      positive_items: {
+        item_1: { description: 'Led successful cross-functional collaboration with Finance team on budget reconciliation', files: [] },
+        item_2: { description: 'Proactively identified and resolved process inefficiencies, saving 6 hours per week', files: [] },
+        item_3: { description: '', files: [] },
+      }
+    };
+
+    const demoLeaderFormData = {
+      kpis: {
+        kpi_1: { kpi: 'Deliverables on Time', rows: [
+          { employee: 'Hoe Chyi', comment: 'Consistently delivers on schedule with quality output', files: [] }
+        ] },
+        kpi_2: { kpi: 'Quality of Work', rows: [
+          { employee: 'Jay', comment: 'Excellent attention to detail, minimal revisions needed', files: [] }
+        ] },
+      },
+      positive_items: {
+        item_1: { label: 'Team Collaboration', rows: [
+          { comment: 'Demonstrates strong teamwork and mentors junior staff effectively', files: [] }
+        ] },
+        item_2: { label: 'Initiative & Innovation', rows: [
+          { comment: 'Proposed and implemented 3 process improvements this quarter', files: [] }
+        ] },
+      },
+      overall_remarks: {
+        remarks: 'Overall strong performance this period. Continue to focus on stakeholder communication and strategic planning.',
+        files: []
+      }
+    };
+
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
     let idCounter = 1000;
     employees.forEach((emp, ei) => {
       periods.forEach((period, pi) => {
         const sStatus = selfMatrix[ei][pi];
-        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null, source_table: emp.srcTable });
+        if (sStatus) selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: sStatus==='submitted' ? demoSelfFormData : null, source_table: emp.srcTable });
         if (emp.isLeader) {
           const lStatus = leaderMatrix[ei][pi];
-          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: null, source_table: 'leader_review_submissions' });
+          if (lStatus) leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: lStatus==='submitted' ? demoLeaderFormData : null, source_table: 'leader_review_submissions' });
         }
       });
     });
