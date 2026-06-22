@@ -405,10 +405,17 @@ export default function MySubmissions() {
     fetchAll();
   }, [router, currentPeriod]);
 
-  // When the detail modal opens, scroll the page to the top so the modal
-  // (anchored near the top) is fully in view.
+  // When the detail modal opens, scroll to the top so the modal (anchored near
+  // the top) is fully in view. The modal is position:fixed, but when this page
+  // is embedded in an auto-resized iframe, fixed positioning anchors to the
+  // iframe document — so we also ask the parent page to scroll to the top
+  // (same mechanism the Suggestion Box uses).
   useEffect(() => {
-    if (detail) window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!detail) return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.top && window.top !== window.self) {
+      window.top.postMessage({ type: 'scrollToTop' }, '*');
+    }
   }, [detail]);
 
   const handleLogout = () => {
