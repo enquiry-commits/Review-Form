@@ -378,7 +378,7 @@ export default function MySubmissions() {
                 <colgroup>
                   <col style={{ width: '160px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col style={{ width: '180px' }} />
+                  <col style={{ width: '220px' }} />
                   <col style={{ width: '90px' }} />
                 </colgroup>
                 <thead>
