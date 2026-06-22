@@ -318,9 +318,9 @@ export default function AdminDashboard() {
     const chelseaRows = (chelseaRes.data || []).map(toRow);
     setOverviewSelf([...selfRows, ...chelseaRows]);
     if (leaderRes.data) setOverviewLeader(leaderRes.data.map(toRow));
-    setOverviewEstherHr(estherHrRes.data?.[0] ? toRow(estherHrRes.data[0]) : null);
-    setOverviewEstherFinance(estherFinRes.data?.[0] ? toRow(estherFinRes.data[0]) : null);
-    setOverviewVincentMkt(vincentMktRes.data?.[0] ? toRow(vincentMktRes.data[0]) : null);
+    setOverviewEstherHr(estherHrRes.data?.[0] ? mapRow(estherHrRes.data[0], 'hr_review_submissions', 'Internal-HR') : null);
+    setOverviewEstherFinance(estherFinRes.data?.[0] ? mapRow(estherFinRes.data[0], 'finance_review_submissions', 'Internal-Finance') : null);
+    setOverviewVincentMkt(vincentMktRes.data?.[0] ? mapRow(vincentMktRes.data[0], 'marketing_review_submissions', 'Internal-Marketing') : null);
     setOverviewLoaded(true);
   };
 
@@ -401,9 +401,9 @@ export default function AdminDashboard() {
       setTotalMarketingReviews(mktCountRes.count || 0);
 
       const selfRows = (selfDataRes.data || []).map((r: any) => mapRow(r, 'self_review_submissions'));
-      const hrInternal = (hrInternalRes.data || []).map((r: any) => mapRow(r, 'hr_review_submissions'));
-      const finInternal = (finInternalRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions'));
-      const mktInternal = (mktInternalRes.data || []).map((r: any) => mapRow(r, 'marketing_review_submissions'));
+      const hrInternal = (hrInternalRes.data || []).map((r: any) => mapRow(r, 'hr_review_submissions', 'Internal-HR'));
+      const finInternal = (finInternalRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions', 'Internal-Finance'));
+      const mktInternal = (mktInternalRes.data || []).map((r: any) => mapRow(r, 'marketing_review_submissions', 'Internal-Marketing'));
       const estherFinance = (estherFinanceRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions', 'Internal-Finance'));
       const mergedSelf = [...selfRows, ...hrInternal, ...finInternal, ...mktInternal, ...estherFinance]
         .sort((a, b) => {
