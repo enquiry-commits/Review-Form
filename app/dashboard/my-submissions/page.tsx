@@ -376,7 +376,7 @@ export default function MySubmissions() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <colgroup>
-                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '70px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '120px' }} />)}
                   <col style={{ minWidth: '350px' }} />
                   <col style={{ width: '120px' }} />
