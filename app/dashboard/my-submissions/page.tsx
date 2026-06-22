@@ -622,6 +622,14 @@ export default function MySubmissions() {
 
             {/* Modal Body */}
             <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
+              {detail.record.director_comment?.trim() && (
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Director Comment</div>
+                  <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1e3a5f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                    {detail.record.director_comment}
+                  </div>
+                </div>
+              )}
               <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
             </div>
 
