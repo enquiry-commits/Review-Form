@@ -215,28 +215,59 @@ export default function AdminDashboard() {
       }
     });
 
-    const generateLeaderFormData = (leaderName: string, subordinateName: string) => ({
-      kpis: {
-        client_complaints: { kpi: 'Client Complaints / Issues', rows: [
-          { employee: subordinateName, comment: Math.random() > 0.5 ? `Good client management. Minimal issues reported.` : `One minor issue, handled appropriately.`, files: [] }
-        ] },
-        minor_delays: { kpi: 'Chased / Minor Delays', rows: [
-          { employee: subordinateName, comment: Math.random() > 0.7 ? `Occasionally delayed but generally on schedule` : `Timely deliverables`, files: [] }
-        ] },
-      },
-      positive_items: {
-        pos_compliment: { label: 'Written Client Compliment', rows: [
-          { comment: Math.random() > 0.6 ? `Received positive client feedback this period` : ``, files: [] }
-        ] },
-        pos_requested: { label: 'Client Requested Same Staff', rows: [
-          { comment: Math.random() > 0.7 ? `Clients value ${subordinateName}'s consistent service` : ``, files: [] }
-        ] },
-      },
-      overall_remarks: {
-        remarks: `${subordinateName} demonstrates solid performance this period. Good attention to detail and client focus. Continue to improve communication on project timelines.`,
-        files: []
-      }
-    });
+    // A leader evaluates EVERY subordinate in their department, so each KPI
+    // question carries one row per subordinate (with varied sample comments).
+    const generateLeaderFormData = (subordinateNames: string[]) => {
+      const complaintPool = [
+        'Good client management. Minimal issues reported.',
+        'One minor issue, handled appropriately and resolved the same week.',
+        'Strong follow-through with clients; no escalations this period.',
+        'A small misunderstanding with a client, clarified quickly.',
+        'No complaints — consistently reliable with client communication.',
+      ];
+      const delayPool = [
+        'Timely deliverables throughout the period.',
+        'Occasionally delayed but kept clients informed.',
+        'Met all key deadlines; no chasing required.',
+        'Needed one reminder, otherwise on schedule.',
+        'Proactively flagged a tight deadline in advance.',
+      ];
+      // Positives only apply to some subordinates — empty entries are dropped.
+      const complimentPool = [
+        'Received written praise from a client this period.',
+        '',
+        'Client emailed to thank them for proactive updates.',
+        '',
+        'Client highlighted their clear and patient explanations.',
+      ];
+      const requestedPool = [
+        'Client requested to continue working with them next quarter.',
+        '',
+        '',
+        'Client specifically asked for them by name on a new engagement.',
+        '',
+      ];
+      const kpiRows = (pool: string[]) =>
+        subordinateNames.map((name, i) => ({ employee: name, comment: pool[i % pool.length], files: [] }));
+      const posRows = (pool: string[]) =>
+        subordinateNames
+          .map((name, i) => ({ employee: name, comment: pool[i % pool.length], files: [] }))
+          .filter(r => r.comment);
+      return {
+        kpis: {
+          client_complaints: { kpi: 'Client Complaints / Issues', rows: kpiRows(complaintPool) },
+          minor_delays: { kpi: 'Chased / Minor Delays', rows: kpiRows(delayPool) },
+        },
+        positive_items: {
+          pos_compliment: { label: 'Written Client Compliment', rows: posRows(complimentPool) },
+          pos_requested: { label: 'Client Requested Same Staff', rows: posRows(requestedPool) },
+        },
+        overall_remarks: {
+          remarks: `Solid, steady team performance this period across ${subordinateNames.join(', ')}. Good client focus overall; continue improving communication on project timelines.`,
+          files: []
+        }
+      };
+    };
 
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
@@ -255,9 +286,9 @@ export default function AdminDashboard() {
         if (emp.isLeader) {
           const lStatus = leaderMatrix[ei][pi];
           if (lStatus) {
-            // For leader review, find first non-leader subordinate to use as example
-            const subordinate = employees.find((e, i) => !e.isLeader && e.dept === emp.dept);
-            const leaderData = lStatus==='submitted' && subordinate ? generateLeaderFormData(emp.name, subordinate.name) : null;
+            // A leader evaluates all non-leader subordinates in their department.
+            const subordinates = employees.filter(e => !e.isLeader && e.dept === emp.dept).map(e => e.name);
+            const leaderData = lStatus==='submitted' && subordinates.length ? generateLeaderFormData(subordinates) : null;
             leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?demoTime(period, ei, 14):null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: 'leader_review_submissions' });
           }
         }
