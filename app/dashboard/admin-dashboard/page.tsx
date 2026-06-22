@@ -1320,7 +1320,7 @@ export default function AdminDashboard() {
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                 {/* The spreadsheet table */}
                 <div style={{overflowX:'auto'}}>
-                  <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                     {/* Header row 1: frozen columns + month group headers */}
                     <thead>
                       <tr style={{background:'#f8fafc'}}>
@@ -1391,7 +1391,7 @@ export default function AdminDashboard() {
               {finHrPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                   <div style={{overflowX:'auto'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
@@ -1467,7 +1467,7 @@ export default function AdminDashboard() {
               {mktPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                   <div style={{overflowX:'auto'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
