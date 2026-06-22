@@ -35,6 +35,10 @@ interface DetailTarget {
   record: FormRecord;
 }
 
+// Admin groups Self + HR + Finance + Marketing together under "Self Reviews"
+// and adds director comments there; Leader reviews are separate and have none.
+const DIRECTOR_COMMENT_FORMS = new Set(['self', 'finance', 'hr', 'marketing']);
+
 function getFormsForUser(user: User): FormConfig[] {
   const forms: FormConfig[] = [];
   if (user.email !== 'chelsea@tassure.com') {
@@ -291,7 +295,7 @@ export default function MySubmissions() {
           id: `demo-${fc.key}-${i}`,
           submitted_at: st === 'submitted' ? `${period}-15T09:00:00Z` : null,
           form_data: demoFormData(fc.key, st),
-          director_comment: fc.key === 'self' && st === 'submitted' ? 'Well documented submission — keep up the consistent quality. / 记录完整，继续保持稳定质量。' : '',
+          director_comment: DIRECTOR_COMMENT_FORMS.has(fc.key) && st === 'submitted' ? 'Well documented submission — keep up the consistent quality. / 记录完整，继续保持稳定质量。' : '',
         } : null;
       });
       return { period, statuses, records };
@@ -454,7 +458,7 @@ export default function MySubmissions() {
               const status = currentRow?.statuses[form.key] || 'pending';
               const isSubmitted = status === 'submitted';
               const record = currentRow?.records?.[form.key];
-              const directorComment = form.key === 'self' ? (record?.director_comment || '') : '';
+              const directorComment = DIRECTOR_COMMENT_FORMS.has(form.key) ? (record?.director_comment || '') : '';
               return (
                 <div key={form.key} style={{ padding: '20px', background: isSubmitted ? '#f0fdf4' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSubmitted ? '#bbf7d0' : '#e2e8f0'}`, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e3a5f' }}>{form.label}</div>
@@ -518,7 +522,7 @@ export default function MySubmissions() {
                   {historyRows.map((row, idx) => {
                     // Collect all director comments across forms for this period
                     const comments = forms
-                      .filter(f => f.key === 'self')
+                      .filter(f => DIRECTOR_COMMENT_FORMS.has(f.key))
                       .map(f => ({ label: f.label, comment: row.records?.[f.key]?.director_comment || '' }))
                       .filter(x => x.comment.trim());
                     return (
@@ -622,14 +626,6 @@ export default function MySubmissions() {
 
             {/* Modal Body */}
             <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
-              {detail.record.director_comment?.trim() && (
-                <div style={{ marginBottom: '20px' }}>
-                  <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Director Comment</div>
-                  <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1e3a5f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                    {detail.record.director_comment}
-                  </div>
-                </div>
-              )}
               <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
             </div>
 
