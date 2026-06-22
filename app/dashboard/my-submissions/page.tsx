@@ -592,7 +592,7 @@ export default function MySubmissions() {
                           </div>
                         ))}
                       </td>
-                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'center' }}>
                         {/* Show View button if any form has a record for this period */}
                         {forms.some(f => row.records?.[f.key]) && (
                           <button
