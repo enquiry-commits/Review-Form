@@ -1345,17 +1345,18 @@ export default function AdminDashboard() {
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
               {finHrPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{padding:'10px 16px',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',gap:'8px'}}>
-                    <span style={{fontWeight:'800',fontSize:'13px',color:'#1e3a5f'}}>Internal · Finance &amp; HR</span>
-                    <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{finHrPeople.length} member{finHrPeople.length!==1?'s':''}</span>
-                  </div>
                   <div style={{overflowX:'auto'}}>
                     <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Dept</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Department</th>
+                          <th colSpan={months.length * 2} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
+                            Internal · Finance &amp; HR <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{finHrPeople.length} members</span>
+                          </th>
+                        </tr>
+                        <tr style={{background:'#f8fafc'}}>
                           {months.map(m => (
                             <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
                               {fullMonthNames[parseInt(m)]}
@@ -1419,17 +1420,18 @@ export default function AdminDashboard() {
               {/* ── Table 3: Internal Marketing (Vincent) ── */}
               {mktPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{padding:'10px 16px',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',borderBottom:'1px solid #e2e8f0',display:'flex',alignItems:'center',gap:'8px'}}>
-                    <span style={{fontWeight:'800',fontSize:'13px',color:'#1e3a5f'}}>Internal · Marketing</span>
-                    <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{mktPeople.length} member{mktPeople.length!==1?'s':''}</span>
-                  </div>
                   <div style={{overflowX:'auto'}}>
                     <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'100%',tableLayout:'auto'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Dept</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'140px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'110px',background:'#f8fafc',position:'sticky',left:'180px',zIndex:2}}>Department</th>
+                          <th colSpan={months.length * 2} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
+                            Internal · Marketing <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{mktPeople.length} member{mktPeople.length!==1?'s':''}</span>
+                          </th>
+                        </tr>
+                        <tr style={{background:'#f8fafc'}}>
                           {months.map(m => (
                             <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
                               {fullMonthNames[parseInt(m)]}
