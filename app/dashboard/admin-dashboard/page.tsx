@@ -555,8 +555,8 @@ export default function AdminDashboard() {
       });
       Object.values(fd.positive_items || {}).forEach((pos: any) => {
         (pos.rows || []).forEach((row: any) => {
-          if (row.comment?.trim())
-            entries.push([...base, '', '', '', pos.label, row.comment, '']);
+          if (row.employee?.trim() || row.comment?.trim())
+            entries.push([...base, '', row.employee || '', '', pos.label, row.comment, '']);
         });
       });
       if (fd.overall_remarks?.remarks?.trim())

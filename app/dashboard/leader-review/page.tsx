@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 
 type FileLink  = { name: string; url: string };
 type KPIRow    = { employee: string; comment: string; files: FileLink[] };
-type PosRow    = { comment: string; files: FileLink[] };
+type PosRow    = { employee: string; comment: string; files: FileLink[] };
 type Overall   = { remarks: string; files: FileLink[] };
 
 // KPI category/item structure (static metadata)
@@ -56,7 +56,7 @@ const DEPT_EMPLOYEES: Record<string, string[]> = {
 const emptyKpiRows = (): Record<string, KPIRow[]> =>
   Object.fromEntries(ALL_KPI_IDS.map(id => [id, [{ employee:'', comment:'', files:[] }]]));
 const emptyPosRows = (): Record<string, PosRow[]> =>
-  Object.fromEntries(ALL_POS_IDS.map(id => [id, [{ comment:'', files:[] }]]));
+  Object.fromEntries(ALL_POS_IDS.map(id => [id, [{ employee:'', comment:'', files:[] }]]));
 
 export default function LeaderReviewForm() {
   const router = useRouter();
@@ -394,17 +394,26 @@ export default function LeaderReviewForm() {
                     <div key={rowIdx} style={{marginBottom:rowIdx<rows.length-1?'24px':'0',paddingBottom:rowIdx<rows.length-1?'24px':'0',borderBottom:rowIdx<rows.length-1?'1.5px solid #e2e8f0':'none'}}>
                       <div style={{display:'flex',gap:'12px',alignItems:'flex-end',marginBottom:'12px'}}>
                         <div style={{flex:1}}>
-                          <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Leader Comment / 主管评语</label>
-                          <textarea value={row.comment} disabled={isSubmitted}
-                            onChange={e=>{dirtyRef.current=true;const r=[...posRows[pi.id]];r[rowIdx]={...r[rowIdx],comment:e.target.value};setPosRows(p=>({...p,[pi.id]:r}));}}
-                            placeholder="Evidence / Event description... / 证据／事件描述"
-                            style={{width:'100%',minHeight:'70px',padding:'12px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'13px',fontFamily:'inherit',background:'#fff',resize:'vertical'}} />
+                          <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Employee / 员工</label>
+                          <select value={row.employee||''} disabled={isSubmitted}
+                            onChange={e=>{dirtyRef.current=true;const r=[...posRows[pi.id]];r[rowIdx]={...r[rowIdx],employee:e.target.value};setPosRows(p=>({...p,[pi.id]:r}));}}
+                            style={{width:'100%',padding:'10px 12px',border:'1.5px solid #e2e8f0',borderRadius:'10px',fontSize:'13px',color:'#1a1a2e',background:'#fff',fontFamily:'inherit',cursor:isSubmitted?'not-allowed':'pointer'}}>
+                            <option value="">-- Select Employee / 选择员工 --</option>
+                            {employees.map(emp=><option key={emp} value={emp}>{emp}</option>)}
+                          </select>
                         </div>
                         {!isSubmitted&&rows.length>1&&(
                           <button onClick={()=>setPosRows(p=>{const r=[...p[pi.id]];r.splice(rowIdx,1);return{...p,[pi.id]:r};})}
                             style={{padding:'10px 16px',background:'#fee2e2',color:'#dc2626',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'700',cursor:'pointer',alignSelf:'flex-start',marginTop:'28px'}}
                             onMouseEnter={e=>{e.currentTarget.style.background='#fecaca';}} onMouseLeave={e=>{e.currentTarget.style.background='#fee2e2';}}>Remove</button>
                         )}
+                      </div>
+                      <div style={{marginBottom:'12px'}}>
+                        <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'8px',display:'block'}}>Leader Comment / 主管评语</label>
+                        <textarea value={row.comment} disabled={isSubmitted}
+                          onChange={e=>{dirtyRef.current=true;const r=[...posRows[pi.id]];r[rowIdx]={...r[rowIdx],comment:e.target.value};setPosRows(p=>({...p,[pi.id]:r}));}}
+                          placeholder="Evidence / Event description... / 证据／事件描述"
+                          style={{width:'100%',minHeight:'70px',padding:'12px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'13px',fontFamily:'inherit',background:'#fff',resize:'vertical'}} />
                       </div>
                       <div style={{background:'rgba(126,184,212,0.04)',border:'1.5px solid #e2e8f0',borderRadius:'12px',padding:'14px'}}>
                         <label style={{fontSize:'12px',color:'#64748b',fontWeight:'700',marginBottom:'10px',display:'block'}}>Upload Evidence / 上传证据</label>
@@ -438,7 +447,7 @@ export default function LeaderReviewForm() {
                   ))}
                   {!isSubmitted&&(
                     <div style={{marginTop:'16px',paddingTop:'16px',borderTop:'1.5px solid #e2e8f0'}}>
-                      <button onClick={()=>setPosRows(p=>({...p,[pi.id]:[...p[pi.id],{comment:'',files:[]}]}))}
+                      <button onClick={()=>setPosRows(p=>({...p,[pi.id]:[...p[pi.id],{employee:'',comment:'',files:[]}]}))}
                         style={{width:'100%',padding:'12px 24px',background:'#1e3a5f',color:'white',border:'none',borderRadius:'12px',fontSize:'13px',fontWeight:'700',cursor:'pointer',transition:'all 0.3s'}}
                         onMouseEnter={e=>{e.currentTarget.style.background='#152840';}} onMouseLeave={e=>{e.currentTarget.style.background='#1e3a5f';}}>
                         + Add another item / 增加另一个项目
