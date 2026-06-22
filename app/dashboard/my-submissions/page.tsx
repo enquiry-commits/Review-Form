@@ -151,6 +151,35 @@ export default function MySubmissions() {
   const [detail, setDetail] = useState<DetailTarget | null>(null);
   const currentPeriod = getCurrentReviewPeriod();
 
+  const demoFormData = (formKey: string, status: Status) => {
+    // Leader review uses employee-tagged rows; self/finance omit the employee field
+    const withEmp = formKey === 'leader';
+    const full = {
+      kpis: {
+        k_complaints: { kpi: 'Client Complaints / Issues — 客户抱怨／异常', rows: [
+          { ...(withEmp ? { employee: 'Tee Yu Heng' } : {}), comment: 'One minor client inquiry regarding document timing — followed up same day and resolved. / 一次关于文件时间的客户询问，当天跟进并解决。', files: [] },
+        ] },
+        k_efficiency: { kpi: 'Task Efficiency & Execution — 任务执行力', rows: [
+          { ...(withEmp ? { employee: 'Vernice Chai' } : {}), comment: 'Deliverables completed on schedule this period, no chasing required. / 本期交付均按时完成，无需催办。', files: [] },
+        ] },
+      },
+      positive_items: {
+        p_compliment: { label: 'Written Client Compliment — 客户书面表扬', rows: [
+          { comment: 'Client sent an email praising the proactive handling of their year-end filing. / 客户发邮件表扬年终申报的主动处理。', files: [] },
+        ] },
+      },
+      overall_remarks: {
+        remarks: 'Solid, steady performance this period. Good client focus and attention to detail; continue improving timeline communication. / 本期表现稳健，客户意识与细节把控良好；继续加强时间节点沟通。',
+        files: [],
+      },
+    };
+    if (status === 'draft') {
+      // Draft = partially filled sample
+      return { kpis: { k_complaints: full.kpis.k_complaints }, positive_items: {}, overall_remarks: { remarks: '', files: [] } };
+    }
+    return full;
+  };
+
   const generateDemoRows = (f: FormConfig[]): PeriodRow[] => {
     const periods: string[] = [];
     let year = parseInt(currentPeriod.split('-')[0]);
@@ -174,7 +203,8 @@ export default function MySubmissions() {
         records[fc.key] = st !== 'pending' ? {
           id: `demo-${fc.key}-${i}`,
           submitted_at: st === 'submitted' ? `${period}-15T09:00:00Z` : null,
-          form_data: null,
+          form_data: demoFormData(fc.key, st),
+          director_comment: fc.key === 'self' && st === 'submitted' ? 'Well documented submission — keep up the consistent quality. / 记录完整，继续保持稳定质量。' : '',
         } : null;
       });
       return { period, statuses, records };
@@ -499,13 +529,7 @@ export default function MySubmissions() {
 
             {/* Modal Body */}
             <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
-              {isDemoMode ? (
-                <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8', fontSize: '14px' }}>
-                  Form content not available in demo mode.
-                </div>
-              ) : (
-                <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
-              )}
+              <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
             </div>
 
             {/* Modal Footer */}
