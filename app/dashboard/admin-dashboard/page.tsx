@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
-import { User, ALL_REVIEWABLE_USERS, DIRECTOR_EMAILS } from '@/lib/auth';
+import { User, ALL_REVIEWABLE_USERS, DIRECTOR_EMAILS, logout } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 import { KPI_META, POS_META } from '@/lib/reviewMeta';
@@ -611,8 +611,8 @@ export default function AdminDashboard() {
     XLSX.writeFile(wb, `tassure-review-${period}.xlsx`);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    await logout();
     router.push('/');
   };
 

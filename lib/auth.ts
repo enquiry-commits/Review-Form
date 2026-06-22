@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 // 用户权限等级
 export type UserRole = 'admin' | 'leader' | 'employee';
 
@@ -77,6 +79,63 @@ export async function authenticate(email: string, password: string): Promise<Use
     role: userData.role,
     department: userData.department,
   };
+}
+
+// ─── Google (Supabase) authentication ────────────────────────────────────────
+// Only company Google Workspace accounts may sign in.
+export const ALLOWED_EMAIL_DOMAIN = 'tassure.com';
+
+// Map a verified email (from a Google/Supabase session) to an app User, or null
+// if the email is not a registered member of the review system.
+export function mapEmailToUser(email: string): User | null {
+  const normalized = email.trim().toLowerCase();
+  const userData = USERS_DATABASE[normalized as keyof typeof USERS_DATABASE];
+  if (!userData) return null;
+  return {
+    id: normalized,
+    email: normalized,
+    name: userData.name,
+    role: userData.role,
+    department: userData.department,
+  };
+}
+
+// Kick off the Google OAuth flow. The browser is redirected to Google and,
+// after consent, back to the app origin where the session is finalized.
+export async function signInWithGoogle(): Promise<{ error: string | null }> {
+  const redirectTo =
+    typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      // hd hints Google to pre-select the company domain; real enforcement is
+      // done below in resolveSessionUser (and by RLS at the database).
+      queryParams: { hd: ALLOWED_EMAIL_DOMAIN, prompt: 'select_account' },
+    },
+  });
+  return { error: error ? error.message : null };
+}
+
+export type SessionResolveReason = 'no-session' | 'wrong-domain' | 'not-registered';
+
+// Resolve the current Supabase session into an app User, validating that the
+// email belongs to the company domain and is a registered member.
+export async function resolveSessionUser(): Promise<{ user: User | null; reason?: SessionResolveReason }> {
+  const { data } = await supabase.auth.getSession();
+  const email = data.session?.user?.email?.toLowerCase();
+  if (!email) return { user: null, reason: 'no-session' };
+  if (!email.endsWith('@' + ALLOWED_EMAIL_DOMAIN)) return { user: null, reason: 'wrong-domain' };
+  const user = mapEmailToUser(email);
+  if (!user) return { user: null, reason: 'not-registered' };
+  return { user };
+}
+
+// Single logout entry point: clears both the Supabase session and the cached
+// user object so the user is not silently re-authenticated.
+export async function logout(): Promise<void> {
+  try { await supabase.auth.signOut(); } catch { /* ignore */ }
+  if (typeof window !== 'undefined') localStorage.removeItem('user');
 }
 
 // 权限检查

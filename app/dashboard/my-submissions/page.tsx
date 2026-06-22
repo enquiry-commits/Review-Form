@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from '@/lib/auth';
+import { User, logout } from '@/lib/auth';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 import { supabase } from '@/lib/supabase';
 import { KPI_META, POS_META } from '@/lib/reviewMeta';
@@ -418,8 +418,8 @@ export default function MySubmissions() {
     }
   }, [detail]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    await logout();
     router.push('/');
   };
 

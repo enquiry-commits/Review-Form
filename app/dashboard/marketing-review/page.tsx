@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from '@/lib/auth';
+import { User, logout } from '@/lib/auth';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -308,7 +308,7 @@ export default function MarketingReviewForm() {
     }
   };
 
-  const handleLogout = () => { localStorage.removeItem('user'); router.push('/'); };
+  const handleLogout = async () => { await logout(); router.push('/'); };
 
   if (accessDenied) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>

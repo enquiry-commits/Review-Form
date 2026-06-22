@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, hasAccess } from '@/lib/auth';
+import { User, hasAccess, logout } from '@/lib/auth';
 
 const ICONS: Record<string, ReactElement> = {
   'self-review': (
@@ -115,7 +115,7 @@ export default function Dashboard() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const handleLogout = () => { localStorage.removeItem('user'); router.push('/'); };
+  const handleLogout = async () => { await logout(); router.push('/'); };
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
