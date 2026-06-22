@@ -220,9 +220,7 @@ export default function MySubmissions() {
       const allPeriods = new Set<string>([currentPeriod]);
       Object.values(statusMaps).forEach(m => m.forEach((_, p) => allPeriods.add(p)));
 
-      const sortedPeriods = [...allPeriods].sort().reverse();
-
-      const result: PeriodRow[] = sortedPeriods.map(period => {
+      const result: PeriodRow[] = [...allPeriods].map(period => {
         const statuses: Record<string, Status> = {};
         const records: Record<string, FormRecord | null> = {};
         userForms.forEach(f => {
@@ -232,7 +230,28 @@ export default function MySubmissions() {
         return { period, statuses, records };
       });
 
-      setRows(result);
+      // Sort by latest submitted_at timestamp, then by period (descending)
+      const sortedResult = result.sort((a, b) => {
+        const getLatestSubmitTime = (row: PeriodRow) => {
+          let latest: string | null = null;
+          Object.values(row.records).forEach(rec => {
+            if (rec?.submitted_at && (!latest || rec.submitted_at > latest)) {
+              latest = rec.submitted_at;
+            }
+          });
+          return latest;
+        };
+
+        const timeA = getLatestSubmitTime(a);
+        const timeB = getLatestSubmitTime(b);
+
+        if (timeA && timeB) return new Date(timeB).getTime() - new Date(timeA).getTime();
+        if (timeA) return -1;
+        if (timeB) return 1;
+        return (b.period || '').localeCompare(a.period || '');
+      });
+
+      setRows(sortedResult);
       setLoaded(true);
     };
 
