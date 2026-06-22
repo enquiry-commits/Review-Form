@@ -1372,27 +1372,28 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody>
                         {finHrPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa', borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none'}}
+                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
                             onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
                               <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                               <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                             </td>
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
                             {months.map(m => {
                               const period = `${selYear}-${m}`;
                               const finRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='finance_review_submissions');
                               const hrRow  = emp.email === 'esther@tassure.com'
                                 ? tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='hr_review_submissions')
                                 : undefined;
+                              const borderStyle = i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none';
                               return [
-                                cellStyle(finRow, ()=>{ setTableDetailRow(finRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); }),
+                                <td key={`${period}-fin`} onClick={finRow ? ()=>{ setTableDetailRow(finRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:finRow?.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor: finRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(finRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:finRow?.status==='submitted'?'#15803d':'#92400e'}}>{finRow?.status==='submitted'?'✓':finRow?.status==='draft'?'○':'—'}</span></td>,
                                 hrRow !== undefined
-                                  ? cellStyle(hrRow, ()=>{ setTableDetailRow(hrRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); })
-                                  : <td key={`${period}-hr-na`} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
+                                  ? <td key={`${period}-hr`} onClick={hrRow ? ()=>{ setTableDetailRow(hrRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:hrRow?.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor: hrRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(hrRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:hrRow?.status==='submitted'?'#15803d':'#92400e'}}>{hrRow?.status==='submitted'?'✓':hrRow?.status==='draft'?'○':'—'}</span></td>
+                                  : <td key={`${period}-hr-na`} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
                                       <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
                                     </td>,
                               ];
@@ -1447,22 +1448,23 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody>
                         {mktPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa', borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none'}}
+                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
                             onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 16px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
                               <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                               <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                             </td>
-                            <td style={{border:'1px solid #e2e8f0',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
                             {months.map(m => {
                               const period = `${selYear}-${m}`;
                               const mktRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='marketing_review_submissions');
+                              const borderStyle = i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none';
                               return [
-                                cellStyle(mktRow, ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); }),
-                                <td key={`${period}-na`} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
+                                <td key={`${period}-mkt`} onClick={mktRow ? ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:mktRow?.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor: mktRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(mktRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:mktRow?.status==='submitted'?'#15803d':'#92400e'}}>{mktRow?.status==='submitted'?'✓':mktRow?.status==='draft'?'○':'—'}</span></td>,
+                                <td key={`${period}-na`} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
                                   <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
                                 </td>,
                               ];
