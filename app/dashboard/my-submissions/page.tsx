@@ -376,19 +376,19 @@ export default function MySubmissions() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <colgroup>
-                  <col style={{ width: '160px' }} />
-                  {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col style={{ minWidth: '200px' }} />
-                  <col style={{ width: '90px' }} />
+                  <col style={{ width: '100px' }} />
+                  {forms.map(f => <col key={f.key} style={{ width: '120px' }} />)}
+                  <col style={{ minWidth: '350px' }} />
+                  <col style={{ width: '120px' }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '12px 28px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Period</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Period</th>
                     {forms.map(f => (
-                      <th key={f.key} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
+                      <th key={f.key} style={{ padding: '12px 12px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
                     ))}
                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7eb8d4', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Director Comment</th>
-                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}></th>
+                    <th style={{ padding: '12px 20px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -400,11 +400,11 @@ export default function MySubmissions() {
                       .filter(x => x.comment.trim());
                     return (
                     <tr key={row.period} style={{ background: idx % 2 === 0 ? '#ffffff' : '#fafbfc' }}>
-                      <td style={{ padding: '14px 28px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '14px 16px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
                         {formatPeriodDisplay(row.period)}
                       </td>
                       {forms.map(f => (
-                        <td key={f.key} style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                        <td key={f.key} style={{ padding: '14px 12px', borderBottom: '1px solid #f1f5f9', textAlign: 'center' }}>
                           <StatusBadge status={row.statuses[f.key] || 'pending'} />
                         </td>
                       ))}
@@ -432,7 +432,7 @@ export default function MySubmissions() {
                           </div>
                         ))}
                       </td>
-                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'center' }}>
                         {/* Show View button if any form has a record for this period */}
                         {forms.some(f => row.records?.[f.key]) && (
                           <button
