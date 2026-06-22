@@ -78,13 +78,15 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 // Normalize any field value (object {comment}/{description}, or array of rows)
-// into a flat list of answers, each optionally tagged with an employee name.
-function extractAnswers(val: any): { text: string; employee?: string }[] {
-  const out: { text: string; employee?: string }[] = [];
+// into a flat list of answers, each optionally tagged with an employee name
+// and carrying any attached files.
+function extractAnswers(val: any): { text: string; employee?: string; files: any[] }[] {
+  const out: { text: string; employee?: string; files: any[] }[] = [];
   const pushRow = (row: any) => {
     const text = (row?.comment ?? row?.description ?? '').trim();
     const employee = row?.employee?.trim() || undefined;
-    if (text || employee) out.push({ text, employee });
+    const files = Array.isArray(row?.files) ? row.files : [];
+    if (text || employee || files.length) out.push({ text, employee, files });
   };
   if (Array.isArray(val)) {
     val.forEach(pushRow);                       // leader: [{employee, comment}]
@@ -93,6 +95,26 @@ function extractAnswers(val: any): { text: string; employee?: string }[] {
     else pushRow(val);                          // self/finance: {comment}/{description}
   }
   return out;
+}
+
+// Render uploaded file attachments as links (matches Admin Dashboard).
+function FileLinks({ files }: { files: any[] }) {
+  if (!files?.length) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+      {files.map((f: any, i: number) => (
+        f?.url && !f.url.startsWith('blob:') ? (
+          <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            📎 {f.name} ↗
+          </a>
+        ) : (
+          <span key={i} style={{ background: '#f1f5f9', color: '#94a3b8', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }} title="File URL expired (uploaded before storage was set up)">
+            📎 {f?.name} (expired)
+          </span>
+        )
+      ))}
+    </div>
+  );
 }
 
 function humanize(key: string): string {
@@ -123,6 +145,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
   const kpis = form_data.kpis || {};
   const positives = form_data.positive_items || {};
   const remarks = form_data.overall_remarks?.remarks?.trim();
+  const remarksFiles = Array.isArray(form_data.overall_remarks?.files) ? form_data.overall_remarks.files : [];
 
   const kpiBlocks = Object.entries(kpis)
     .map(([key, val]: any) => ({ key, answers: extractAnswers(val), count: (val && !Array.isArray(val) && typeof val.count === 'number') ? val.count : 0, meta: KPI_META[key] }))
@@ -131,7 +154,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
     .map(([key, val]: any) => ({ key, answers: extractAnswers(val), meta: POS_META[key] }))
     .filter(b => b.answers.length > 0);
 
-  if (kpiBlocks.length === 0 && posBlocks.length === 0 && !remarks) {
+  if (kpiBlocks.length === 0 && posBlocks.length === 0 && !remarks && remarksFiles.length === 0) {
     return <p style={{ color: '#94a3b8', fontSize: '14px' }}>Form was saved with no content.</p>;
   }
 
@@ -161,6 +184,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
                       <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', margin: '6px 0 0 0' }}>{a.employee}</span>
                     )}
                     {a.text && <AnswerText text={a.text} />}
+                    <FileLinks files={a.files} />
                   </div>
                 ))}
               </div>
@@ -190,6 +214,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
                       <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', margin: '6px 0 0 0' }}>{a.employee}</span>
                     )}
                     {a.text && <AnswerText text={a.text} />}
+                    <FileLinks files={a.files} />
                   </div>
                 ))}
               </div>
@@ -203,11 +228,12 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
       </div>
 
       {/* Overall Remarks */}
-      {remarks && (
+      {(remarks || remarksFiles.length > 0) && (
         <div>
           <SectionHeader label="Overall Remarks" color="#7eb8d4" />
           <div style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
-            <AnswerText text={remarks} />
+            {remarks && <AnswerText text={remarks} />}
+            <FileLinks files={remarksFiles} />
           </div>
         </div>
       )}
