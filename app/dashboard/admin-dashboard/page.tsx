@@ -1197,7 +1197,7 @@ export default function AdminDashboard() {
               <span style={{fontSize:'16px'}}>👁</span>
               <div>
                 <span style={{fontSize:'13px',fontWeight:'800',color:'#92400e'}}>Demo Preview Mode</span>
-                <span style={{fontSize:'12px',color:'#92400e',marginLeft:'8px',opacity:'0.8'}}>— Showing sample data (10 employees × 12 months). No real records.</span>
+                <span style={{fontSize:'12px',color:'#92400e',marginLeft:'8px',opacity:'0.8'}}>— Showing sample data (18 employees × 12 months, 12 months each). No real records.</span>
               </div>
             </div>
             <button onClick={clearDemoData} style={{padding:'6px 14px',background:'#92400e',color:'white',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer',flexShrink:0}}>
@@ -1287,7 +1287,7 @@ export default function AdminDashboard() {
             <div style={{textAlign:'center',padding:'60px'}}>
               <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
               <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
-                👁 Preview with Demo Data (10 employees × 3 months)
+                👁 Preview with Demo Data (18 employees × 12 months)
               </button>
             </div>
           );
@@ -1589,7 +1589,7 @@ export default function AdminDashboard() {
             <div style={{textAlign:'center',padding:'60px'}}>
               <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
               <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
-                👁 Preview with Demo Data (10 employees × 3 months)
+                👁 Preview with Demo Data (18 employees × 12 months)
               </button>
             </div>
           );
