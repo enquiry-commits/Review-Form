@@ -1372,7 +1372,7 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody>
                         {finHrPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
+                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa', borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none'}}
                             onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
@@ -1447,7 +1447,7 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody>
                         {mktPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
+                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa', borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none'}}
                             onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
