@@ -373,8 +373,8 @@ export default function MySubmissions() {
               <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e3a5f' }}>Past Review Periods</div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto', width: '100%' }}>
+              <table style={{ width: 'auto', minWidth: '100%', borderCollapse: 'collapse' }}>
                 <colgroup>
                   <col style={{ width: '70px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '120px' }} />)}
