@@ -176,6 +176,8 @@ export default function Dashboard() {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         transition: 'all 0.2s',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
       }}
       onMouseEnter={(e) => { if (activeTab !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; } }}
       onMouseLeave={(e) => { if (activeTab !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; } }}
@@ -276,7 +278,7 @@ export default function Dashboard() {
                   color: adminMenu === id ? '#1e3a5f' : '#64748b',
                   background: adminMenu === id ? 'rgba(126,184,212,0.15)' : 'transparent',
                   boxShadow: adminMenu === id ? 'inset 3px 0 0 #7eb8d4' : 'none',
-                  whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s' }}
+                  whiteSpace: 'nowrap', overflow: 'hidden', transition: 'all 0.2s', userSelect: 'none', WebkitUserSelect: 'none' }}
                 onMouseEnter={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.color = '#1e3a5f'; }}}
                 onMouseLeave={e => { if (adminMenu !== id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}}>
                 {label}
@@ -285,7 +287,7 @@ export default function Dashboard() {
             const groupHeader = (title: string, isOpen: boolean, onToggle: () => void, showDivider = true) => (
               <div key={`hdr-${title}`}>
                 {showDivider && <div style={{ borderTop: '1px dashed #e2e8f0', margin: '8px 0 4px' }} />}
-                <div onClick={onToggle} style={{ fontSize: '11px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.6px', textTransform: 'uppercase', padding: '5px 14px 5px 28px', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7, cursor: 'pointer', borderRadius: '8px', transition: 'all 0.15s' }}
+                <div onClick={onToggle} style={{ fontSize: '11px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.6px', textTransform: 'uppercase', padding: '5px 14px 5px 28px', display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.7, cursor: 'pointer', borderRadius: '8px', transition: 'all 0.15s', userSelect: 'none', WebkitUserSelect: 'none' }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(30,58,95,0.04)'; }}
                   onMouseLeave={e => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.background = 'transparent'; }}>
                   <span style={{ fontSize: '10px', display: 'inline-block', transition: 'transform 0.2s', transform: isOpen ? 'rotate(90deg)' : 'none', flexShrink: 0 }}>›</span>
