@@ -240,12 +240,16 @@ export default function AdminDashboard() {
     const selfRows: SubmissionRow[] = [];
     const leaderRows: SubmissionRow[] = [];
     let idCounter = 1000;
+    // Give each demo submission a distinct timestamp within its period (varying by
+    // employee) so the time-sorted feed interleaves people rather than grouping them.
+    const demoTime = (period: string, ei: number, baseHour: number) =>
+      `${period}-${String(12 + (ei % 16)).padStart(2, '0')}T${String(baseHour + (ei % 6)).padStart(2, '0')}:${String((ei * 11) % 60).padStart(2, '0')}:00Z`;
     employees.forEach((emp, ei) => {
       periods.forEach((period, pi) => {
         const sStatus = selfMatrix[ei][pi];
         if (sStatus) {
           const selfData = sStatus==='submitted' ? generateSelfFormData(emp.name) : null;
-          selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?`${period}-15T09:00:00Z`:null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: selfData, source_table: emp.srcTable });
+          selfRows.push({ id: `demo-s-${idCounter++}`, user_id: emp.email, submitted_at: sStatus==='submitted'?demoTime(period, ei, 9):null, status: sStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: selfData, source_table: emp.srcTable });
         }
         if (emp.isLeader) {
           const lStatus = leaderMatrix[ei][pi];
@@ -253,7 +257,7 @@ export default function AdminDashboard() {
             // For leader review, find first non-leader subordinate to use as example
             const subordinate = employees.find((e, i) => !e.isLeader && e.dept === emp.dept);
             const leaderData = lStatus==='submitted' && subordinate ? generateLeaderFormData(emp.name, subordinate.name) : null;
-            leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?`${period}-16T10:00:00Z`:null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: 'leader_review_submissions' });
+            leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?demoTime(period, ei, 14):null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: 'leader_review_submissions' });
           }
         }
       });
@@ -606,6 +610,13 @@ export default function AdminDashboard() {
         ? row.review_period === `${filterYear}-${filterMonth}`
         : row.review_period?.startsWith(filterYear);
     return matchesSearch && matchesDept && matchesStatus && matchesPeriod;
+  })
+  // Order strictly by submission time (most recent first), not grouped by person.
+  // Drafts (no submitted_at) sink to the bottom.
+  .sort((a, b) => {
+    const ta = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+    const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+    return tb - ta;
   });
 
 
