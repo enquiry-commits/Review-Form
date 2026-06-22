@@ -1798,7 +1798,7 @@ export default function AdminDashboard() {
                     <thead>
                       <tr style={{background:'#fafafa',borderBottom:'1px solid #e2e8f0'}}>
                         <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Name</th>
-                        <th style={{padding:'10px 16px',textAlign:'left',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Role</th>
+                        <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#334155',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Role</th>
                         <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#3b82f6',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Self Review</th>
                         <th style={{padding:'10px 16px',textAlign:'center',fontWeight:'700',color:'#16a34a',fontSize:'11px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Leader Review</th>
                       </tr>
