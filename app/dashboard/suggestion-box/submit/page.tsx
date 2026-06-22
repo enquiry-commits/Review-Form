@@ -144,6 +144,9 @@ export default function SuggestionSubmitPage() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(126,184,212,0.1)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(126,184,212,0.04)'; }}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#7eb8d4'; e.currentTarget.style.background = 'rgba(126,184,212,0.18)'; }}
+              onDragLeave={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'rgba(126,184,212,0.04)'; }}
+              onDrop={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'rgba(126,184,212,0.04)'; if (e.dataTransfer.files && e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files); }}
               onClick={() => document.getElementById('suggestion_files')?.click()}
             >
               <input

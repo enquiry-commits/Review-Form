@@ -330,6 +330,9 @@ export default function LeaderReviewForm() {
                             <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.06)',cursor:'pointer',transition:'all 0.3s'}}
                               onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.12)';}}
                               onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+                              onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.18)';}}
+                              onDragLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+                              onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';if(e.dataTransfer.files&&e.dataTransfer.files.length)handleKpiFileUpload(item.id,rowIdx,e.dataTransfer.files);}}
                               onClick={()=>document.getElementById(`file_kpi_${item.id}_${rowIdx}`)?.click()}>
                               <input type="file" id={`file_kpi_${item.id}_${rowIdx}`} multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                                 onChange={e=>e.target.files&&handleKpiFileUpload(item.id,rowIdx,e.target.files)} />
@@ -409,6 +412,9 @@ export default function LeaderReviewForm() {
                           <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.06)',cursor:'pointer',transition:'all 0.3s'}}
                             onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.12)';}}
                             onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+                            onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.18)';}}
+                            onDragLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+                            onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';if(e.dataTransfer.files&&e.dataTransfer.files.length)handlePosFileUpload(pi.id,rowIdx,e.dataTransfer.files);}}
                             onClick={()=>document.getElementById(`file_pos_${pi.id}_${rowIdx}`)?.click()}>
                             <input type="file" id={`file_pos_${pi.id}_${rowIdx}`} multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                               onChange={e=>e.target.files&&handlePosFileUpload(pi.id,rowIdx,e.target.files)} />
@@ -462,6 +468,9 @@ export default function LeaderReviewForm() {
               <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.04)',cursor:'pointer',transition:'all 0.3s'}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.1)';}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.04)';}}
+                onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.1)';}}
+                onDragLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.04)';}}
+                onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.04)';if(e.dataTransfer.files&&e.dataTransfer.files.length)handleOverallFileUpload(e.dataTransfer.files);}}
                 onClick={()=>document.getElementById('file_overall')?.click()}>
                 <input type="file" id="file_overall" multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                   onChange={e=>e.target.files&&handleOverallFileUpload(e.target.files)} />

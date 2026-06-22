@@ -54,6 +54,9 @@ function KPIItem({ id, name, question, data, onChange, onFileUpload }: KPIItemPr
         <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.06)',cursor:'pointer',transition:'all 0.3s'}}
           onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.12)';}}
           onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+          onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.18)';}}
+          onDragLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+          onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';if(e.dataTransfer.files&&e.dataTransfer.files.length)onFileUpload(e.dataTransfer.files);}}
           onClick={()=>document.getElementById(`file_kpi_${id}`)?.click()}>
           <input type="file" id={`file_kpi_${id}`} multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
             onChange={e=>e.target.files&&onFileUpload(e.target.files)} />
@@ -97,6 +100,9 @@ function PositiveItem({ id, name, question, data, onChange, onFileUpload }: PosI
         <div style={{border:'1.5px dashed #7eb8d4',borderRadius:'10px',padding:'20px',textAlign:'center',background:'rgba(126,184,212,0.06)',cursor:'pointer',transition:'all 0.3s'}}
           onMouseEnter={e=>{e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.12)';}}
           onMouseLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+          onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#5a9bc4';e.currentTarget.style.background='rgba(126,184,212,0.18)';}}
+          onDragLeave={e=>{e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';}}
+          onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='#7eb8d4';e.currentTarget.style.background='rgba(126,184,212,0.06)';if(e.dataTransfer.files&&e.dataTransfer.files.length)onFileUpload(e.dataTransfer.files);}}
           onClick={()=>document.getElementById(`file_pos_${id}`)?.click()}>
           <input type="file" id={`file_pos_${id}`} multiple style={{display:'none'}} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
             onChange={e=>e.target.files&&onFileUpload(e.target.files)} />
