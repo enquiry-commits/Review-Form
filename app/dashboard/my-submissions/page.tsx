@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
 import { supabase } from '@/lib/supabase';
+import { KPI_META, POS_META } from '@/lib/reviewMeta';
 
 type Status = 'pending' | 'draft' | 'submitted';
 
@@ -72,70 +73,97 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-function FormDataView({ form_data, formKey }: { form_data: any; formKey: string }) {
+// Normalize any field value (object {comment}/{description}, or array of rows)
+// into a flat list of answers, each optionally tagged with an employee name.
+function extractAnswers(val: any): { text: string; employee?: string }[] {
+  const out: { text: string; employee?: string }[] = [];
+  const pushRow = (row: any) => {
+    const text = (row?.comment ?? row?.description ?? '').trim();
+    const employee = row?.employee?.trim() || undefined;
+    if (text || employee) out.push({ text, employee });
+  };
+  if (Array.isArray(val)) {
+    val.forEach(pushRow);                       // leader: [{employee, comment}]
+  } else if (val && typeof val === 'object') {
+    if (Array.isArray(val.rows)) val.rows.forEach(pushRow); // demo {rows:[...]}
+    else pushRow(val);                          // self/finance: {comment}/{description}
+  }
+  return out;
+}
+
+// One field block: Title (bold) + Question (gray) + Answer (white box)
+function FieldBlock({ name, question, answers, accent }: { name: string; question: string; answers: { text: string; employee?: string }[]; accent: string }) {
+  return (
+    <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '16px 18px' }}>
+      {name && <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginBottom: '6px', lineHeight: '1.4' }}>{name}</div>}
+      {question && <div style={{ fontSize: '13px', color: '#64748b', fontStyle: 'italic', lineHeight: '1.6', marginBottom: '12px' }}>{question}</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {answers.length > 0 ? answers.map((a, i) => (
+          <div key={i} style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '12px 14px' }}>
+            {a.employee && (
+              <span style={{ display: 'inline-block', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '5px', fontSize: '12px', fontWeight: '700', marginBottom: '6px' }}>{a.employee}</span>
+            )}
+            <div style={{ fontSize: '13px', color: '#334155', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{a.text || <span style={{ color: '#cbd5e1' }}>—</span>}</div>
+          </div>
+        )) : (
+          <div style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '12px', padding: '12px 14px', fontSize: '13px', color: '#cbd5e1' }}>—</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function humanize(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function FormDataView({ form_data }: { form_data: any; formKey: string }) {
   if (!form_data) return <p style={{ color: '#94a3b8', fontSize: '14px' }}>No form data available.</p>;
 
-  const sections: { title: string; content: string; type: 'kpi' | 'pos' | 'remark' }[] = [];
-
-  // KPI sections
   const kpis = form_data.kpis || {};
-  Object.entries(kpis).forEach(([, val]: any) => {
-    const title = val?.kpi || val?.label || '';
-    const texts: string[] = [];
-    (val?.rows || []).forEach((row: any) => {
-      if (row?.comment?.trim()) texts.push(row.comment.trim());
-      if (row?.employee?.trim()) texts.push(`— ${row.employee.trim()}`);
-    });
-    if (title || texts.length > 0) {
-      sections.push({ title, content: texts.join('\n') || '(No comment)', type: 'kpi' });
-    }
-  });
-
-  // Positive items
   const positives = form_data.positive_items || {};
-  Object.entries(positives).forEach(([, val]: any) => {
-    const title = val?.label || '';
-    const texts: string[] = [];
-    (val?.rows || []).forEach((row: any) => {
-      if (row?.comment?.trim()) texts.push(row.comment.trim());
-    });
-    if (title || texts.length > 0) {
-      sections.push({ title, content: texts.join('\n') || '(No comment)', type: 'pos' });
-    }
-  });
-
-  // Overall remarks
   const remarks = form_data.overall_remarks?.remarks?.trim();
-  if (remarks) {
-    sections.push({ title: 'Overall Remarks', content: remarks, type: 'remark' });
-  }
 
-  if (sections.length === 0) {
+  // Only show fields that have an answer
+  const kpiBlocks = Object.entries(kpis)
+    .map(([key, val]: any) => ({ key, answers: extractAnswers(val), meta: KPI_META[key] }))
+    .filter(b => b.answers.length > 0);
+  const posBlocks = Object.entries(positives)
+    .map(([key, val]: any) => ({ key, answers: extractAnswers(val), meta: POS_META[key] }))
+    .filter(b => b.answers.length > 0);
+
+  if (kpiBlocks.length === 0 && posBlocks.length === 0 && !remarks) {
     return <p style={{ color: '#94a3b8', fontSize: '14px' }}>Form was saved with no content.</p>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {sections.map((s, i) => {
-        const colors = {
-          kpi:    { bg: '#f0f7ff', border: '#bfdbfe', accent: '#1d4ed8' },
-          pos:    { bg: '#f0fdf4', border: '#bbf7d0', accent: '#15803d' },
-          remark: { bg: '#fafafa', border: '#e2e8f0', accent: '#64748b' },
-        };
-        const c = colors[s.type];
-        return (
-          <div key={i} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '10px', padding: '12px 14px' }}>
-            {s.title && (
-              <div style={{ fontSize: '12px', fontWeight: '700', color: c.accent, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {s.title}
-              </div>
-            )}
-            <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
-              {s.content}
-            </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {kpiBlocks.length > 0 && (
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>KPI Performance</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {kpiBlocks.map(b => (
+              <FieldBlock key={b.key} name={b.meta?.name || humanize(b.key)} question={b.meta?.question || ''} answers={b.answers} accent="#1d4ed8" />
+            ))}
           </div>
-        );
-      })}
+        </div>
+      )}
+      {posBlocks.length > 0 && (
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Positive Items</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {posBlocks.map(b => (
+              <FieldBlock key={b.key} name={b.meta?.name || humanize(b.key)} question={b.meta?.question || ''} answers={b.answers} accent="#15803d" />
+            ))}
+          </div>
+        </div>
+      )}
+      {remarks && (
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Overall Remarks</div>
+          <FieldBlock name="" question="" answers={[{ text: remarks }]} accent="#64748b" />
+        </div>
+      )}
     </div>
   );
 }
@@ -152,31 +180,47 @@ export default function MySubmissions() {
   const currentPeriod = getCurrentReviewPeriod();
 
   const demoFormData = (formKey: string, status: Status) => {
-    // Leader review uses employee-tagged rows; self/finance omit the employee field
-    const withEmp = formKey === 'leader';
+    // Build sample data using the SAME field ids and shapes as real submissions,
+    // so View Details renders through the identical code path (Title/Question/Answer).
+    if (formKey === 'leader') {
+      const full = {
+        kpis: {
+          kpi_0_0: [{ employee: 'Tee Yu Heng', comment: 'One minor client inquiry regarding document timing — followed up same day and resolved. / 一次关于文件时间的客户询问，当天跟进并解决。', files: [] }],
+          kpi_1_0: [{ employee: 'Vernice Chai', comment: 'Occasional delays on routine tasks, but prioritized urgent matters. / 日常任务偶有延误，但优先处理紧急事项。', files: [] }],
+        },
+        positive_items: {
+          pos_0: [{ comment: 'Client sent an email praising the proactive handling of their year-end filing. / 客户发邮件表扬年终申报的主动处理。', files: [] }],
+        },
+        overall_remarks: { remarks: 'Solid, steady team performance this period. Good client focus; continue improving timeline communication. / 本期团队表现稳健，客户意识良好；继续加强时间节点沟通。', files: [] },
+      };
+      if (status === 'draft') return { kpis: { kpi_0_0: full.kpis.kpi_0_0 }, positive_items: {}, overall_remarks: { remarks: '', files: [] } };
+      return full;
+    }
+    if (formKey === 'finance') {
+      const full = {
+        kpis: {
+          fin_efficiency: { count: 0, comment: 'Month-end close completed ahead of schedule, no bottlenecks. / 月末结账提前完成，无瓶颈。', files: [] },
+          fin_billing_errors: { count: 1, comment: 'One duplicate invoice caught and corrected before sending. / 发现并在发送前更正一张重复发票。', files: [] },
+        },
+        positive_items: {
+          fin_billing_accuracy: { description: 'All invoices issued accurately and on time this period. / 本期所有发票准确且按时开具。', files: [] },
+        },
+        overall_remarks: { remarks: 'Reliable support to all departments; billing accuracy maintained. / 对各部门支持稳定，开单准确性保持良好。', files: [] },
+      };
+      if (status === 'draft') return { kpis: { fin_efficiency: full.kpis.fin_efficiency }, positive_items: {}, overall_remarks: { remarks: '', files: [] } };
+      return full;
+    }
+    // self review
     const full = {
       kpis: {
-        k_complaints: { kpi: 'Client Complaints / Issues — 客户抱怨／异常', rows: [
-          { ...(withEmp ? { employee: 'Tee Yu Heng' } : {}), comment: 'One minor client inquiry regarding document timing — followed up same day and resolved. / 一次关于文件时间的客户询问，当天跟进并解决。', files: [] },
-        ] },
-        k_efficiency: { kpi: 'Task Efficiency & Execution — 任务执行力', rows: [
-          { ...(withEmp ? { employee: 'Vernice Chai' } : {}), comment: 'Deliverables completed on schedule this period, no chasing required. / 本期交付均按时完成，无需催办。', files: [] },
-        ] },
+        client_complaints: { count: 1, comment: 'One minor client inquiry regarding document timing — followed up same day and resolved. / 一次关于文件时间的客户询问，当天跟进并解决。', files: [] },
+        minor_delays: { count: 0, comment: 'Occasional delays on routine tasks, but prioritized urgent matters. / 日常任务偶有延误，但优先处理紧急事项。', files: [] },
       },
       positive_items: {
-        p_compliment: { label: 'Written Client Compliment — 客户书面表扬', rows: [
-          { comment: 'Client sent an email praising the proactive handling of their year-end filing. / 客户发邮件表扬年终申报的主动处理。', files: [] },
-        ] },
-      },
-      overall_remarks: {
-        remarks: 'Solid, steady performance this period. Good client focus and attention to detail; continue improving timeline communication. / 本期表现稳健，客户意识与细节把控良好；继续加强时间节点沟通。',
-        files: [],
+        pos_compliment: { description: 'Client sent an email praising the proactive handling of their year-end filing. / 客户发邮件表扬年终申报的主动处理。', files: [] },
       },
     };
-    if (status === 'draft') {
-      // Draft = partially filled sample
-      return { kpis: { k_complaints: full.kpis.k_complaints }, positive_items: {}, overall_remarks: { remarks: '', files: [] } };
-    }
+    if (status === 'draft') return { kpis: { client_complaints: full.kpis.client_complaints }, positive_items: {} };
     return full;
   };
 
