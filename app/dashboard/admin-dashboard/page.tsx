@@ -1319,7 +1319,7 @@ export default function AdminDashboard() {
               {/* Spreadsheet */}
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                 {/* The spreadsheet table */}
-                <div style={{overflowX:'auto'}}>
+                <div style={{overflowX:'auto',minWidth:'1600px'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                     {/* Header row 1: frozen columns + month group headers */}
                     <thead>
@@ -1390,7 +1390,7 @@ export default function AdminDashboard() {
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
               {finHrPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto'}}>
+                  <div style={{overflowX:'auto',minWidth:'1600px'}}>
                     <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
@@ -1466,7 +1466,7 @@ export default function AdminDashboard() {
               {/* ── Table 3: Internal Marketing (Vincent) ── */}
               {mktPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto'}}>
+                  <div style={{overflowX:'auto',minWidth:'1600px'}}>
                     <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
