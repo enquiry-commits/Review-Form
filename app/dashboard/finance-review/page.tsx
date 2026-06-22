@@ -52,7 +52,7 @@ const POS_META: Record<string, { name: string; question: string }> = {
   },
 };
 
-const ALLOWED_EMAILS = ['chelsea@tassure.com', 'vincent@tassure.com'];
+const ALLOWED_EMAILS = ['chelsea@tassure.com', 'vincent@tassure.com', 'esther@tassure.com'];
 const TABLE = 'finance_review_submissions';
 
 const emptyKPIs = (): Record<string, KPIData> =>
