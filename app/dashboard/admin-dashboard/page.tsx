@@ -2547,6 +2547,17 @@ export default function AdminDashboard() {
               <div><label style={{fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase'}}>Department</label><p style={{fontSize:'14px',color:'#0f172a',margin:'6px 0 0'}}>{tableDetailRow.department}</p></div>
               <div><label style={{fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase'}}>Period</label><p style={{fontSize:'14px',color:'#0f172a',margin:'6px 0 0'}}>{tableDetailRow.review_period}</p></div>
               <div><label style={{fontSize:'11px',fontWeight:'700',color:'#64748b',textTransform:'uppercase'}}>Status</label><p style={{fontSize:'14px',color:'#0f172a',margin:'6px 0 0'}}>{tableDetailRow.status==='submitted'?'✓ Submitted':'⏱ Draft'}</p></div>
+              {tableDetailRow.source_table === 'finance_review_submissions' && tableAllLeader.some(r => r.id === tableDetailRow.id) && (
+                <div style={{gridColumn:'1 / -1',background:'#eff6ff',border:'1.5px solid #bfdbfe',borderRadius:'10px',padding:'12px 16px',display:'flex',alignItems:'center',gap:'10px'}}>
+                  <span style={{fontSize:'16px'}}>👤</span>
+                  <div>
+                    <label style={{fontSize:'11px',fontWeight:'800',color:'#3b82f6',textTransform:'uppercase',letterSpacing:'0.4px'}}>Evaluating / 评估对象</label>
+                    <p style={{fontSize:'14px',fontWeight:'700',color:'#1e3a5f',margin:'3px 0 0'}}>
+                      {tableDetailRow.form_data?.subject?.name || 'Chelsea Ang'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px'}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
