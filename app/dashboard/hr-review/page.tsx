@@ -11,8 +11,8 @@ type FileLink = { name: string; url: string };
 type KPIData = { count: number; comment: string; files: FileLink[] };
 type PosData  = { description: string; files: FileLink[] };
 
-const KPI_IDS = ['hr_turnover', 'hr_complaints', 'hr_process_issues', 'hr_doc_issues'];
-const POS_IDS = ['hr_retention', 'hr_mgmt_support', 'hr_process_improve', 'hr_records_accuracy'];
+const KPI_IDS = ['hr_turnover', 'hr_complaints', 'hr_process_issues', 'hr_doc_issues', 'hr_efficiency'];
+const POS_IDS = ['hr_retention', 'hr_mgmt_support', 'hr_records_accuracy'];
 
 const KPI_META: Record<string, { name: string; question: string }> = {
   hr_turnover: {
@@ -31,6 +31,10 @@ const KPI_META: Record<string, { name: string; question: string }> = {
     name: 'Documentation / Confidentiality Issues / 文件记录 / 保密性问题',
     question: 'Were there issues with record keeping, document accuracy, or confidentiality? / 是否有文件记录、资料准确性或保密性方面的问题？',
   },
+  hr_efficiency: {
+    name: 'Internal Work Efficiency Issues / 内部工作效率问题',
+    question: 'Were there inefficiencies or bottlenecks in finance or admin tasks this period? / 本月财务或行政工作是否出现效率不足或瓶颈问题？',
+  },
 };
 
 const POS_META: Record<string, { name: string; question: string }> = {
@@ -41,10 +45,6 @@ const POS_META: Record<string, { name: string; question: string }> = {
   hr_mgmt_support: {
     name: 'HR Support to Employees and Management / 对员工和管理层的人事支持',
     question: 'Did you provide effective HR support to both employees and management? / 是否为员工和管理层提供了有效的人事支持？',
-  },
-  hr_process_improve: {
-    name: 'HR Process or Form Improvement / HR 流程或表格改善',
-    question: 'Did you improve any HR process, form, or system this period? / 本期是否有改善任何HR流程、表格或系统？',
   },
   hr_records_accuracy: {
     name: 'Accuracy and Completeness of HR Records / 员工资料记录的准确性与完整性',
