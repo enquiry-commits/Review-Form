@@ -1537,22 +1537,21 @@ export default function AdminDashboard() {
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'120px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'90px',background:'#f8fafc',position:'sticky',left:'160px',zIndex:2}}>Department</th>
-                          <th colSpan={months.length * 2} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
+                          <th colSpan={months.length} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
                             Internal · Marketing <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{mktPeople.length} member{mktPeople.length!==1?'s':''}</span>
                           </th>
                         </tr>
                         <tr style={{background:'#f8fafc'}}>
                           {months.map(m => (
-                            <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
+                            <th key={m} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
                               {fullMonthNames[parseInt(m)]}
                             </th>
                           ))}
                         </tr>
                         <tr style={{background:'#f8fafc'}}>
-                          {months.map(m => [
-                            <th key={`${m}-mkt`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#7eb8d4',fontSize:'11px',background:'rgba(126,184,212,0.1)',width:'72px'}}>📣 Marketing</th>,
-                            <th key={`${m}-na`}  style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#e2e8f0',fontSize:'11px',background:'#fafafa',width:'72px'}}>—</th>,
-                          ])}
+                          {months.map(m => (
+                            <th key={`${m}-mkt`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#7eb8d4',fontSize:'11px',background:'rgba(126,184,212,0.1)',width:'72px'}}>📣 Marketing</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -1571,19 +1570,16 @@ export default function AdminDashboard() {
                               const period = `${selYear}-${m}`;
                               const mktRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='marketing_review_submissions');
                               const borderStyle = i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none';
-                              return [
-                                <td key={`${period}-mkt`} onClick={mktRow ? ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:mktRow?.status==='submitted'?'rgba(220,252,231,0.5)':'rgba(254,249,195,0.5)',cursor: mktRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(mktRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:mktRow?.status==='submitted'?'#15803d':'#92400e'}}>{mktRow?.status==='submitted'?'✓':mktRow?.status==='draft'?'○':'—'}</span></td>,
-                                <td key={`${period}-na`} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
-                                  <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
-                                </td>,
-                              ];
+                              return (
+                                <td key={`${period}-mkt`} onClick={mktRow ? ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:mktRow?.status==='submitted'?'rgba(220,252,231,0.5)':mktRow?.status==='draft'?'rgba(254,249,195,0.5)':'white',cursor: mktRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(mktRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:mktRow?.status==='submitted'?'#15803d':'#92400e'}}>{mktRow?.status==='submitted'?'✓':mktRow?.status==='draft'?'○':'—'}</span></td>
+                              );
                             })}
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan={3 + months.length*2} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
+                          <td colSpan={3 + months.length} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
                             <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
                               <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
                               <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
