@@ -292,7 +292,8 @@ export default function AdminDashboard() {
             // A leader evaluates all non-leader subordinates in their department.
             const subordinates = employees.filter(e => !e.isLeader && e.dept === emp.dept).map(e => e.name);
             const leaderData = lStatus==='submitted' && subordinates.length ? generateLeaderFormData(subordinates) : null;
-            leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?demoTime(period, ei, 14):null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: 'leader_review_submissions' });
+            const leaderSrcTable = emp.srcTable !== 'self_review_submissions' ? emp.srcTable : 'leader_review_submissions';
+            leaderRows.push({ id: `demo-l-${idCounter++}`, user_id: emp.email, submitted_at: lStatus==='submitted'?demoTime(period, ei, 14):null, status: lStatus as any, department: emp.dept, employee_name: emp.name, employee_email: emp.email, review_period: period, form_data: leaderData, source_table: leaderSrcTable });
           }
         }
       });
@@ -307,7 +308,7 @@ export default function AdminDashboard() {
     setOverviewSelf(selfRows.filter(r => r.review_period === curPeriod));
     setOverviewLeader(leaderRows.filter(r => r.review_period === curPeriod));
     const demoEstherHr = selfRows.find(r => r.employee_email === 'esther@tassure.com' && r.department === 'Internal-HR' && r.review_period === curPeriod) || null;
-    const demoEstherFin = selfRows.find(r => r.employee_email === 'esther@tassure.com' && r.department === 'Internal-Finance' && r.review_period === curPeriod) || null;
+    const demoEstherFin = leaderRows.find(r => r.employee_email === 'esther@tassure.com' && r.source_table === 'finance_review_submissions' && r.review_period === curPeriod) || null;
     const demoVincentMkt = selfRows.find(r => r.employee_email === 'vincent@tassure.com' && r.review_period === curPeriod) || null;
     setOverviewEstherHr(demoEstherHr);
     setOverviewEstherFinance(demoEstherFin);
