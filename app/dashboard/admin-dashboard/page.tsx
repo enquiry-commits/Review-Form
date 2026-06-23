@@ -1379,17 +1379,22 @@ export default function AdminDashboard() {
                 }
               </div>
 
-              {/* Spreadsheet */}
+              {/* Spreadsheet — all three tables share one scroll container so columns align */}
+              <div style={{overflowX:'auto',width:'100%'}}>
+              <div style={{minWidth:'1800px'}}>
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
-                {/* The spreadsheet table */}
-                <div style={{overflowX:'auto',width:'100%'}}>
-                  <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'1600px',width:'auto',tableLayout:'fixed'}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                    <colgroup>
+                      <col style={{width:'40px'}} />
+                      <col style={{width:'150px'}} />
+                      <col style={{width:'110px'}} />
+                    </colgroup>
                     {/* Header row 1: frozen columns + month group headers */}
                     <thead>
                       <tr style={{background:'#f8fafc'}}>
                         <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'120px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'90px',background:'#f8fafc',position:'sticky',left:'160px',zIndex:2}}>Department</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
                         {months.map(m => (
                           <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
                             {fullMonthNames[parseInt(m)]}
@@ -1419,7 +1424,7 @@ export default function AdminDashboard() {
                             <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                             <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                           </td>
-                          <td style={{border:'1px solid #e2e8f0',padding:'10px 12px',color:'#475569',position:'sticky',left:'160px',background:'inherit',zIndex:1,fontSize:'12px'}}>{emp.dept}</td>
+                          <td style={{border:'1px solid #e2e8f0',padding:'10px 12px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>{emp.dept}</td>
                           {months.map(m => {
                             const period = `${selYear}-${m}`;
                             const selfRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='self_review_submissions');
@@ -1447,19 +1452,22 @@ export default function AdminDashboard() {
                       </tr>
                     </tfoot>
                   </table>
-                </div>
               </div>
 
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
               {finHrPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto',width:'100%'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'1600px',width:'auto',tableLayout:'fixed'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                      <colgroup>
+                        <col style={{width:'40px'}} />
+                        <col style={{width:'150px'}} />
+                        <col style={{width:'110px'}} />
+                      </colgroup>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'120px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'90px',background:'#f8fafc',position:'sticky',left:'160px',zIndex:2}}>Department</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
                           <th colSpan={months.length * 2} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
                             Internal · Finance &amp; HR <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{finHrPeople.length} members</span>
                           </th>
@@ -1489,7 +1497,7 @@ export default function AdminDashboard() {
                               <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                               <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                             </td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',color:'#475569',position:'sticky',left:'160px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
                             {months.map(m => {
                               const period = `${selYear}-${m}`;
                               const finPool = emp.email === 'esther@tassure.com' ? tableAllLeader : tableAllSelf;
@@ -1523,20 +1531,23 @@ export default function AdminDashboard() {
                         </tr>
                       </tfoot>
                     </table>
-                  </div>
                 </div>
               )}
 
               {/* ── Table 3: Internal Marketing (Vincent) ── */}
               {mktPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto',width:'100%'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',minWidth:'1600px',width:'auto',tableLayout:'fixed'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                      <colgroup>
+                        <col style={{width:'40px'}} />
+                        <col style={{width:'150px'}} />
+                        <col style={{width:'110px'}} />
+                      </colgroup>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
                           <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'120px',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',minWidth:'90px',background:'#f8fafc',position:'sticky',left:'160px',zIndex:2}}>Department</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
+                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
                           <th colSpan={months.length} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
                             Internal · Marketing <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{mktPeople.length} member{mktPeople.length!==1?'s':''}</span>
                           </th>
@@ -1565,7 +1576,7 @@ export default function AdminDashboard() {
                               <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
                               <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                             </td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 14px',color:'#475569',position:'sticky',left:'180px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
+                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 14px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
                             {months.map(m => {
                               const period = `${selYear}-${m}`;
                               const mktRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='marketing_review_submissions');
@@ -1590,9 +1601,10 @@ export default function AdminDashboard() {
                         </tr>
                       </tfoot>
                     </table>
-                  </div>
                 </div>
               )}
+              </div>{/* end minWidth inner wrapper */}
+              </div>{/* end shared overflowX container */}
             </div>
           );
         })()}
