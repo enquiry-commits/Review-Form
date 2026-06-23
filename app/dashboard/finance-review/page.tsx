@@ -247,7 +247,8 @@ export default function FinanceReviewForm() {
       const u = userRef.current;
       if (!u) return;
       setSaving(true);
-      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current };
+      const isEsther = userRef.current?.email === 'esther@tassure.com';
+      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current, ...(isEsther ? { subject: { email: 'chelsea@tassure.com', name: 'Chelsea Ang' } } : {}) };
       try {
         if (existingIdRef.current) {
           await supabase.from(TABLE).update({ form_data: payload }).eq('id', existingIdRef.current);
@@ -287,7 +288,7 @@ export default function FinanceReviewForm() {
     if (!user || statusRef.current === 'submitted') return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     try {
-      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current };
+      const payload = { kpis: kpiRef.current, positive_items: posRef.current, overall_remarks: remarksRef.current, ...(isEstherMode ? { subject: { email: 'chelsea@tassure.com', name: 'Chelsea Ang' } } : {}) };
       if (existingIdRef.current) {
         const { error } = await supabase.from(TABLE)
           .update({ form_data: payload, submitted_at: new Date().toISOString(), is_locked: true })
@@ -310,6 +311,8 @@ export default function FinanceReviewForm() {
   };
 
   const handleLogout = async () => { await logout(); router.push('/'); };
+
+  const isEstherMode = user?.email === 'esther@tassure.com';
 
   if (accessDenied) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
@@ -370,21 +373,40 @@ export default function FinanceReviewForm() {
           </div>
         </div>
 
+        {isEstherMode && (
+          <div style={{display:'flex',alignItems:'flex-start',gap:'14px',marginBottom:'24px',padding:'16px 20px',background:'#eff6ff',borderRadius:'12px',border:'1.5px solid #bfdbfe',boxShadow:'0 2px 8px rgba(59,130,246,0.08)'}}>
+            <div style={{fontSize:'22px',lineHeight:1,marginTop:'2px'}}>👤</div>
+            <div>
+              <div style={{fontSize:'11px',color:'#3b82f6',fontWeight:'800',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:'3px'}}>Evaluating / 评估对象</div>
+              <div style={{fontSize:'15px',fontWeight:'800',color:'#1e3a5f'}}>Chelsea Ang</div>
+              <div style={{fontSize:'12px',color:'#64748b',marginTop:'4px',lineHeight:'1.6'}}>You are evaluating Chelsea Ang&apos;s Finance &amp; Admin performance for this period. / 你正在评估 Chelsea Ang 本期的财务行政表现。</div>
+            </div>
+          </div>
+        )}
+
         {isSubmitted && (
           <div style={{marginBottom:'24px',padding:'14px 20px',background:'#dcfce7',borderRadius:'12px',border:'1.5px solid #bbf7d0',color:'#15803d',fontWeight:'700',fontSize:'14px'}}>
-            ✓ You have already submitted your Finance & Admin review for {formatPeriodDisplay(currentPeriod)}. The form is read-only.
+            {isEstherMode
+              ? `✓ You have already submitted your Finance & Admin evaluation of Chelsea Ang for ${formatPeriodDisplay(currentPeriod)}. The form is read-only.`
+              : `✓ You have already submitted your Finance & Admin review for ${formatPeriodDisplay(currentPeriod)}. The form is read-only.`}
           </div>
         )}
 
         {/* Basic Info */}
         <div style={{marginBottom:'40px',background:'rgba(255,255,255,0.95)',border:'1.5px solid #e2e8f0',borderRadius:'14px',padding:'24px',boxShadow:'0 4px 12px rgba(0,0,0,0.04)'}}>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'20px'}}>
+          <div style={{display:'grid',gridTemplateColumns: isEstherMode ? 'repeat(4,1fr)' : 'repeat(3,1fr)',gap:'20px'}}>
             {[['Department / 部门', user.department||''],['Your Name / 你的名字',user.name],['Review Period / 评审周期',formatPeriodDisplay(currentPeriod)]].map(([label,val])=>(
               <div key={label}>
                 <label style={{fontSize:'13px',color:'#334155',fontWeight:'700',marginBottom:'10px',letterSpacing:'0.4px',display:'block'}}>{label} *</label>
                 <input type="text" value={val} disabled style={{width:'100%',padding:'12px 16px',border:'1.5px solid #e2e8f0',borderRadius:'12px',fontSize:'14px',color:'#1a1a2e',background:'#f0f4f8',fontFamily:'inherit',cursor:'not-allowed',opacity:0.7}} />
               </div>
             ))}
+            {isEstherMode && (
+              <div>
+                <label style={{fontSize:'13px',color:'#3b82f6',fontWeight:'700',marginBottom:'10px',letterSpacing:'0.4px',display:'block'}}>Evaluating / 评估对象 *</label>
+                <input type="text" value="Chelsea Ang" disabled style={{width:'100%',padding:'12px 16px',border:'1.5px solid #bfdbfe',borderRadius:'12px',fontSize:'14px',color:'#1e3a5f',background:'#eff6ff',fontFamily:'inherit',cursor:'not-allowed',fontWeight:'700'}} />
+              </div>
+            )}
           </div>
         </div>
 

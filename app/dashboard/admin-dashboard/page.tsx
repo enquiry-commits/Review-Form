@@ -116,12 +116,15 @@ export default function AdminDashboard() {
       employee_email: r.employee_email, review_period: r.review_period,
       form_data: r.form_data, source_table: srcTable,
     });
-    const selfRows = (selfRes.data || []).map((r: any) => toRow(r, 'self_review_submissions'));
-    const hrRows   = (hrRes.data   || []).map((r: any) => toRow(r, 'hr_review_submissions'));
-    const finRows  = (finRes.data  || []).map((r: any) => toRow(r, 'finance_review_submissions'));
-    const mktRows  = (mktRes.data  || []).map((r: any) => toRow(r, 'marketing_review_submissions'));
-    setTableAllSelf([...selfRows, ...hrRows, ...finRows, ...mktRows]);
-    if (leaderRes.data) setTableAllLeader(leaderRes.data.map((r: any) => toRow(r, 'leader_review_submissions')));
+    const selfRows     = (selfRes.data  || []).map((r: any) => toRow(r, 'self_review_submissions'));
+    const hrRows       = (hrRes.data    || []).map((r: any) => toRow(r, 'hr_review_submissions'));
+    const finRows      = (finRes.data   || []).map((r: any) => toRow(r, 'finance_review_submissions'));
+    const mktRows      = (mktRes.data   || []).map((r: any) => toRow(r, 'marketing_review_submissions'));
+    const estherFinTableRows  = finRows.filter(r => r.employee_email === 'esther@tassure.com');
+    const chelseaFinTableRows = finRows.filter(r => r.employee_email !== 'esther@tassure.com');
+    setTableAllSelf([...selfRows, ...hrRows, ...chelseaFinTableRows, ...mktRows]);
+    const leaderTableRows = (leaderRes.data || []).map((r: any) => toRow(r, 'leader_review_submissions'));
+    setTableAllLeader([...leaderTableRows, ...estherFinTableRows]);
     setTableDataLoaded(true);
   };
 
@@ -147,7 +150,7 @@ export default function AdminDashboard() {
       { name: 'Victoria Yap', email: 'victoriayap@tassure.com',dept: 'Tax',                   isLeader: false, srcTable: 'self_review_submissions'    },
       // Internal
       { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-HR',           isLeader: false, srcTable: 'hr_review_submissions'      },
-      { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
+      { name: 'Esther',       email: 'esther@tassure.com',     dept: 'Internal-Finance',      isLeader: true,  srcTable: 'finance_review_submissions' },
       { name: 'Chelsea Ang',  email: 'chelsea@tassure.com',    dept: 'Internal-Finance',      isLeader: false, srcTable: 'finance_review_submissions' },
       { name: 'Vincent',      email: 'vincent@tassure.com',    dept: 'Internal-Marketing',    isLeader: false, srcTable: 'marketing_review_submissions'},
     ];
@@ -176,7 +179,7 @@ export default function AdminDashboard() {
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft',     'submitted','submitted','submitted', null      ], // Victoria Yap
       // Internal
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted', null      ], // Esther (HR)
-      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Esther (Finance)
+      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther (Finance) — leader evaluating Chelsea, no self-review
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Chelsea Ang
       ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Vincent
     ];
@@ -197,7 +200,7 @@ export default function AdminDashboard() {
       [null,null,null,null,null,null,null,null,null,null,null,null], // Quinnie Tan
       [null,null,null,null,null,null,null,null,null,null,null,null], // Victoria Yap
       [null,null,null,null,null,null,null,null,null,null,null,null], // Esther (HR)
-      [null,null,null,null,null,null,null,null,null,null,null,null], // Esther (Finance)
+      ['submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','submitted','draft'     ], // Esther (Finance) — evaluating Chelsea
       [null,null,null,null,null,null,null,null,null,null,null,null], // Chelsea Ang
       [null,null,null,null,null,null,null,null,null,null,null,null], // Vincent
     ];
@@ -441,15 +444,15 @@ export default function AdminDashboard() {
       const finInternal = (finInternalRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions', 'Internal-Finance'));
       const mktInternal = (mktInternalRes.data || []).map((r: any) => mapRow(r, 'marketing_review_submissions', 'Internal-Marketing'));
       const estherFinance = (estherFinanceRes.data || []).map((r: any) => mapRow(r, 'finance_review_submissions', 'Internal-Finance'));
-      const mergedSelf = [...selfRows, ...hrInternal, ...finInternal, ...mktInternal, ...estherFinance]
-        .sort((a, b) => {
-          const ta = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
-          const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
-          return tb - ta;
-        });
-      setSelfReviews(mergedSelf);
+      const sortByTime = (arr: SubmissionRow[]) => arr.sort((a, b) => {
+        const ta = a.submitted_at ? new Date(a.submitted_at).getTime() : 0;
+        const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
+        return tb - ta;
+      });
+      setSelfReviews(sortByTime([...selfRows, ...hrInternal, ...finInternal, ...mktInternal]));
 
-      if (leaderDataRes.data) setLeaderReviews(leaderDataRes.data.map((r: any) => mapRow(r, 'leader_review_submissions')));
+      const leaderBaseRows = (leaderDataRes.data || []).map((r: any) => mapRow(r, 'leader_review_submissions'));
+      setLeaderReviews(sortByTime([...leaderBaseRows, ...estherFinance]));
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
@@ -1488,7 +1491,8 @@ export default function AdminDashboard() {
                             <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',color:'#475569',position:'sticky',left:'160px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
                             {months.map(m => {
                               const period = `${selYear}-${m}`;
-                              const finRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='finance_review_submissions');
+                              const finPool = emp.email === 'esther@tassure.com' ? tableAllLeader : tableAllSelf;
+                              const finRow = finPool.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='finance_review_submissions');
                               const hrRow  = emp.email === 'esther@tassure.com'
                                 ? tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='hr_review_submissions')
                                 : undefined;
@@ -2225,7 +2229,16 @@ export default function AdminDashboard() {
                   >
                     <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{submittedDate}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.department}</td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.employee_name}</td>
+                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden'}}>
+                      <div style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{row.employee_name}</div>
+                      {activeMenu === 'leader-reviews' && row.source_table === 'finance_review_submissions' && (
+                        <div style={{marginTop:'3px'}}>
+                          <span style={{fontSize:'10px',background:'#dbeafe',color:'#1d4ed8',padding:'2px 7px',borderRadius:'4px',fontWeight:'700',whiteSpace:'nowrap'}}>
+                            Evaluating: {row.form_data?.subject?.name || 'Chelsea Ang'}
+                          </span>
+                        </div>
+                      )}
+                    </td>
                     <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.employee_email}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.review_period}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px'}}>
@@ -2480,12 +2493,23 @@ export default function AdminDashboard() {
                   {selectedDetail.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                 </p>
               </div>
+              {activeMenu === 'leader-reviews' && selectedDetail.source_table === 'finance_review_submissions' && (
+                <div style={{gridColumn: '1 / -1', background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+                  <span style={{fontSize: '16px'}}>👤</span>
+                  <div>
+                    <label style={{fontSize: '11px', fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Evaluating / 评估对象</label>
+                    <p style={{fontSize: '14px', fontWeight: '700', color: '#1e3a5f', margin: '3px 0 0 0'}}>
+                      {selectedDetail.form_data?.subject?.name || 'Chelsea Ang'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
               {selectedDetail.form_data ? (
-                ['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu)
+                (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || selectedDetail.source_table === 'finance_review_submissions')
                   ? renderDeptFormData(selectedDetail.form_data)
                   : renderFormData(selectedDetail.form_data, activeMenu)
               ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
@@ -2526,7 +2550,9 @@ export default function AdminDashboard() {
             <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px'}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
               {tableDetailRow.form_data
-                ? renderFormData(tableDetailRow.form_data, tableAllLeader.some(r=>r.id===tableDetailRow.id)?'leader-reviews':'self-reviews')
+                ? (tableDetailRow.source_table === 'finance_review_submissions'
+                    ? renderDeptFormData(tableDetailRow.form_data)
+                    : renderFormData(tableDetailRow.form_data, tableAllLeader.some(r=>r.id===tableDetailRow.id)?'leader-reviews':'self-reviews'))
                 : <p style={{fontSize:'14px',color:'#64748b'}}>No data</p>}
             </div>
             <div style={{marginTop:'20px',paddingTop:'16px',borderTop:'1px solid #e2e8f0'}}>
