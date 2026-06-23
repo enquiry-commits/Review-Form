@@ -1655,6 +1655,11 @@ export default function AdminDashboard() {
           // Detect internal user
           const isInternal = !!person && INTERNAL_EMAILS_SET.has(person.email);
           const internalSrcs = isInternal ? (INTERNAL_FORM_MAP[person!.email] || []) : [];
+          // Esther's Finance rows live in leaderReviews, not selfReviews
+          const getInternalPool = (src: string) =>
+            selEmail === 'esther@tassure.com' && src === 'finance_review_submissions'
+              ? personLeader
+              : personSelf;
           // All unique years across all data
           const allYears = [...new Set([...tableAllSelf, ...tableAllLeader].map(r=>r.review_period?.split('-')[0]).filter(Boolean))].sort().reverse();
           const selPersonYear = tableYearSel || allYears[0] || '';
@@ -1725,7 +1730,7 @@ export default function AdminDashboard() {
                     </div>
                     <div style={{marginLeft:'auto',display:'flex',gap:'24px'}}>
                       {isInternal ? internalSrcs.map(src => {
-                        const rows = personSelf.filter(r => r.source_table === src);
+                        const rows = getInternalPool(src).filter(r => r.source_table === src);
                         const shortLabel = src === 'hr_review_submissions' ? 'HR' : src === 'finance_review_submissions' ? 'Finance' : 'Marketing';
                         return (
                           <div key={src} style={{textAlign:'center'}}>
@@ -1785,7 +1790,7 @@ export default function AdminDashboard() {
                             <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
                             <td style={{border:'1px solid #e2e8f0',padding:'10px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'13px'}}>{period}</td>
                             {isInternal
-                              ? internalSrcs.map(src => statusCell(personSelf.find(r=>r.review_period===period && r.source_table===src)))
+                              ? internalSrcs.map(src => statusCell(getInternalPool(src).find(r=>r.review_period===period && r.source_table===src)))
                               : <>{statusCell(selfRow)}{person?.isLeader && statusCell(leaderRow)}</>
                             }
                           </tr>
