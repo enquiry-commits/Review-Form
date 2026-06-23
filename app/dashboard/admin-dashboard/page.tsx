@@ -1379,15 +1379,18 @@ export default function AdminDashboard() {
                 }
               </div>
 
-              {/* Spreadsheet — all three tables share one scroll container so columns align */}
-              <div style={{overflowX:'auto',width:'100%'}}>
-              <div style={{minWidth:'1800px'}}>
+              {/* Spreadsheet */}
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
-                  <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                <div style={{overflowX:'auto',width:'100%'}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
                     <colgroup>
                       <col style={{width:'40px'}} />
                       <col style={{width:'150px'}} />
                       <col style={{width:'110px'}} />
+                      {months.map(m => [
+                        <col key={`${m}-a`} style={{width:'80px'}} />,
+                        <col key={`${m}-b`} style={{width:'80px'}} />,
+                      ])}
                     </colgroup>
                     {/* Header row 1: frozen columns + month group headers */}
                     <thead>
@@ -1452,16 +1455,22 @@ export default function AdminDashboard() {
                       </tr>
                     </tfoot>
                   </table>
+                </div>{/* end overflowX */}
               </div>
 
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
               {finHrPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                  <div style={{overflowX:'auto',width:'100%'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
                       <colgroup>
                         <col style={{width:'40px'}} />
                         <col style={{width:'150px'}} />
                         <col style={{width:'110px'}} />
+                        {months.map(m => [
+                          <col key={`${m}-fin`} style={{width:'80px'}} />,
+                          <col key={`${m}-hr`} style={{width:'80px'}} />,
+                        ])}
                       </colgroup>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
@@ -1531,17 +1540,22 @@ export default function AdminDashboard() {
                         </tr>
                       </tfoot>
                     </table>
+                  </div>{/* end overflowX */}
                 </div>
               )}
 
               {/* ── Table 3: Internal Marketing (Vincent) ── */}
               {mktPeople.length > 0 && (
                 <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%',tableLayout:'fixed'}}>
+                  <div style={{overflowX:'auto',width:'100%'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
                       <colgroup>
                         <col style={{width:'40px'}} />
                         <col style={{width:'150px'}} />
                         <col style={{width:'110px'}} />
+                        {months.map(m => (
+                          <col key={`${m}-mkt`} style={{width:'160px'}} />
+                        ))}
                       </colgroup>
                       <thead>
                         <tr style={{background:'#f8fafc'}}>
@@ -1601,10 +1615,9 @@ export default function AdminDashboard() {
                         </tr>
                       </tfoot>
                     </table>
+                  </div>{/* end overflowX */}
                 </div>
               )}
-              </div>{/* end minWidth inner wrapper */}
-              </div>{/* end shared overflowX container */}
             </div>
           );
         })()}
