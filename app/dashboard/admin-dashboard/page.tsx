@@ -970,7 +970,7 @@ export default function AdminDashboard() {
               <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>Overall Remarks</span>
             </div>
             <div style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
-              {overallRemarks.remarks?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:0,lineHeight:'1.6'}}>{overallRemarks.remarks}</p>}
+              {overallRemarks.remarks?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:0,lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{overallRemarks.remarks}</p>}
               {renderFiles(overallRemarks.files)}
             </div>
           </div>
