@@ -1915,9 +1915,24 @@ export default function AdminDashboard() {
             );
           };
 
-          const submittedCount = ALL_REVIEWABLE_USERS.filter(u => selfMap.get(u.email)?.status === 'submitted').length;
-          const draftCount     = ALL_REVIEWABLE_USERS.filter(u => selfMap.get(u.email)?.status === 'draft').length;
-          const pendingCount   = ALL_REVIEWABLE_USERS.length - submittedCount - draftCount;
+          const reviewableNonInternal = ALL_REVIEWABLE_USERS.filter(u => u.department !== 'Internal');
+          const nonInternalLeaders    = reviewableNonInternal.filter(u => u.role === 'leader');
+          // Self review counts (all non-internal)
+          const selfS = reviewableNonInternal.filter(u => selfMap.get(u.email)?.status === 'submitted').length;
+          const selfD = reviewableNonInternal.filter(u => selfMap.get(u.email)?.status === 'draft').length;
+          const selfP = reviewableNonInternal.length - selfS - selfD;
+          // Leader review counts (leaders only)
+          const leaderS = nonInternalLeaders.filter(u => leaderMap.get(u.email)?.status === 'submitted').length;
+          const leaderD = nonInternalLeaders.filter(u => leaderMap.get(u.email)?.status === 'draft').length;
+          const leaderP = nonInternalLeaders.length - leaderS - leaderD;
+          // Internal review counts (Esther HR, Esther Finance, Chelsea Finance, Vincent Marketing)
+          const internalRows = [overviewEstherHr, overviewEstherFinance, selfMap.get('chelsea@tassure.com') ?? null, overviewVincentMkt];
+          const internalS = internalRows.filter(r => r?.status === 'submitted').length;
+          const internalD = internalRows.filter(r => r?.status === 'draft').length;
+          const internalP = internalRows.length - internalS - internalD;
+          const submittedCount = selfS + leaderS + internalS;
+          const draftCount     = selfD + leaderD + internalD;
+          const pendingCount   = selfP + leaderP + internalP;
 
           if (!overviewLoaded) return <div style={{textAlign:'center',padding:'60px',color:'#64748b'}}>Loading…</div>;
 
