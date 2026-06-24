@@ -2611,7 +2611,7 @@ export default function AdminDashboard() {
             <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px'}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
               {tableDetailRow.form_data
-                ? (['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(tableDetailRow.source_table)
+                ? (['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(tableDetailRow.source_table ?? '')
                     ? renderDeptFormData(tableDetailRow.form_data, tableDetailRow.source_table)
                     : renderFormData(tableDetailRow.form_data, tableAllLeader.some(r=>r.id===tableDetailRow.id)?'leader-reviews':'self-reviews'))
                 : <p style={{fontSize:'14px',color:'#64748b'}}>No data</p>}
