@@ -450,13 +450,10 @@ export default function AdminDashboard() {
         const tb = b.submitted_at ? new Date(b.submitted_at).getTime() : 0;
         return tb - ta;
       });
-      setSelfReviews(sortByTime([...selfRows]));
-      setHrReviews(sortByTime([...hrInternal]));
-      setFinanceReviews(sortByTime([...finInternal, ...estherFinance]));
-      setMarketingReviews(sortByTime([...mktInternal]));
+      setSelfReviews(sortByTime([...selfRows, ...hrInternal, ...finInternal, ...mktInternal]));
 
       const leaderBaseRows = (leaderDataRes.data || []).map((r: any) => mapRow(r, 'leader_review_submissions'));
-      setLeaderReviews(sortByTime([...leaderBaseRows]));
+      setLeaderReviews(sortByTime([...leaderBaseRows, ...estherFinance]));
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
@@ -634,11 +631,8 @@ export default function AdminDashboard() {
   }
 
   const displayData =
-    activeMenu === 'self-reviews'      ? selfReviews :
-    activeMenu === 'leader-reviews'    ? leaderReviews :
-    activeMenu === 'hr-reviews'        ? hrReviews :
-    activeMenu === 'finance-reviews'   ? financeReviews :
-    activeMenu === 'marketing-reviews' ? marketingReviews : [];
+    activeMenu === 'self-reviews'   ? selfReviews :
+    activeMenu === 'leader-reviews' ? leaderReviews : [];
   const filteredData = displayData.filter(row => {
     const matchesSearch =
       row.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
