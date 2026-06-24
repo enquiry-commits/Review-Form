@@ -1382,14 +1382,13 @@ export default function AdminDashboard() {
               return { email, name: ref.employee_name, dept: ref.department };
             }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
 
-          // Internal Finance+HR people (Esther + Chelsea)
+          // Internal Finance+HR people (Esther + Chelsea) — always show even with no records
+          const INTERNAL_NAMES: Record<string,string> = { 'esther@tassure.com':'Esther', 'chelsea@tassure.com':'Chelsea Ang', 'vincent@tassure.com':'Vincent' };
           const finHrPeople = BY_YEAR_INTERNAL.financeHr
-            .map(email => { const ref = rowsInYear.find(r => r.employee_email === email); return ref ? { email, name: ref.employee_name } : null; })
-            .filter(Boolean) as {email:string;name:string}[];
+            .map(email => { const ref = rowsInYear.find(r => r.employee_email === email); return { email, name: ref?.employee_name || INTERNAL_NAMES[email] || email }; });
           // Internal Marketing (Vincent)
           const mktPeople = BY_YEAR_INTERNAL.marketing
-            .map(email => { const ref = rowsInYear.find(r => r.employee_email === email); return ref ? { email, name: ref.employee_name } : null; })
-            .filter(Boolean) as {email:string;name:string}[];
+            .map(email => { const ref = rowsInYear.find(r => r.employee_email === email); return { email, name: ref?.employee_name || INTERNAL_NAMES[email] || email }; });
           const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           const fullMonthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -1697,6 +1696,13 @@ export default function AdminDashboard() {
           };
 
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
+          // Seed internal users so they always appear even with no submissions
+          const INTERNAL_SEED = [
+            { email:'esther@tassure.com',  name:'Esther',      dept:'Internal', isLeader:true  },
+            { email:'chelsea@tassure.com', name:'Chelsea Ang', dept:'Internal', isLeader:false },
+            { email:'vincent@tassure.com', name:'Vincent',     dept:'Internal', isLeader:false },
+          ];
+          INTERNAL_SEED.forEach(p => personMap.set(p.email, p));
           tableAllSelf.forEach(r => {
             if (!personMap.has(r.employee_email)) {
               const dept = INTERNAL_EMAILS_SET.has(r.employee_email) ? 'Internal' : r.department;
