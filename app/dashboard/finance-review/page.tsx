@@ -275,7 +275,9 @@ export default function FinanceReviewForm() {
         const { data: u } = supabase.storage.from('review-files').getPublicUrl(data.path);
         links.push({ name: file.name, url: u.publicUrl });
       } else {
-        links.push({ name: file.name, url: URL.createObjectURL(file) });
+        console.error("Storage upload failed:", error);
+        alert(`Upload failed for "${file.name}". Please check your connection and try again.
+上传失败，请检查网络后重试。`);
       }
     }
     dirtyRef.current = true;
