@@ -1375,11 +1375,12 @@ export default function AdminDashboard() {
           const rowsInYear = allRows.filter(r => r.review_period?.startsWith(selYear));
           const months = [...new Set(rowsInYear.map(r => r.review_period?.split('-')[1]).filter(Boolean))].sort();
           // Regular employees only — internal reviewers rendered in separate tables below
+          const leaderEmailSet = new Set(ALL_REVIEWABLE_USERS.filter(u => u.role === 'leader').map(u => u.email));
           const emailSet = new Set(rowsInYear.filter(r => !BY_YEAR_INTERNAL_ALL.has(r.employee_email)).map(r => r.employee_email));
           const employees = [...emailSet]
             .map(email => {
               const ref = rowsInYear.find(r => r.employee_email === email)!;
-              return { email, name: ref.employee_name, dept: ref.department };
+              return { email, name: ref.employee_name, dept: ref.department, isLeader: leaderEmailSet.has(email) };
             }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
 
           // Internal Finance+HR people (Esther + Chelsea) — always show even with no records
@@ -1695,6 +1696,7 @@ export default function AdminDashboard() {
             'marketing_review_submissions': '📣 Marketing Review',
           };
 
+          const roleLeaderEmails = new Set(ALL_REVIEWABLE_USERS.filter(u => u.role === 'leader').map(u => u.email));
           const personMap = new Map<string, {name:string;email:string;dept:string;isLeader:boolean}>();
           // Seed internal users so they always appear even with no submissions
           const INTERNAL_SEED = [
@@ -1706,7 +1708,8 @@ export default function AdminDashboard() {
           tableAllSelf.forEach(r => {
             if (!personMap.has(r.employee_email)) {
               const dept = INTERNAL_EMAILS_SET.has(r.employee_email) ? 'Internal' : r.department;
-              personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept,isLeader:false});
+              const isLeader = roleLeaderEmails.has(r.employee_email);
+              personMap.set(r.employee_email, {name:r.employee_name,email:r.employee_email,dept,isLeader});
             }
           });
           tableAllLeader.forEach(r => {
