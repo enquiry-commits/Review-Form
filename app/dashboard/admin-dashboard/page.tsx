@@ -678,6 +678,21 @@ export default function AdminDashboard() {
     pos_special:    { name: 'Special Contribution / 特别贡献', question: 'Contribution clearly beyond job scope, requires manager explanation / 有明显超出岗位职责的贡献，需主管说明' },
   };
 
+  const MKT_KPI_IDS = ['mkt_event_feedback','mkt_social_weak','mkt_output_errors','mkt_miscommunication'];
+  const MKT_POS_IDS = ['mkt_event_results','mkt_social_growth','mkt_branding','mkt_automation'];
+  const MKT_KPI_INFO: Record<string, string> = {
+    mkt_event_feedback:  'Event Negative Feedback or Areas for Improvement / 活动负面反馈或需要改善的地方',
+    mkt_social_weak:     'Weak Social Media Performance or Inconsistent Posting / 社交媒体表现不足或发布不稳定',
+    mkt_output_errors:   'Marketing Output Errors, Delays, or Repeated Revisions / Marketing 产出错误、延误或多次修改',
+    mkt_miscommunication:'Miscommunication or Unclear Requirement Handling / 沟通误解或需求理解不清楚',
+  };
+  const MKT_POS_INFO: Record<string, string> = {
+    mkt_event_results: 'Event Results and Positive Feedback / 活动成果与正面反馈',
+    mkt_social_growth: 'Social Media Growth, Engagement, or Enquiries / 社交媒体增长、互动率或询问量',
+    mkt_branding:      'Branding, Content, Design, or Website Contribution / 品牌、内容、设计或网站方面的贡献',
+    mkt_automation:    'Automation, System, Workflow, or Cross-department Support / 自动化、系统、流程优化或跨部门支持',
+  };
+
   const hasContent = (val: any) =>
     (val?.count ?? 0) > 0 || val?.comment?.trim() || val?.description?.trim() || val?.files?.length > 0;
 
@@ -890,12 +905,20 @@ export default function AdminDashboard() {
     );
   };
 
-  const renderDeptFormData = (form_data: any) => {
+  const renderDeptFormData = (form_data: any, sourceTable?: string) => {
     const kpis = form_data?.kpis || {};
     const pos  = form_data?.positive_items || {};
     const overallRemarks = form_data?.overall_remarks;
-    const filledKpis = Object.entries(kpis).filter(([, v]: any) => hasContent(v));
-    const filledPos  = Object.entries(pos).filter(([, v]: any) => v?.description?.trim() || v?.files?.length > 0);
+    const isMkt = sourceTable === 'marketing_review_submissions';
+
+    // Use defined order arrays to avoid JSONB alphabetical reordering
+    const kpiOrder = isMkt ? MKT_KPI_IDS : Object.keys(kpis);
+    const posOrder = isMkt ? MKT_POS_IDS : Object.keys(pos);
+    const getKpiName = (key: string) => isMkt ? (MKT_KPI_INFO[key] || key) : key.replace(/_/g,' ');
+    const getPosName = (key: string) => isMkt ? (MKT_POS_INFO[key] || key) : key.replace(/_/g,' ');
+
+    const filledKpis = kpiOrder.filter(k => kpis[k] && hasContent(kpis[k])).map(k => [k, kpis[k]] as [string,any]);
+    const filledPos  = posOrder.filter(k => pos[k] && (pos[k]?.description?.trim() || pos[k]?.files?.length > 0)).map(k => [k, pos[k]] as [string,any]);
     const hasRemarks = overallRemarks?.remarks?.trim() || overallRemarks?.files?.length > 0;
     return (
       <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
@@ -909,7 +932,7 @@ export default function AdminDashboard() {
               {filledKpis.map(([key, val]: any) => (
                 <div key={key} style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px',gap:'12px'}}>
-                    <span style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',wordBreak:'break-word'}}>{key.replace(/_/g,' ')}</span>
+                    <span style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',wordBreak:'break-word'}}>{getKpiName(key)}</span>
                     {(val.count ?? 0) > 0 && <span style={{flexShrink:0,background:'#dbeafe',color:'#1d4ed8',padding:'2px 10px',borderRadius:'6px',fontSize:'12px',fontWeight:'700'}}>×{val.count}</span>}
                   </div>
                   {val.comment?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.comment}</p>}
@@ -930,7 +953,7 @@ export default function AdminDashboard() {
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {filledPos.map(([key, val]: any) => (
                 <div key={key} style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'10px',padding:'12px 14px'}}>
-                  <div style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',marginBottom:'4px',wordBreak:'break-word'}}>{key.replace(/_/g,' ')}</div>
+                  <div style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',marginBottom:'4px',wordBreak:'break-word'}}>{getPosName(key)}</div>
                   {val.description?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.description}</p>}
                   {renderFiles(val.files)}
                 </div>
@@ -2537,7 +2560,7 @@ export default function AdminDashboard() {
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
               {selectedDetail.form_data ? (
                 (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || selectedDetail.source_table === 'finance_review_submissions')
-                  ? renderDeptFormData(selectedDetail.form_data)
+                  ? renderDeptFormData(selectedDetail.form_data, selectedDetail.source_table)
                   : renderFormData(selectedDetail.form_data, activeMenu)
               ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
             </div>
@@ -2588,8 +2611,8 @@ export default function AdminDashboard() {
             <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px'}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
               {tableDetailRow.form_data
-                ? (tableDetailRow.source_table === 'finance_review_submissions'
-                    ? renderDeptFormData(tableDetailRow.form_data)
+                ? (['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(tableDetailRow.source_table)
+                    ? renderDeptFormData(tableDetailRow.form_data, tableDetailRow.source_table)
                     : renderFormData(tableDetailRow.form_data, tableAllLeader.some(r=>r.id===tableDetailRow.id)?'leader-reviews':'self-reviews'))
                 : <p style={{fontSize:'14px',color:'#64748b'}}>No data</p>}
             </div>
