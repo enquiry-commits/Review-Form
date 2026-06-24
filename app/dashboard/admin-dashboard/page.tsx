@@ -693,6 +693,36 @@ export default function AdminDashboard() {
     mkt_automation:    'Automation, System, Workflow, or Cross-department Support / 自动化、系统、流程优化或跨部门支持',
   };
 
+  const FIN_KPI_IDS = ['fin_efficiency','fin_support_delay','fin_billing_errors','fin_filing_issues'];
+  const FIN_POS_IDS = ['fin_efficiency_improve','fin_employee_support','fin_billing_accuracy','fin_office_operations'];
+  const FIN_KPI_INFO: Record<string, string> = {
+    fin_efficiency:    'Internal Work Efficiency Issues / 内部工作效率问题',
+    fin_support_delay: 'Delay or Weakness in Supporting Other Employees / 协助其他员工时的延误或不足',
+    fin_billing_errors:'Billing / Invoice Errors or Delays / 开单 / 发票错误或延误',
+    fin_filing_issues: 'Filing, Record Keeping, or Document Accuracy Issues / 文件归档、记录保存或资料准确性问题',
+  };
+  const FIN_POS_INFO: Record<string, string> = {
+    fin_efficiency_improve: 'Improvement in Finance / Admin Work Efficiency / 财务 / 行政工作效率提升',
+    fin_employee_support:   'Support Provided to Employees and Departments / 对员工和部门提供的支持',
+    fin_billing_accuracy:   'Billing / Invoice Accuracy and Timely Completion / 开单 / 发票的准确性与及时完成情况',
+    fin_office_operations:  'Contribution to Smooth Daily Office Operations / 对办公室日常顺利运作的贡献',
+  };
+
+  const HR_KPI_IDS = ['hr_turnover','hr_complaints','hr_process_issues','hr_doc_issues','hr_efficiency'];
+  const HR_POS_IDS = ['hr_retention','hr_mgmt_support','hr_records_accuracy'];
+  const HR_KPI_INFO: Record<string, string> = {
+    hr_turnover:       'Employee Turnover / 员工离职情况',
+    hr_complaints:     'Employee Complaints or Negative Feedback / 员工投诉或负面反馈',
+    hr_process_issues: 'HR Process Delays or Errors / HR 流程延误或错误',
+    hr_doc_issues:     'Documentation / Confidentiality Issues / 文件记录 / 保密性问题',
+    hr_efficiency:     'Internal Work Efficiency Issues / 内部工作效率问题',
+  };
+  const HR_POS_INFO: Record<string, string> = {
+    hr_retention:       'Employee Retention and Stability Support / 员工留任与稳定性支持',
+    hr_mgmt_support:    'HR Support to Employees and Management / 对员工和管理层的人事支持',
+    hr_records_accuracy:'Accuracy and Completeness of HR Records / 员工资料记录的准确性与完整性',
+  };
+
   const hasContent = (val: any) =>
     (val?.count ?? 0) > 0 || val?.comment?.trim() || val?.description?.trim() || val?.files?.length > 0;
 
@@ -909,19 +939,26 @@ export default function AdminDashboard() {
     const kpis = form_data?.kpis || {};
     const pos  = form_data?.positive_items || {};
     const overallRemarks = form_data?.overall_remarks;
+    const subject = form_data?.subject;
     const isMkt = sourceTable === 'marketing_review_submissions';
+    const isFin = sourceTable === 'finance_review_submissions';
+    const isHr  = sourceTable === 'hr_review_submissions';
 
-    // Use defined order arrays to avoid JSONB alphabetical reordering
-    const kpiOrder = isMkt ? MKT_KPI_IDS : Object.keys(kpis);
-    const posOrder = isMkt ? MKT_POS_IDS : Object.keys(pos);
-    const getKpiName = (key: string) => isMkt ? (MKT_KPI_INFO[key] || key) : key.replace(/_/g,' ');
-    const getPosName = (key: string) => isMkt ? (MKT_POS_INFO[key] || key) : key.replace(/_/g,' ');
+    const kpiOrder = isMkt ? MKT_KPI_IDS : isFin ? FIN_KPI_IDS : isHr ? HR_KPI_IDS : Object.keys(kpis);
+    const posOrder = isMkt ? MKT_POS_IDS : isFin ? FIN_POS_IDS : isHr ? HR_POS_IDS : Object.keys(pos);
+    const getKpiName = (key: string) => isMkt ? (MKT_KPI_INFO[key] || key) : isFin ? (FIN_KPI_INFO[key] || key) : isHr ? (HR_KPI_INFO[key] || key) : key.replace(/_/g,' ');
+    const getPosName = (key: string) => isMkt ? (MKT_POS_INFO[key] || key) : isFin ? (FIN_POS_INFO[key] || key) : isHr ? (HR_POS_INFO[key] || key) : key.replace(/_/g,' ');
 
     const filledKpis = kpiOrder.filter(k => kpis[k] && hasContent(kpis[k])).map(k => [k, kpis[k]] as [string,any]);
     const filledPos  = posOrder.filter(k => pos[k] && (pos[k]?.description?.trim() || pos[k]?.files?.length > 0)).map(k => [k, pos[k]] as [string,any]);
     const hasRemarks = overallRemarks?.remarks?.trim() || overallRemarks?.files?.length > 0;
     return (
       <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+        {subject?.name && (
+          <div style={{background:'#fffbeb',border:'1px solid #fcd34d',borderRadius:'8px',padding:'8px 12px',fontSize:'12px',color:'#92400e',fontWeight:'600'}}>
+            Reviewing on behalf of: {subject.name}
+          </div>
+        )}
         <div>
           <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
             <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
