@@ -2559,7 +2559,7 @@ export default function AdminDashboard() {
             <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
               {selectedDetail.form_data ? (
-                (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || selectedDetail.source_table === 'finance_review_submissions')
+                (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || ['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(selectedDetail.source_table ?? ''))
                   ? renderDeptFormData(selectedDetail.form_data, selectedDetail.source_table)
                   : renderFormData(selectedDetail.form_data, activeMenu)
               ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
