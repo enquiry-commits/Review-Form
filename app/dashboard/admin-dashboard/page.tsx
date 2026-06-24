@@ -680,47 +680,47 @@ export default function AdminDashboard() {
 
   const MKT_KPI_IDS = ['mkt_event_feedback','mkt_social_weak','mkt_output_errors','mkt_miscommunication'];
   const MKT_POS_IDS = ['mkt_event_results','mkt_social_growth','mkt_branding','mkt_automation'];
-  const MKT_KPI_INFO: Record<string, string> = {
-    mkt_event_feedback:  'Event Negative Feedback or Areas for Improvement / 活动负面反馈或需要改善的地方',
-    mkt_social_weak:     'Weak Social Media Performance or Inconsistent Posting / 社交媒体表现不足或发布不稳定',
-    mkt_output_errors:   'Marketing Output Errors, Delays, or Repeated Revisions / Marketing 产出错误、延误或多次修改',
-    mkt_miscommunication:'Miscommunication or Unclear Requirement Handling / 沟通误解或需求理解不清楚',
+  const MKT_KPI_INFO: Record<string, {name:string;question:string}> = {
+    mkt_event_feedback:  { name:'Event Negative Feedback or Areas for Improvement / 活动负面反馈或需要改善的地方', question:'Were there any complaints, negative feedback, or areas needing improvement from events or campaigns? / 活动或推广中是否有投诉、负面反馈或需要改善的地方？' },
+    mkt_social_weak:     { name:'Weak Social Media Performance or Inconsistent Posting / 社交媒体表现不足或发布不稳定', question:'Was there inconsistent posting, low engagement, or poor reach on social media channels? / 社交媒体发布是否不稳定、互动率低或触达率差？' },
+    mkt_output_errors:   { name:'Marketing Output Errors, Delays, or Repeated Revisions / Marketing 产出错误、延误或多次修改', question:'Were there marketing materials with errors, missed deadlines, or requiring multiple rounds of revision? / 是否有Marketing产出出现错误、错过截止日期或需要多次修改的情况？' },
+    mkt_miscommunication:{ name:'Miscommunication or Unclear Requirement Handling / 沟通误解或需求理解不清楚', question:'Were there instances of miscommunication or misunderstanding of requirements with internal or external stakeholders? / 是否有与内外部相关方沟通误解或需求不清晰的情况？' },
   };
-  const MKT_POS_INFO: Record<string, string> = {
-    mkt_event_results: 'Event Results and Positive Feedback / 活动成果与正面反馈',
-    mkt_social_growth: 'Social Media Growth, Engagement, or Enquiries / 社交媒体增长、互动率或询问量',
-    mkt_branding:      'Branding, Content, Design, or Website Contribution / 品牌、内容、设计或网站方面的贡献',
-    mkt_automation:    'Automation, System, Workflow, or Cross-department Support / 自动化、系统、流程优化或跨部门支持',
+  const MKT_POS_INFO: Record<string, {name:string;question:string}> = {
+    mkt_event_results: { name:'Event Results and Positive Feedback / 活动成果与正面反馈', question:'Were there events or campaigns that delivered strong results or received positive feedback? / 是否有活动或推广取得出色成果或获得正面反馈？' },
+    mkt_social_growth: { name:'Social Media Growth, Engagement, or Enquiries / 社交媒体增长、互动率或询问量', question:'Were there notable improvements in followers, engagement rate, or enquiries from social media? / 是否在粉丝数、互动率或社交媒体询问量上有明显改善？' },
+    mkt_branding:      { name:'Branding, Content, Design, or Website Contribution / 品牌、内容、设计或网站方面的贡献', question:'Did you make notable contributions to brand identity, content quality, design output, or website improvements? / 是否在品牌形象、内容质量、设计产出或网站改善方面有显著贡献？' },
+    mkt_automation:    { name:'Automation, System, Workflow, or Cross-department Support / 自动化、系统、流程优化或跨部门支持', question:'Did you contribute to automation, workflow improvements, or support other departments in meaningful ways? / 是否有贡献于自动化、流程改善，或以有意义的方式支持其他部门？' },
   };
 
   const FIN_KPI_IDS = ['fin_efficiency','fin_support_delay','fin_billing_errors','fin_filing_issues'];
   const FIN_POS_IDS = ['fin_efficiency_improve','fin_employee_support','fin_billing_accuracy','fin_office_operations'];
-  const FIN_KPI_INFO: Record<string, string> = {
-    fin_efficiency:    'Internal Work Efficiency Issues / 内部工作效率问题',
-    fin_support_delay: 'Delay or Weakness in Supporting Other Employees / 协助其他员工时的延误或不足',
-    fin_billing_errors:'Billing / Invoice Errors or Delays / 开单 / 发票错误或延误',
-    fin_filing_issues: 'Filing, Record Keeping, or Document Accuracy Issues / 文件归档、记录保存或资料准确性问题',
+  const FIN_KPI_INFO: Record<string, {name:string;question:string}> = {
+    fin_efficiency:    { name:'Internal Work Efficiency Issues / 内部工作效率问题', question:'Were there inefficiencies or bottlenecks in finance or admin tasks this period? / 本月财务或行政工作是否出现效率不足或瓶颈问题？' },
+    fin_support_delay: { name:'Delay or Weakness in Supporting Other Employees / 协助其他员工时的延误或不足', question:'Were there delays or failures in responding to employee requests or supporting other departments? / 在回应员工请求或协助其他部门时，是否有延误或不足？' },
+    fin_billing_errors:{ name:'Billing / Invoice Errors or Delays / 开单 / 发票错误或延误', question:'Were there any errors, duplications, or delays in billing and invoice processing? / 开单或发票处理是否出现错误、重复或延误？' },
+    fin_filing_issues: { name:'Filing, Record Keeping, or Document Accuracy Issues / 文件归档、记录保存或资料准确性问题', question:'Were there issues with filing, document completeness, or data accuracy? / 是否有文件归档、资料完整性或数据准确性方面的问题？' },
   };
-  const FIN_POS_INFO: Record<string, string> = {
-    fin_efficiency_improve: 'Improvement in Finance / Admin Work Efficiency / 财务 / 行政工作效率提升',
-    fin_employee_support:   'Support Provided to Employees and Departments / 对员工和部门提供的支持',
-    fin_billing_accuracy:   'Billing / Invoice Accuracy and Timely Completion / 开单 / 发票的准确性与及时完成情况',
-    fin_office_operations:  'Contribution to Smooth Daily Office Operations / 对办公室日常顺利运作的贡献',
+  const FIN_POS_INFO: Record<string, {name:string;question:string}> = {
+    fin_efficiency_improve: { name:'Improvement in Finance / Admin Work Efficiency / 财务 / 行政工作效率提升', question:'Did you implement improvements that made finance or admin processes faster or more reliable? / 是否有改善措施让财务或行政流程更快速或更可靠？' },
+    fin_employee_support:   { name:'Support Provided to Employees and Departments / 对员工和部门提供的支持', question:'Did you provide notable support to employees or other departments this period? / 本期是否为员工或其他部门提供了显著的支持？' },
+    fin_billing_accuracy:   { name:'Billing / Invoice Accuracy and Timely Completion / 开单 / 发票的准确性与及时完成情况', question:'Was all billing and invoicing completed accurately and on time? / 所有开单和发票是否准确且及时完成？' },
+    fin_office_operations:  { name:'Contribution to Smooth Daily Office Operations / 对办公室日常顺利运作的贡献', question:'Did you contribute to keeping daily office operations running smoothly? / 是否有贡献于确保办公室日常运作顺利进行？' },
   };
 
   const HR_KPI_IDS = ['hr_turnover','hr_complaints','hr_process_issues','hr_doc_issues','hr_efficiency'];
   const HR_POS_IDS = ['hr_retention','hr_mgmt_support','hr_records_accuracy'];
-  const HR_KPI_INFO: Record<string, string> = {
-    hr_turnover:       'Employee Turnover / 员工离职情况',
-    hr_complaints:     'Employee Complaints or Negative Feedback / 员工投诉或负面反馈',
-    hr_process_issues: 'HR Process Delays or Errors / HR 流程延误或错误',
-    hr_doc_issues:     'Documentation / Confidentiality Issues / 文件记录 / 保密性问题',
-    hr_efficiency:     'Internal Work Efficiency Issues / 内部工作效率问题',
+  const HR_KPI_INFO: Record<string, {name:string;question:string}> = {
+    hr_turnover:       { name:'Employee Turnover / 员工离职情况', question:'Were there any employee resignations or terminations this period? / 本月有没有员工辞职或被解雇？' },
+    hr_complaints:     { name:'Employee Complaints or Negative Feedback / 员工投诉或负面反馈', question:'Were there any complaints or negative feedback from employees regarding HR matters? / 是否有员工对人事事务提出投诉或负面反馈？' },
+    hr_process_issues: { name:'HR Process Delays or Errors / HR 流程延误或错误', question:'Were there delays or errors in HR processes such as onboarding, payroll, or documentation? / HR流程（如入职、薪资、文件）是否出现延误或错误？' },
+    hr_doc_issues:     { name:'Documentation / Confidentiality Issues / 文件记录 / 保密性问题', question:'Were there issues with record keeping, document accuracy, or confidentiality? / 是否有文件记录、资料准确性或保密性方面的问题？' },
+    hr_efficiency:     { name:'Internal Work Efficiency Issues / 内部工作效率问题', question:'Were there inefficiencies or bottlenecks in HR or admin tasks this period? / 本月HR或行政工作是否出现效率不足或瓶颈问题？' },
   };
-  const HR_POS_INFO: Record<string, string> = {
-    hr_retention:       'Employee Retention and Stability Support / 员工留任与稳定性支持',
-    hr_mgmt_support:    'HR Support to Employees and Management / 对员工和管理层的人事支持',
-    hr_records_accuracy:'Accuracy and Completeness of HR Records / 员工资料记录的准确性与完整性',
+  const HR_POS_INFO: Record<string, {name:string;question:string}> = {
+    hr_retention:       { name:'Employee Retention and Stability Support / 员工留任与稳定性支持', question:'Did you contribute to retaining staff or improving workplace stability this period? / 本期是否有助于留住员工或改善职场稳定性？' },
+    hr_mgmt_support:    { name:'HR Support to Employees and Management / 对员工和管理层的人事支持', question:'Did you provide effective HR support to both employees and management? / 是否为员工和管理层提供了有效的人事支持？' },
+    hr_records_accuracy:{ name:'Accuracy and Completeness of HR Records / 员工资料记录的准确性与完整性', question:'Are all employee records accurate, complete, and up to date? / 员工资料是否准确、完整且保持最新？' },
   };
 
   const hasContent = (val: any) =>
@@ -946,8 +946,10 @@ export default function AdminDashboard() {
 
     const kpiOrder = isMkt ? MKT_KPI_IDS : isFin ? FIN_KPI_IDS : isHr ? HR_KPI_IDS : Object.keys(kpis);
     const posOrder = isMkt ? MKT_POS_IDS : isFin ? FIN_POS_IDS : isHr ? HR_POS_IDS : Object.keys(pos);
-    const getKpiName = (key: string) => isMkt ? (MKT_KPI_INFO[key] || key) : isFin ? (FIN_KPI_INFO[key] || key) : isHr ? (HR_KPI_INFO[key] || key) : key.replace(/_/g,' ');
-    const getPosName = (key: string) => isMkt ? (MKT_POS_INFO[key] || key) : isFin ? (FIN_POS_INFO[key] || key) : isHr ? (HR_POS_INFO[key] || key) : key.replace(/_/g,' ');
+    const getKpiName = (key: string) => isMkt ? (MKT_KPI_INFO[key]?.name || key) : isFin ? (FIN_KPI_INFO[key]?.name || key) : isHr ? (HR_KPI_INFO[key]?.name || key) : key.replace(/_/g,' ');
+    const getPosName = (key: string) => isMkt ? (MKT_POS_INFO[key]?.name || key) : isFin ? (FIN_POS_INFO[key]?.name || key) : isHr ? (HR_POS_INFO[key]?.name || key) : key.replace(/_/g,' ');
+    const getKpiQ   = (key: string) => isMkt ? MKT_KPI_INFO[key]?.question : isFin ? FIN_KPI_INFO[key]?.question : isHr ? HR_KPI_INFO[key]?.question : undefined;
+    const getPosQ   = (key: string) => isMkt ? MKT_POS_INFO[key]?.question : isFin ? FIN_POS_INFO[key]?.question : isHr ? HR_POS_INFO[key]?.question : undefined;
 
     const filledKpis = kpiOrder.filter(k => kpis[k] && hasContent(kpis[k])).map(k => [k, kpis[k]] as [string,any]);
     const filledPos  = posOrder.filter(k => pos[k] && (pos[k]?.description?.trim() || pos[k]?.files?.length > 0)).map(k => [k, pos[k]] as [string,any]);
@@ -972,6 +974,7 @@ export default function AdminDashboard() {
                     <span style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',wordBreak:'break-word'}}>{getKpiName(key)}</span>
                     {(val.count ?? 0) > 0 && <span style={{flexShrink:0,background:'#dbeafe',color:'#1d4ed8',padding:'2px 10px',borderRadius:'6px',fontSize:'12px',fontWeight:'700'}}>×{val.count}</span>}
                   </div>
+                  {getKpiQ(key) && <p style={{fontSize:'12px',color:'#94a3b8',margin:'0 0 6px 0',lineHeight:'1.5',fontStyle:'italic'}}>{getKpiQ(key)}</p>}
                   {val.comment?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.comment}</p>}
                   {renderFiles(val.files)}
                 </div>
@@ -991,6 +994,7 @@ export default function AdminDashboard() {
               {filledPos.map(([key, val]: any) => (
                 <div key={key} style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'10px',padding:'12px 14px'}}>
                   <div style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',marginBottom:'4px',wordBreak:'break-word'}}>{getPosName(key)}</div>
+                  {getPosQ(key) && <p style={{fontSize:'12px',color:'#94a3b8',margin:'0 0 6px 0',lineHeight:'1.5',fontStyle:'italic'}}>{getPosQ(key)}</p>}
                   {val.description?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.description}</p>}
                   {renderFiles(val.files)}
                 </div>
