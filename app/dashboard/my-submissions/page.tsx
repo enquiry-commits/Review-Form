@@ -344,7 +344,7 @@ export default function MySubmissions() {
         userForms.map(f =>
           supabase
             .from(f.table)
-            .select('id, review_period, submitted_at, form_data, director_comment')
+            .select(`id, review_period, submitted_at, form_data${DIRECTOR_COMMENT_FORMS.has(f.key) ? ', director_comment' : ''}`)
             .eq('employee_email', u.email)
             .order('review_period', { ascending: false })
         )
