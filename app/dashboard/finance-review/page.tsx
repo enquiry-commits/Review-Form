@@ -209,6 +209,8 @@ export default function FinanceReviewForm() {
       .select('*')
       .eq('employee_email', u.email)
       .eq('review_period', currentPeriod)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {

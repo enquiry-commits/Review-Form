@@ -350,9 +350,9 @@ export default function AdminDashboard() {
       supabase.from('self_review_submissions').select('*').eq('review_period', period),
       supabase.from('leader_review_submissions').select('*').eq('review_period', period),
       supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'chelsea@tassure.com'),
-      supabase.from('hr_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com'),
-      supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com'),
-      supabase.from('marketing_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'vincent@tassure.com'),
+      supabase.from('hr_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com').order('created_at', { ascending: false }),
+      supabase.from('finance_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'esther@tassure.com').order('created_at', { ascending: false }),
+      supabase.from('marketing_review_submissions').select('*').eq('review_period', period).eq('employee_email', 'vincent@tassure.com').order('created_at', { ascending: false }),
     ]);
     const selfRows = (selfRes.data || []).map(toRow);
     const chelseaRows = (chelseaRes.data || []).map(toRow);
