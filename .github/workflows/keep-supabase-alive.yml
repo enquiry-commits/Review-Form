@@ -2,7 +2,7 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 0 */5 * *'   # every 5 days at midnight UTC
+    - cron: '0 0 */3 * *'   # every 3 days at midnight UTC
   workflow_dispatch:          # allow manual trigger from GitHub UI
 
 jobs:
@@ -11,13 +11,17 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/self_review_submissions?limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
-          echo "HTTP status: $STATUS"
-          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
-            echo "Ping failed with status $STATUS"
-            exit 1
-          fi
-          echo "Supabase is alive."
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              "${{ secrets.SUPABASE_URL }}/rest/v1/self_review_submissions?limit=1" \
+              -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
+              echo "Supabase is alive."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "All 3 attempts failed"
+          exit 1
