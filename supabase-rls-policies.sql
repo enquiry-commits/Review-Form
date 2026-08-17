@@ -1,5 +1,5 @@
 -- ============================================================================
--- Tassure Corporate Services System — Row Level Security (RLS) policies
+-- Tassure Review System — Row Level Security (RLS) policies
 -- ============================================================================
 -- Run this in the Supabase SQL editor AFTER Google OAuth login is working.
 --

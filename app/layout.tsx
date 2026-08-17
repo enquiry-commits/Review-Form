@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tassure Corporate Services System",
+  title: "Tassure Review System",
   description: "Tassure internal performance review platform",
 };
 
