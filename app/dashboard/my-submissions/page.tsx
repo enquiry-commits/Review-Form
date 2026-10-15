@@ -633,9 +633,10 @@ export default function MySubmissions() {
             <div>
               <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <colgroup>
-                  <col style={{ width: '160px' }} />
-                  {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col />
+                  {/* equal fifths: Period 1, each form 1, View 2 */}
+                  <col style={{ width: `${100 / (forms.length + 3)}%` }} />
+                  {forms.map(f => <col key={f.key} style={{ width: `${100 / (forms.length + 3)}%` }} />)}
+                  <col style={{ width: `${200 / (forms.length + 3)}%` }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
