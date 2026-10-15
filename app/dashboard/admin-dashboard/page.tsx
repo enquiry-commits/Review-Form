@@ -2500,21 +2500,19 @@ export default function AdminDashboard() {
         }}>
           <table style={{width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed'}}>
             <colgroup>
+              <col style={{width: '14%'}} />
               <col style={{width: '13%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '17%' : '24%'}} />
+              <col style={{width: '10%'}} />
               <col style={{width: '12%'}} />
-              <col style={{width: '16%'}} />
-              <col style={{width: '13%'}} />
-              <col style={{width: '9%'}} />
-              <col style={{width: '12%'}} />
-              <col style={{width: activeMenu === 'self-reviews' ? '15%' : '10%'}} />
-              <col style={{width: activeMenu === 'self-reviews' ? '7%' : '5%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '27%' : '20%'}} />
+              <col style={{width: '7%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Submitted</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Department</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Name</th>
-                <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
@@ -2528,7 +2526,7 @@ export default function AdminDashboard() {
                     onClick={() => setPeriodOpen(o => ({ ...o, [g.period]: !isPeriodOpen(g.period) }))}
                     style={{cursor: 'pointer', background: 'linear-gradient(135deg, #eef3f8, #e6edf4)', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', userSelect: 'none'}}
                   >
-                    <td colSpan={8} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
+                    <td colSpan={7} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
                       <span style={{display: 'inline-block', width: '14px', transition: 'transform 0.2s', transform: isPeriodOpen(g.period) ? 'rotate(90deg)' : 'none'}}>›</span>
                       {g.period === '—' ? 'No period' : formatPeriodDisplay(g.period)}
                       <span style={{marginLeft: '10px', fontSize: '11px', fontWeight: '600', color: '#64748b'}}>
@@ -2560,7 +2558,6 @@ export default function AdminDashboard() {
                         </div>
                       )}
                     </td>
-                    <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.employee_email}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{row.review_period}</td>
                     <td style={{padding: '11px 14px', fontSize: '11px'}}>
                       <span style={{
@@ -2580,7 +2577,7 @@ export default function AdminDashboard() {
                     <td style={{padding: '11px 14px'}}>
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button onClick={() => { setSelectedDetail(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }} style={{
-                          padding: '5px 10px',
+                          padding: '5px 10px', whiteSpace: 'nowrap',
                           border: 'none',
                           borderRadius: '8px',
                           background: 'rgba(126, 184, 212, 0.15)',
@@ -2600,7 +2597,7 @@ export default function AdminDashboard() {
                             disabled={!leaderRecord}
                             title={leaderRecord ? '' : 'No leader review for this period'}
                             onClick={() => { if (leaderRecord) { setSelectedDetail(leaderRecord); window.parent.postMessage({type:'scrollToTop'}, '*'); } }}
-                            style={{padding: '5px 10px', border: 'none', borderRadius: '8px', background: leaderRecord ? 'rgba(30, 58, 95, 0.12)' : 'rgba(148, 163, 184, 0.15)', color: leaderRecord ? '#1e3a5f' : '#94a3b8', cursor: leaderRecord ? 'pointer' : 'not-allowed', fontSize: '11px', fontWeight: '600', transition: 'all 0.3s'}}
+                            style={{padding: '5px 10px', whiteSpace: 'nowrap', border: 'none', borderRadius: '8px', background: leaderRecord ? 'rgba(30, 58, 95, 0.12)' : 'rgba(148, 163, 184, 0.15)', color: leaderRecord ? '#1e3a5f' : '#94a3b8', cursor: leaderRecord ? 'pointer' : 'not-allowed', fontSize: '11px', fontWeight: '600', transition: 'all 0.3s'}}
                           >
                             View Leader Review
                           </button>
@@ -2631,7 +2628,7 @@ export default function AdminDashboard() {
                 </Fragment>
               )) : (
                 <tr>
-                  <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
                   </td>
                 </tr>
