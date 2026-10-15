@@ -276,7 +276,7 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
     </div>
 
       {(overallDirector || sideBySide) && (
-        <div>
+        <div style={{ marginTop: '40px' }}>
           <SectionHeader label="Director's Overall Comment" color="#1e3a5f" />
           <div style={{ background: overallDirector ? 'linear-gradient(135deg, #f0f7fb, #e8f4f8)' : '#f8fafc', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: overallDirector ? '#1e3a5f' : '#94a3b8', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector || 'No comment yet / 暂无评论'}</div>
         </div>

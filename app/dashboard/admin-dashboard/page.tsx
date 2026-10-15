@@ -609,7 +609,7 @@ export default function AdminDashboard() {
     const st = directorState();
     if (!st) return null;
     return (
-      <div style={{marginTop: '20px'}}>
+      <div style={{marginTop: '60px'}}>
         <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px'}}>Overall Comment (shown to the employee)</div>
         <textarea
           value={dfOverall}
