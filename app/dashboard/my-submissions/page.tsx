@@ -150,10 +150,13 @@ function DirectorNote({ text, label = 'Director Comment' }: { text?: string; lab
 }
 
 // Read-only director comment placed beside its answer card (same top and height)
+// Same box the director types into on the Admin Dashboard, but read-only.
 function SideNote({ text }: { text?: string }) {
-  if (!text?.trim()) return null;
+  const has = !!text?.trim();
   return (
-    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: '#1e3a5f', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>{text}</div>
+    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', background: has ? 'white' : '#f8fafc', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: has ? '#1e3a5f' : '#94a3b8', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>
+      {has ? text : 'No comment yet / 暂无评论'}
+    </div>
   );
 }
 
@@ -264,10 +267,10 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
         </div>
       )}
 
-      {overallDirector && (
-        <div>
+      {(overallDirector || sideBySide) && (
+        <div style={sideBySide ? { marginRight: '-356px' } : undefined}>
           <SectionHeader label="Director's Overall Comment" color="#1e3a5f" />
-          <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#1e3a5f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector}</div>
+          <div style={{ background: overallDirector ? 'linear-gradient(135deg, #f0f7fb, #e8f4f8)' : '#f8fafc', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: overallDirector ? '#1e3a5f' : '#94a3b8', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector || 'No comment yet / 暂无评论'}</div>
         </div>
       )}
     </div>
@@ -444,9 +447,8 @@ export default function MySubmissions() {
     fetchAll();
   }, [router, currentPeriod]);
 
-  // Wide layout (comment beside each answer) only when the director left per-question comments
-  const detailSideBySide = !!detail
-    && Object.values(detail.record.form_data?.director_feedback?.items || {}).some((v: any) => String(v ?? '').trim() !== '')
+  // Same side-by-side layout as the Admin Dashboard (answer | director comment), read-only
+  const detailSideBySide = !!detail && !!detail.record.submitted_at
     && typeof window !== 'undefined' && window.innerWidth >= 900;
 
   const handleLogout = async () => {
