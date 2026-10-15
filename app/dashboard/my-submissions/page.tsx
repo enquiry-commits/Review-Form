@@ -60,12 +60,10 @@ function activeRating(fd: any): string | null {
 
 function RatingBubble({ ratingKey }: { ratingKey: string }) {
   return (
-    <div style={{ position: 'absolute', left: '100%', top: '50%', marginLeft: '14px', transform: 'translateY(-50%)', zIndex: 20 }}>
-    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 2s ease-in-out infinite' }}>
+    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '10px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 2s ease-in-out infinite' }}>
       <span style={{ position: 'absolute', left: '-8px', top: '50%', width: '11px', height: '11px', marginTop: '-6px', background: '#fff', borderLeft: '2.5px solid #231815', borderBottom: '2.5px solid #231815', transform: 'rotate(45deg)' }} />
       <img src={`/ratings/${ratingKey}.png`} alt="" width={34} height={34} />
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{RATING_LABELS[ratingKey]}</span>
-    </div>
     </div>
   );
 }
@@ -622,18 +620,18 @@ export default function MySubmissions() {
 
         {/* Submission History */}
         {(loaded || isDemoMode) && historyRows.length > 0 && (
-          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid rgba(30, 58, 95, 0.08)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
             <div style={{ padding: '20px 28px', borderBottom: '1px solid #f1f5f9' }}>
               <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Submission History</div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e3a5f' }}>Past Review Periods</div>
             </div>
 
-            <div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: 'auto', minWidth: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <colgroup>
                   <col style={{ width: '160px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col />
+                  <col style={{ width: '520px' }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
@@ -657,7 +655,7 @@ export default function MySubmissions() {
                         </td>
                       ))}
                       <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'left' }}>
-                        <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                           {forms.filter(f => row.records?.[f.key]).map(f => (
                             <button
                               key={f.key}
