@@ -2674,10 +2674,17 @@ export default function AdminDashboard() {
                                         <span style={{fontSize: '10px', fontWeight: '600', color: '#334155', lineHeight: 1.2}}>{r.label}</span>
                                       </button>
                                     ))}
+                                    {current && (
+                                      <button
+                                        onClick={() => handleSetRating(row, null)}
+                                        title="Remove rating"
+                                        style={{border: '2px solid transparent', borderRadius: '12px', background: 'transparent', padding: '6px 2px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'}}
+                                      >
+                                        <span style={{width: '44px', height: '44px', borderRadius: '50%', border: '2px dashed #cbd5e1', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 700, lineHeight: 1}}>✕</span>
+                                        <span style={{fontSize: '10px', fontWeight: '600', color: '#94a3b8', lineHeight: 1.2}}>Remove</span>
+                                      </button>
+                                    )}
                                   </div>
-                                  {current && (
-                                    <button onClick={() => handleSetRating(row, null)} style={{marginTop: '10px', border: 'none', background: 'transparent', color: '#94a3b8', fontSize: '11px', cursor: 'pointer'}}>Clear rating</button>
-                                  )}
                                 </div>
                               </>,
                               document.body
