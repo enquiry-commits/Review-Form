@@ -2502,12 +2502,11 @@ export default function AdminDashboard() {
             <colgroup>
               <col style={{width: '13%'}} />
               <col style={{width: '12%'}} />
-              <col style={{width: activeMenu === 'self-reviews' ? '9%' : '16%'}} />
+              <col style={{width: '16%'}} />
               <col style={{width: '13%'}} />
               <col style={{width: '9%'}} />
               <col style={{width: '12%'}} />
-              {activeMenu === 'self-reviews' && <col style={{width: '16%'}} />}
-              <col style={{width: activeMenu === 'self-reviews' ? '16%' : '15%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '22%' : '15%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
@@ -2517,7 +2516,6 @@ export default function AdminDashboard() {
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Email</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
-                {activeMenu === 'self-reviews' && <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Director Comment</th>}
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
               </tr>
             </thead>
@@ -2528,7 +2526,7 @@ export default function AdminDashboard() {
                     onClick={() => setPeriodOpen(o => ({ ...o, [g.period]: !isPeriodOpen(g.period) }))}
                     style={{cursor: 'pointer', background: 'linear-gradient(135deg, #eef3f8, #e6edf4)', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', userSelect: 'none'}}
                   >
-                    <td colSpan={8} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
+                    <td colSpan={7} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
                       <span style={{display: 'inline-block', width: '14px', transition: 'transform 0.2s', transform: isPeriodOpen(g.period) ? 'rotate(90deg)' : 'none'}}>›</span>
                       {g.period === '—' ? 'No period' : formatPeriodDisplay(g.period)}
                       <span style={{marginLeft: '10px', fontSize: '11px', fontWeight: '600', color: '#64748b'}}>
@@ -2539,8 +2537,8 @@ export default function AdminDashboard() {
                   {isPeriodOpen(g.period) && g.rows.map((row, idx) => {
                 const statusColor = getStatusColor(row.status === 'submitted' ? 'Completed' : 'Draft');
                 const submittedDate = row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-';
-                const canEditComment = user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
-                const isEditingThis = editingComment?.id === row.id;
+                const isLeaderPerson = activeMenu === 'self-reviews' && ALL_REVIEWABLE_USERS.some(u => u.role === 'leader' && u.email === row.employee_email);
+                const leaderRecord = isLeaderPerson ? leaderReviews.find(r => r.employee_email === row.employee_email && r.review_period === row.review_period) : undefined;
                 return (
                   <tr
                     key={row.id}
@@ -2577,57 +2575,6 @@ export default function AdminDashboard() {
                         {row.status === 'submitted' ? '✓ Submitted' : '⏱ Draft'}
                       </span>
                     </td>
-                    {activeMenu === 'self-reviews' && <td style={{padding: '11px 14px', fontSize: '11px', minWidth: '200px', maxWidth: '300px'}}>
-                      {isEditingThis ? (
-                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                          <textarea
-                            value={editingComment.value}
-                            onChange={(e) => setEditingComment({id: row.id, value: e.target.value})}
-                            rows={3}
-                            style={{
-                              width: '100%', padding: '8px', fontSize: '13px',
-                              border: '1px solid #7eb8d4', borderRadius: '6px',
-                              resize: 'vertical', outline: 'none', fontFamily: 'inherit',
-                              color: '#1e3a5f', background: '#f0f7fb'
-                            }}
-                            autoFocus
-                          />
-                          <div style={{display: 'flex', gap: '6px'}}>
-                            <button
-                              onClick={() => handleSaveComment(row, editingComment.value)}
-                              style={{padding: '4px 10px', border: 'none', borderRadius: '6px', background: '#1e3a5f', color: '#fff', cursor: 'pointer', fontSize: '12px', fontWeight: '600'}}
-                            >Save</button>
-                            <button
-                              onClick={() => setEditingComment(null)}
-                              style={{padding: '4px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff', color: '#64748b', cursor: 'pointer', fontSize: '12px'}}
-                            >Cancel</button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div style={{display: 'flex', alignItems: 'flex-start', gap: '8px'}}>
-                          <span style={{
-                            color: row.director_comment ? '#1e3a5f' : '#94a3b8',
-                            fontSize: '12px',
-                            lineHeight: '1.5',
-                            flex: 1,
-                            wordBreak: 'break-word'
-                          }}>
-                            {row.director_comment || '—'}
-                          </span>
-                          {canEditComment && (
-                            <button
-                              onClick={() => setEditingComment({id: row.id, value: row.director_comment || ''})}
-                              title="Edit comment"
-                              style={{
-                                flexShrink: 0, padding: '3px 7px', border: '1px solid #e2e8f0',
-                                borderRadius: '6px', background: 'rgba(126,184,212,0.12)',
-                                color: '#7eb8d4', cursor: 'pointer', fontSize: '12px', lineHeight: 1
-                              }}
-                            >✎</button>
-                          )}
-                        </div>
-                      )}
-                    </td>}
                     <td style={{padding: '11px 14px'}}>
                       <div style={{display: 'flex', gap: '8px'}}>
                         <button onClick={() => { setSelectedDetail(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }} style={{
@@ -2644,8 +2591,18 @@ export default function AdminDashboard() {
                         onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.3)'}}
                         onMouseLeave={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.15)'}}
                         >
-                          View Details
+                          {activeMenu === 'self-reviews' ? 'View Self Review' : 'View Details'}
                         </button>
+                        {isLeaderPerson && (
+                          <button
+                            disabled={!leaderRecord}
+                            title={leaderRecord ? '' : 'No leader review for this period'}
+                            onClick={() => { if (leaderRecord) { setSelectedDetail(leaderRecord); window.parent.postMessage({type:'scrollToTop'}, '*'); } }}
+                            style={{padding: '5px 10px', border: 'none', borderRadius: '8px', background: leaderRecord ? 'rgba(30, 58, 95, 0.12)' : 'rgba(148, 163, 184, 0.15)', color: leaderRecord ? '#1e3a5f' : '#94a3b8', cursor: leaderRecord ? 'pointer' : 'not-allowed', fontSize: '11px', fontWeight: '600', transition: 'all 0.3s'}}
+                          >
+                            View Leader Review
+                          </button>
+                        )}
                         <button onClick={() => handleDelete(row)} style={{
                           padding: '5px 10px',
                           border: 'none',
@@ -2670,7 +2627,7 @@ export default function AdminDashboard() {
                 </Fragment>
               )) : (
                 <tr>
-                  <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
                   </td>
                 </tr>
@@ -2757,7 +2714,7 @@ export default function AdminDashboard() {
               {selectedDetail.form_data ? (
                 (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || ['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(selectedDetail.source_table ?? ''))
                   ? renderDeptFormData(selectedDetail.form_data, selectedDetail.source_table)
-                  : renderFormData(selectedDetail.form_data, activeMenu)
+                  : renderFormData(selectedDetail.form_data, selectedDetail.source_table === 'leader_review_submissions' ? 'leader-reviews' : activeMenu)
               ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
             </div>
             {renderDirectorOverall()}
