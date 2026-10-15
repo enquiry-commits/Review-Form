@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
@@ -54,6 +54,8 @@ export default function AdminDashboard() {
   const [filterYear, setFilterYear] = useState('');
   const [filterMonth, setFilterMonth] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
+  // Per-period expand/collapse overrides; unset = default (latest period open, others collapsed)
+  const [periodOpen, setPeriodOpen] = useState<Record<string, boolean>>({});
   const [totalSelfReviews, setTotalSelfReviews] = useState(0);
   const [totalLeaderReviews, setTotalLeaderReviews] = useState(0);
   const [hrReviews, setHrReviews] = useState<SubmissionRow[]>([]);
@@ -674,7 +676,22 @@ export default function AdminDashboard() {
     return tb - ta;
   });
 
-  const pagedData = filteredData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  // Group by review period (newest first). Only the latest period starts expanded;
+  // searching expands everything so matches are never hidden.
+  const periodGroups = (() => {
+    const map = new Map<string, SubmissionRow[]>();
+    for (const r of filteredData) {
+      const k = r.review_period || '—';
+      if (!map.has(k)) map.set(k, []);
+      map.get(k)!.push(r);
+    }
+    return [...map.entries()]
+      .sort((a, b) => (a[0] === '—' ? 1 : b[0] === '—' ? -1 : b[0].localeCompare(a[0])))
+      .map(([period, rows]) => ({ period, rows }));
+  })();
+  const latestPeriod = periodGroups[0]?.period;
+  const isPeriodOpen = (period: string) =>
+    periodOpen[period] ?? (searchTerm.trim() !== '' || period === latestPeriod);
 
   const KPI_INFO: Record<string, {name: string; question: string}> = {
     client_complaints: { name: 'Client Complaints / Issues 客户抱怨／异常', question: 'Were there any client complaints, issues or controllable churn? / 有没有客户抱怨、异常和可控流失？' },
@@ -2352,7 +2369,21 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 ? pagedData.map((row, idx) => {
+              {filteredData.length > 0 ? periodGroups.map(g => (
+                <Fragment key={g.period}>
+                  <tr
+                    onClick={() => setPeriodOpen(o => ({ ...o, [g.period]: !isPeriodOpen(g.period) }))}
+                    style={{cursor: 'pointer', background: 'linear-gradient(135deg, #eef3f8, #e6edf4)', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', userSelect: 'none'}}
+                  >
+                    <td colSpan={8} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
+                      <span style={{display: 'inline-block', width: '14px', transition: 'transform 0.2s', transform: isPeriodOpen(g.period) ? 'rotate(90deg)' : 'none'}}>›</span>
+                      {g.period === '—' ? 'No period' : formatPeriodDisplay(g.period)}
+                      <span style={{marginLeft: '10px', fontSize: '11px', fontWeight: '600', color: '#64748b'}}>
+                        {g.rows.filter(r => r.status === 'submitted').length} submitted / {g.rows.length} total
+                      </span>
+                    </td>
+                  </tr>
+                  {isPeriodOpen(g.period) && g.rows.map((row, idx) => {
                 const statusColor = getStatusColor(row.status === 'submitted' ? 'Completed' : 'Draft');
                 const submittedDate = row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-';
                 const canEditComment = user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
@@ -2360,7 +2391,7 @@ export default function AdminDashboard() {
                 return (
                   <tr
                     key={row.id}
-                    style={{borderBottom: idx < pagedData.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
+                    style={{borderBottom: idx < g.rows.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
                     onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}}
                     onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
                   >
@@ -2482,7 +2513,9 @@ export default function AdminDashboard() {
                     </td>
                   </tr>
                 );
-              }) : (
+                  })}
+                </Fragment>
+              )) : (
                 <tr>
                   <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
@@ -2493,84 +2526,6 @@ export default function AdminDashboard() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {(() => {
-          const totalCount =
-            activeMenu === 'self-reviews' || activeMenu === 'leader-reviews' ? filteredData.length : 0;
-          const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-          const hasPrev = currentPage > 0;
-          const hasNext = currentPage < totalPages - 1;
-
-          return (
-            <div style={{display: 'flex', justifyContent: 'center', gap: '8px', alignItems: 'center', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
-              <button
-                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                disabled={!hasPrev}
-                style={{
-                  padding: '8px 12px',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: hasPrev ? '#64748b' : '#cbd5e1',
-                  fontWeight: '600',
-                  fontSize: '12px',
-                  cursor: hasPrev ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.3s',
-                  opacity: hasPrev ? 1 : 0.5
-                }}
-                onMouseEnter={(e) => {
-                  if (hasPrev) {
-                    e.currentTarget.style.borderColor = '#7eb8d4';
-                    e.currentTarget.style.color = '#1e3a5f';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (hasPrev) {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    e.currentTarget.style.color = '#64748b';
-                  }
-                }}
-              >
-                ← Previous
-              </button>
-
-              <span style={{fontSize: '12px', color: '#64748b', fontWeight: '600', minWidth: '60px', textAlign: 'center'}}>
-                Page {currentPage + 1} / {totalPages}
-              </span>
-
-              <button
-                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
-                disabled={!hasNext}
-                style={{
-                  padding: '8px 12px',
-                  border: '1.5px solid #e2e8f0',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: hasNext ? '#64748b' : '#cbd5e1',
-                  fontWeight: '600',
-                  fontSize: '12px',
-                  cursor: hasNext ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.3s',
-                  opacity: hasNext ? 1 : 0.5
-                }}
-                onMouseEnter={(e) => {
-                  if (hasNext) {
-                    e.currentTarget.style.borderColor = '#7eb8d4';
-                    e.currentTarget.style.color = '#1e3a5f';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (hasNext) {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    e.currentTarget.style.color = '#64748b';
-                  }
-                }}
-              >
-                Next →
-              </button>
-            </div>
-          );
-        })()}
         </>}
       </div>
 
