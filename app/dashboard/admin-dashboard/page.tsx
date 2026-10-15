@@ -515,31 +515,40 @@ export default function AdminDashboard() {
     }
   };
 
+  // The submission whose detail modal is open (Reviews lists or Overview table)
+  const directorRow = tableDetailRow ?? selectedDetail;
+
   // Load saved director feedback whenever a different submission is opened
   useEffect(() => {
-    const fb = selectedDetail?.form_data?.director_feedback;
+    const fb = directorRow?.form_data?.director_feedback;
     setDfItems(fb?.items || {});
-    setDfOverall(selectedDetail?.director_comment || fb?.overall || '');
-  }, [selectedDetail?.id]);
+    setDfOverall(directorRow?.director_comment || fb?.overall || '');
+  }, [directorRow?.id]);
 
   // Save per-question comments inside form_data.director_feedback and mirror the
   // overall comment into director_comment (what My Submissions already displays).
   const handleSaveDirectorFeedback = async () => {
-    if (!selectedDetail || !user) return;
+    const row = directorRow;
+    if (!row || !user) return;
     setDfSaving(true);
     const items = Object.fromEntries(Object.entries(dfItems).filter(([, v]) => v.trim()).map(([k, v]) => [k, v.trim()]));
     const overall = dfOverall.trim();
     const form_data = {
-      ...(selectedDetail.form_data || {}),
+      ...(row.form_data || {}),
       director_feedback: { items, overall, updated_by: user.email, updated_at: new Date().toISOString() },
     };
     const { error } = await supabase
-      .from(directorTable(selectedDetail))
+      .from(directorTable(row))
       .update({ form_data, director_comment: overall })
-      .eq('id', selectedDetail.id);
+      .eq('id', row.id);
     setDfSaving(false);
     if (error) { alert('Save failed: ' + error.message); return; }
-    setSelectedDetail({ ...selectedDetail, form_data, director_comment: overall });
+    // Keep every view in sync: open modal, Overview cache and the Reviews lists
+    const patch = (r: SubmissionRow) => r.id === row.id ? { ...r, form_data, director_comment: overall } : r;
+    setSelectedDetail(d => (d && d.id === row.id ? patch(d) : d));
+    setTableDetailRow(d => (d && d.id === row.id ? patch(d) : d));
+    setTableAllSelf(rs => rs.map(patch));
+    setTableAllLeader(rs => rs.map(patch));
     fetchAllReviews();
   };
 
@@ -576,9 +585,9 @@ export default function AdminDashboard() {
   };
 
   const renderDirectorPanel = () => {
-    const row = selectedDetail;
-    if (!row || !['self-reviews', 'leader-reviews'].includes(activeMenu)) return null;
-    if (row.status !== 'submitted') return null;
+    const row = directorRow;
+    if (!row || row.status !== 'submitted') return null;
+    if (tableDemoMode && tableDetailRow) return null; // demo rows are not real records
     const canEdit = !!user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
     const hasSaved = !!(row.director_comment || Object.keys(row.form_data?.director_feedback?.items || {}).length);
     if (!canEdit && !hasSaved) return null;
@@ -2752,7 +2761,8 @@ export default function AdminDashboard() {
       {/* Table Detail Modal */}
       {tableDetailRow && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'40px 20px 20px',overflowY:'auto'}}>
-          <div style={{background:'white',borderRadius:'16px',padding:'40px',maxWidth:'700px',width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
+          <div style={{display:'flex',gap:'20px',alignItems:'flex-start',justifyContent:'center',flexWrap:'wrap',width:'100%',maxWidth:'1140px'}}>
+          <div style={{background:'white',borderRadius:'16px',padding:'40px',flex:'1 1 560px',maxWidth:'700px',boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'24px'}}>
               <h2 style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',margin:0}}>{tableDetailRow.employee_name}</h2>
               <button onClick={()=>setTableDetailRow(null)} style={{background:'none',border:'none',fontSize:'24px',cursor:'pointer',color:'#64748b'}}>✕</button>
@@ -2785,6 +2795,8 @@ export default function AdminDashboard() {
             <div style={{marginTop:'20px',paddingTop:'16px',borderTop:'1px solid #e2e8f0'}}>
               <button onClick={()=>setTableDetailRow(null)} style={{width:'100%',padding:'11px',border:'1.5px solid #e2e8f0',borderRadius:'10px',background:'white',color:'#64748b',fontWeight:'600',cursor:'pointer'}}>Close</button>
             </div>
+          </div>
+          {renderDirectorPanel()}
           </div>
         </div>
       )}
