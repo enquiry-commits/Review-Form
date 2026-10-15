@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
@@ -556,88 +556,71 @@ export default function AdminDashboard() {
   const directorTable = (row: SubmissionRow) =>
     row.source_table || (activeMenu === 'leader-reviews' ? 'leader_review_submissions' : 'self_review_submissions');
 
-  // Answered questions of a submission, in display order, for the comment panel
-  const answeredQuestions = (row: SubmissionRow) => {
-    const fd = row.form_data || {};
-    const kpis = fd.kpis || {};
-    const pos = fd.positive_items || {};
-    const table = directorTable(row);
-    const out: {id: string; name: string; color: string}[] = [];
-    if (DEPT_TABLES.includes(table)) {
-      const isMkt = table === 'marketing_review_submissions';
-      const isFin = table === 'finance_review_submissions';
-      const kOrder = isMkt ? MKT_KPI_IDS : isFin ? FIN_KPI_IDS : HR_KPI_IDS;
-      const pOrder = isMkt ? MKT_POS_IDS : isFin ? FIN_POS_IDS : HR_POS_IDS;
-      const kInfo: Record<string, {name: string}> = isMkt ? MKT_KPI_INFO : isFin ? FIN_KPI_INFO : HR_KPI_INFO;
-      const pInfo: Record<string, {name: string}> = isMkt ? MKT_POS_INFO : isFin ? FIN_POS_INFO : HR_POS_INFO;
-      kOrder.filter(k => kpis[k] && hasContent(kpis[k])).forEach(k => out.push({id: `kpi:${k}`, name: kInfo[k]?.name || k, color: '#7eb8d4'}));
-      pOrder.filter(k => pos[k] && (pos[k]?.description?.trim() || pos[k]?.files?.length > 0)).forEach(k => out.push({id: `pos:${k}`, name: pInfo[k]?.name || k, color: '#16a34a'}));
-    } else if (table === 'leader_review_submissions') {
-      const rowsOf = (v: any): any[] => Array.isArray(v) ? v : Array.isArray(v?.rows) ? v.rows : [];
-      const filled = (v: any) => rowsOf(v).some(r => r?.employee?.trim() || r?.comment?.trim() || r?.files?.length > 0);
-      Object.entries(kpis).filter(([, v]) => filled(v)).forEach(([k, v]: any) => out.push({id: `kpi:${k}`, name: KPI_META[k]?.name || v?.kpi || k, color: '#7eb8d4'}));
-      Object.entries(pos).filter(([, v]) => filled(v)).forEach(([k, v]: any) => out.push({id: `pos:${k}`, name: POS_META[k]?.name || v?.label || k, color: '#16a34a'}));
-    } else {
-      Object.entries(kpis).filter(([, v]: any) => hasContent(v)).forEach(([k]) => out.push({id: `kpi:${k}`, name: KPI_INFO[k]?.name || k, color: '#7eb8d4'}));
-      Object.entries(pos).filter(([, v]: any) => v?.description?.trim() || v?.files?.length > 0).forEach(([k]) => out.push({id: `pos:${k}`, name: POSITIVE_INFO[k]?.name || k, color: '#16a34a'}));
-    }
-    return out;
-  };
-
-  const renderDirectorPanel = () => {
+  // ── Director comments, shown beside each answer ─────────────────────────────
+  // Each answer card gets its comment box in the column to its right (same top and
+  // height), so the director reads an answer and replies to it without scrolling.
+  const directorState = () => {
     const row = directorRow;
     if (!row || row.status !== 'submitted') return null;
     if (tableDemoMode && tableDetailRow) return null; // demo rows are not real records
     const canEdit = !!user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
     const hasSaved = !!(row.director_comment || Object.keys(row.form_data?.director_feedback?.items || {}).length);
     if (!canEdit && !hasSaved) return null;
+    return { row, canEdit };
+  };
+  const isWideModal = () => typeof window !== 'undefined' && window.innerWidth >= 1100;
+  const sideBySide = () => !!directorState() && isWideModal();
+  const modalCardMaxWidth = () => (sideBySide() ? '1120px' : '700px');
+  const detailPadRight = () => (sideBySide() ? '356px' : undefined);
+  const cardPos = (): CSSProperties => (directorState() ? { position: 'relative', ...(isWideModal() ? { minHeight: '96px' } : {}) } : {});
 
-    const questions = answeredQuestions(row);
-    const taStyle = {width: '100%', minHeight: '64px', padding: '8px 10px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical' as const, fontFamily: 'inherit', boxSizing: 'border-box' as const, background: canEdit ? 'white' : '#f8fafc'};
-
+  const commentBox = (id: string) => {
+    const st = directorState();
+    if (!st) return null;
+    const value = dfItems[id] || '';
+    if (!st.canEdit && !value.trim()) return null;
+    const wide = isWideModal();
     return (
-      <div style={{flex: '1 1 340px', maxWidth: '400px', background: 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'}}>
-        <h3 style={{fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px'}}>Director Comments</h3>
-        <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 18px'}}>Comment on each answered question, then add an overall comment. The overall comment is shown to the employee.</p>
-        <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
-          {questions.length === 0 && (
-            <div style={{fontSize: '13px', color: '#94a3b8'}}>No answered questions to comment on.</div>
-          )}
-          {questions.map((q, i) => (
-            <div key={q.id}>
-              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px'}}>
-                <div style={{width: '3px', height: '14px', background: q.color, borderRadius: '2px', flexShrink: 0}} />
-                <span style={{fontSize: '12px', fontWeight: '700', color: '#334155'}}>{i + 1}. {q.name}</span>
-              </div>
-              <textarea
-                value={dfItems[q.id] || ''}
-                onChange={(e) => setDfItems(prev => ({...prev, [q.id]: e.target.value}))}
-                readOnly={!canEdit}
-                placeholder={canEdit ? 'Comment on this answer…' : '—'}
-                style={taStyle}
-              />
-            </div>
-          ))}
-          <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '14px'}}>
-            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px'}}>Overall Comment</div>
-            <textarea
-              value={dfOverall}
-              onChange={(e) => setDfOverall(e.target.value)}
-              readOnly={!canEdit}
-              placeholder={canEdit ? 'Overall comment…' : '—'}
-              style={{...taStyle, minHeight: '96px'}}
-            />
-          </div>
-          {canEdit && (
+      <div style={wide ? {position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', display: 'flex'} : {marginTop: '10px'}}>
+        <textarea
+          value={value}
+          onChange={(e) => setDfItems(prev => ({...prev, [id]: e.target.value}))}
+          readOnly={!st.canEdit}
+          placeholder={st.canEdit ? 'Comment on this answer…' : ''}
+          style={{flex: 1, width: '100%', minHeight: '72px', padding: '10px 12px', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? 'white' : '#f8fafc', color: '#1e3a5f'}}
+        />
+      </div>
+    );
+  };
+
+  const renderDirectorColumnHeader = () => (sideBySide() ? (
+    <div style={{position: 'absolute', top: '2px', right: 0, width: '340px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Director Comments</div>
+  ) : null);
+
+  const renderDirectorOverall = () => {
+    const st = directorState();
+    if (!st) return null;
+    return (
+      <div style={{marginTop: '20px'}}>
+        <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px'}}>Overall Comment (shown to the employee)</div>
+        <textarea
+          value={dfOverall}
+          onChange={(e) => setDfOverall(e.target.value)}
+          readOnly={!st.canEdit}
+          placeholder={st.canEdit ? 'Overall comment…' : ''}
+          style={{width: '100%', minHeight: '96px', padding: '10px 12px', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? 'white' : '#f8fafc', color: '#1e3a5f'}}
+        />
+        {st.canEdit && (
+          <div style={{position: 'sticky', bottom: 0, background: 'white', padding: '12px 0 4px', marginTop: '12px', borderTop: '1px solid #e2e8f0', zIndex: 5}}>
             <button
               onClick={handleSaveDirectorFeedback}
               disabled={dfSaving}
-              style={{padding: '11px', border: 'none', borderRadius: '10px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', fontWeight: '700', fontSize: '14px', cursor: dfSaving ? 'wait' : 'pointer', opacity: dfSaving ? 0.7 : 1}}
+              style={{width: '100%', padding: '11px', border: 'none', borderRadius: '10px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', fontWeight: '700', fontSize: '14px', cursor: dfSaving ? 'wait' : 'pointer', opacity: dfSaving ? 0.7 : 1}}
             >
               {dfSaving ? 'Saving…' : 'Save Comments'}
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -939,7 +922,7 @@ export default function AdminDashboard() {
                 {filledKpis.map(([key, val]: any) => {
                   const info = KPI_INFO[key];
                   return (
-                    <div key={key} style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
+                    <div key={key} style={{...cardPos(), background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
                       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '4px'}}>
                         <span style={{fontSize: '13px', fontWeight: '700', color: '#0f172a'}}>{info?.name || key}</span>
                         {val.count > 0 && (
@@ -955,7 +938,8 @@ export default function AdminDashboard() {
                         <p style={{fontSize: '13px', color: '#475569', margin: '6px 0 0 0', lineHeight: '1.6', background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px'}}>{val.comment}</p>
                       )}
                       {renderFiles(val.files)}
-                    </div>
+                    {commentBox(`kpi:${key}`)}
+</div>
                   );
                 })}
               </div>
@@ -977,7 +961,7 @@ export default function AdminDashboard() {
                 {filledPositive.map(([key, val]: any) => {
                   const info = POSITIVE_INFO[key];
                   return (
-                    <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
+                    <div key={key} style={{...cardPos(), background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
                       <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px'}}>{info?.name || key}</div>
                       {info?.question && (
                         <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic'}}>{info.question}</p>
@@ -986,7 +970,8 @@ export default function AdminDashboard() {
                         <p style={{fontSize: '13px', color: '#475569', margin: '6px 0 0 0', lineHeight: '1.6', background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px'}}>{val.description}</p>
                       )}
                       {renderFiles(val.files)}
-                    </div>
+                    {commentBox(`pos:${key}`)}
+</div>
                   );
                 })}
               </div>
@@ -1029,7 +1014,7 @@ export default function AdminDashboard() {
               {filledKpis.map(([key, val]: any) => {
                 const meta = KPI_META[key];
                 return (
-                  <div key={key} style={{background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
+                  <div key={key} style={{...cardPos(), background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px'}}>
                     <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px'}}>{meta?.name || val.kpi || key}</div>
                     {meta?.question && (
                       <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic'}}>{meta.question}</p>
@@ -1041,7 +1026,8 @@ export default function AdminDashboard() {
                         {renderFiles(row.files)}
                       </div>
                     ))}
-                  </div>
+                  {commentBox(`kpi:${key}`)}
+</div>
                 );
               })}
             </div>
@@ -1063,7 +1049,7 @@ export default function AdminDashboard() {
               {filledPositive.map(([key, val]: any) => {
                 const meta = POS_META[key];
                 return (
-                  <div key={key} style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
+                  <div key={key} style={{...cardPos(), background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px'}}>
                     <div style={{fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px'}}>{meta?.name || val.label || key}</div>
                     {meta?.question && (
                       <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic'}}>{meta.question}</p>
@@ -1075,7 +1061,8 @@ export default function AdminDashboard() {
                         {renderFiles(row.files)}
                       </div>
                     ))}
-                  </div>
+                  {commentBox(`pos:${key}`)}
+</div>
                 );
               })}
             </div>
@@ -1137,7 +1124,7 @@ export default function AdminDashboard() {
           {filledKpis.length > 0 ? (
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {filledKpis.map(([key, val]: any) => (
-                <div key={key} style={{background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
+                <div key={key} style={{...cardPos(), background:'#f0f7ff',border:'1px solid #bfdbfe',borderRadius:'10px',padding:'12px 14px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px',gap:'12px'}}>
                     <span style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',wordBreak:'break-word'}}>{getKpiName(key)}</span>
                     {(val.count ?? 0) > 0 && <span style={{flexShrink:0,background:'#dbeafe',color:'#1d4ed8',padding:'2px 10px',borderRadius:'6px',fontSize:'12px',fontWeight:'700'}}>×{val.count}</span>}
@@ -1145,7 +1132,8 @@ export default function AdminDashboard() {
                   {getKpiQ(key) && <p style={{fontSize:'12px',color:'#94a3b8',margin:'0 0 6px 0',lineHeight:'1.5',fontStyle:'italic'}}>{getKpiQ(key)}</p>}
                   {val.comment?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.comment}</p>}
                   {renderFiles(val.files)}
-                </div>
+                {commentBox(`kpi:${key}`)}
+</div>
               ))}
             </div>
           ) : (
@@ -1160,12 +1148,13 @@ export default function AdminDashboard() {
           {filledPos.length > 0 ? (
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
               {filledPos.map(([key, val]: any) => (
-                <div key={key} style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'10px',padding:'12px 14px'}}>
+                <div key={key} style={{...cardPos(), background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'10px',padding:'12px 14px'}}>
                   <div style={{fontSize:'13px',fontWeight:'700',color:'#0f172a',marginBottom:'4px',wordBreak:'break-word'}}>{getPosName(key)}</div>
                   {getPosQ(key) && <p style={{fontSize:'12px',color:'#94a3b8',margin:'0 0 6px 0',lineHeight:'1.5',fontStyle:'italic'}}>{getPosQ(key)}</p>}
                   {val.description?.trim() && <p style={{fontSize:'13px',color:'#475569',margin:'6px 0 0',lineHeight:'1.6',background:'rgba(255,255,255,0.7)',padding:'8px 10px',borderRadius:'6px'}}>{val.description}</p>}
                   {renderFiles(val.files)}
-                </div>
+                {commentBox(`pos:${key}`)}
+</div>
               ))}
             </div>
           ) : (
@@ -2698,7 +2687,7 @@ export default function AdminDashboard() {
             borderRadius: '16px',
             padding: '40px',
             flex: '1 1 560px',
-            maxWidth: '700px',
+            maxWidth: modalCardMaxWidth(),
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
           }}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
@@ -2748,14 +2737,16 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px'}}>
+            <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px', position: 'relative', paddingRight: detailPadRight()}}>
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
+              {renderDirectorColumnHeader()}
               {selectedDetail.form_data ? (
                 (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || ['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(selectedDetail.source_table ?? ''))
                   ? renderDeptFormData(selectedDetail.form_data, selectedDetail.source_table)
                   : renderFormData(selectedDetail.form_data, activeMenu)
               ) : <p style={{fontSize: '14px', color: '#64748b'}}>No data available</p>}
             </div>
+            {renderDirectorOverall()}
 
             <div style={{display: 'flex', gap: '12px', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e2e8f0'}}>
               <button onClick={() => setSelectedDetail(null)} style={{
@@ -2772,7 +2763,6 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-          {renderDirectorPanel()}
           </div>
         </div>
       )}
@@ -2781,7 +2771,7 @@ export default function AdminDashboard() {
       {tableDetailRow && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'40px 20px 20px',overflowY:'auto'}}>
           <div style={{display:'flex',gap:'20px',alignItems:'flex-start',justifyContent:'center',flexWrap:'wrap',width:'100%',maxWidth:'1140px'}}>
-          <div style={{background:'white',borderRadius:'16px',padding:'40px',flex:'1 1 560px',maxWidth:'700px',boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
+          <div style={{background:'white',borderRadius:'16px',padding:'40px',flex:'1 1 560px',maxWidth:modalCardMaxWidth(),boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'24px'}}>
               <h2 style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',margin:0}}>{tableDetailRow.employee_name}</h2>
               <button onClick={()=>setTableDetailRow(null)} style={{background:'none',border:'none',fontSize:'24px',cursor:'pointer',color:'#64748b'}}>✕</button>
@@ -2803,19 +2793,20 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
-            <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px'}}>
+            <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px',position:'relative',paddingRight:detailPadRight()}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
+              {renderDirectorColumnHeader()}
               {tableDetailRow.form_data
                 ? (['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(tableDetailRow.source_table ?? '')
                     ? renderDeptFormData(tableDetailRow.form_data, tableDetailRow.source_table)
                     : renderFormData(tableDetailRow.form_data, tableAllLeader.some(r=>r.id===tableDetailRow.id)?'leader-reviews':'self-reviews'))
                 : <p style={{fontSize:'14px',color:'#64748b'}}>No data</p>}
             </div>
+            {renderDirectorOverall()}
             <div style={{marginTop:'20px',paddingTop:'16px',borderTop:'1px solid #e2e8f0'}}>
               <button onClick={()=>setTableDetailRow(null)} style={{width:'100%',padding:'11px',border:'1.5px solid #e2e8f0',borderRadius:'10px',background:'white',color:'#64748b',fontWeight:'600',cursor:'pointer'}}>Close</button>
             </div>
           </div>
-          {renderDirectorPanel()}
           </div>
         </div>
       )}
