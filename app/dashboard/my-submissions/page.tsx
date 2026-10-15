@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, logout } from '@/lib/auth';
 import { getCurrentReviewPeriod, formatPeriodDisplay } from '@/lib/reviewHelpers';
@@ -298,6 +298,17 @@ export default function MySubmissions() {
   // (which is as tall as its content), anchor it to the top of the part the user is
   // actually looking at, so the whole modal is in view; otherwise sit by the button.
   const [modalTop, setModalTop] = useState(40);
+  // The modal shows its full content (no inner scroll); track its height so the page grows to fit it
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [modalH, setModalH] = useState(700);
+  useEffect(() => {
+    const el = modalRef.current;
+    if (!detail || !el) return;
+    const ro = new ResizeObserver(() => setModalH(el.offsetHeight));
+    ro.observe(el);
+    setModalH(el.offsetHeight);
+    return () => ro.disconnect();
+  }, [detail]);
   const openDetail = (target: DetailTarget, button: HTMLElement) => {
     let top = button.getBoundingClientRect().top + window.scrollY - 160;
     try {
@@ -482,7 +493,7 @@ export default function MySubmissions() {
   const allCurrentSubmitted = forms.length > 0 && forms.every(f => currentRow?.statuses[f.key] === 'submitted');
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: detail ? `max(100vh, ${modalTop + 700}px)` : '100vh', position: 'relative' }}>
+    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: detail ? `max(100vh, ${modalTop + modalH + 48}px)` : '100vh', position: 'relative' }}>
 
       {/* Header */}
       {!isEmbedded && (
@@ -687,7 +698,8 @@ export default function MySubmissions() {
           onClick={() => setDetail(null)}
         >
           <div
-            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: detailSideBySide ? '1152px' : '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
+            ref={modalRef}
+            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: detailSideBySide ? '1152px' : '580px', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -709,7 +721,7 @@ export default function MySubmissions() {
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
+            <div style={{ padding: '24px 28px', flex: 1 }}>
               <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} directorComment={detail.record.director_comment} sideBySide={detailSideBySide} />
             </div>
 
