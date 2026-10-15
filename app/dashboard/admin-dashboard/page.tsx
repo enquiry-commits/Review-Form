@@ -1557,6 +1557,21 @@ export default function AdminDashboard() {
               return { email, name: ref.employee_name, dept: ref.department, isLeader: leaderEmailSet.has(email) };
             }).sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
 
+          // One table per department (own header, so no scrolling back up); leaders first
+          const DEPT_ORDER = ['Corporate Secretarial', 'Accounting', 'Tax'];
+          const leaderRank = (email: string) => ALL_REVIEWABLE_USERS.findIndex(u => u.email === email);
+          const deptGroups = [...new Set(employees.map(e => e.dept))]
+            .sort((a, b) => {
+              const ia = DEPT_ORDER.indexOf(a), ib = DEPT_ORDER.indexOf(b);
+              return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+            })
+            .map(dept => ({
+              dept,
+              people: employees
+                .filter(e => e.dept === dept)
+                .sort((a, b) => Number(b.isLeader) - Number(a.isLeader) || (a.isLeader && b.isLeader ? leaderRank(a.email) - leaderRank(b.email) : a.name.localeCompare(b.name))),
+            }));
+
           // Internal Finance+HR people (Esther + Chelsea) — always show even with no records
           const INTERNAL_NAMES: Record<string,string> = { 'esther@tassure.com':'Esther', 'chelsea@tassure.com':'Chelsea Ang', 'vincent@tassure.com':'Vincent' };
           const finHrPeople = BY_YEAR_INTERNAL.financeHr
@@ -1613,7 +1628,17 @@ export default function AdminDashboard() {
                 }
               </div>
 
-              {/* Spreadsheet */}
+              {/* Spreadsheets — one per department */}
+              {deptGroups.length === 0 && (
+                <div style={{padding:'40px',textAlign:'center',color:'#94a3b8',background:'white',borderRadius:'12px',border:'1px solid #e2e8f0'}}>No submissions for {selYear}</div>
+              )}
+              {deptGroups.map(g => (
+              <div key={g.dept} style={{marginBottom:'24px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'8px',margin:'0 0 10px 2px'}}>
+                <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
+                <span style={{fontSize:'13px',fontWeight:'800',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
+                <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
+              </div>
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
                 <div style={{overflowX:'auto',width:'100%'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
@@ -1649,9 +1674,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {employees.length === 0 ? (
-                        <tr><td colSpan={3 + months.length*2} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions for {selYear}</td></tr>
-                      ) : employees.map((emp, i) => (
+                      {g.people.map((emp, i) => (
                         <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
                           onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
                           onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
@@ -1674,22 +1697,18 @@ export default function AdminDashboard() {
                         </tr>
                       ))}
                     </tbody>
-                    {/* Legend footer */}
-                    <tfoot>
-                      <tr>
-                        <td colSpan={3 + months.length*2} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
-                          <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
-                            <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
-                            <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
-                            <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
-                            <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
-                            <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a cell to view details</span>
-                          </div>
-                        </td>
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>{/* end overflowX */}
+              </div>
+              </div>
+              ))}
+
+              <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center',margin:'-8px 0 8px 2px'}}>
+                <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
+                <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
+                <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
+                <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
+                <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a cell to view details</span>
               </div>
 
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
