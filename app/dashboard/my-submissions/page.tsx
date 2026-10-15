@@ -122,11 +122,17 @@ function humanize(key: string): string {
 }
 
 // Section header with colored accent bar (matches Admin Dashboard)
-function SectionHeader({ label, color }: { label: string; color: string }) {
+function SectionHeader({ label, color, sideCol }: { label: string; color: string; sideCol?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative' }}>
       <div style={{ width: '4px', height: '16px', background: color, borderRadius: '2px' }} />
       <span style={{ fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+      {sideCol && (
+        <div style={{ position: 'absolute', top: 0, left: 'calc(100% + 16px)', width: '408px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '4px', height: '16px', background: '#8b5cf6', borderRadius: '2px' }} />
+          <span style={{ fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Director Comments</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -154,7 +160,7 @@ function DirectorNote({ text, label = 'Director Comment' }: { text?: string; lab
 function SideNote({ text }: { text?: string }) {
   const has = !!text?.trim();
   return (
-    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '408px', background: has ? 'white' : '#f8fafc', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: has ? '#1e3a5f' : '#94a3b8', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>
+    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '408px', background: has ? '#fdfcff' : '#faf5ff', border: '1.5px solid #ddd6fe', borderLeft: '3px solid #8b5cf6', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: has ? '#1e3a5f' : '#94a3b8', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>
       {has ? text : 'No comment yet / 暂无评论'}
     </div>
   );
@@ -185,13 +191,11 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingRight: sideBySide ? '424px' : undefined }}>
       <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Review Details</div>
-      {sideBySide && (
-        <div style={{ position: 'absolute', top: '4px', right: 0, width: '408px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Director Comments</div>
-      )}
+
 
       {/* KPI Performance */}
       <div>
-        <SectionHeader label="KPI Performance" color="#7eb8d4" />
+        <SectionHeader label="KPI Performance" color="#7eb8d4" sideCol={sideBySide} />
         {kpiBlocks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {kpiBlocks.map(b => (
@@ -227,7 +231,7 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
 
       {/* Positive Contributions */}
       <div>
-        <SectionHeader label="Positive Contributions" color="#16a34a" />
+        <SectionHeader label="Positive Contributions" color="#16a34a" sideCol={sideBySide} />
         {posBlocks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {posBlocks.map(b => (
@@ -269,8 +273,8 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
 
       {(overallDirector || sideBySide) && (
         <div style={sideBySide ? { marginRight: '-424px' } : undefined}>
-          <SectionHeader label="Director's Overall Comment" color="#1e3a5f" />
-          <div style={{ background: overallDirector ? 'linear-gradient(135deg, #f0f7fb, #e8f4f8)' : '#f8fafc', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: overallDirector ? '#1e3a5f' : '#94a3b8', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector || 'No comment yet / 暂无评论'}</div>
+          <SectionHeader label="Director's Overall Comment" color="#8b5cf6" />
+          <div style={{ background: overallDirector ? '#fdfcff' : '#faf5ff', border: '1.5px solid #ddd6fe', borderLeft: '3px solid #8b5cf6', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: overallDirector ? '#1e3a5f' : '#94a3b8', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector || 'No comment yet / 暂无评论'}</div>
         </div>
       )}
     </div>

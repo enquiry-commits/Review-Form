@@ -587,14 +587,18 @@ export default function AdminDashboard() {
           onChange={(e) => setDfItems(prev => ({...prev, [id]: e.target.value}))}
           readOnly={!st.canEdit}
           placeholder={st.canEdit ? 'Comment on this answer…' : ''}
-          style={{flex: 1, width: '100%', minHeight: '72px', padding: '10px 12px', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? 'white' : '#f8fafc', color: '#1e3a5f'}}
+          style={{flex: 1, width: '100%', minHeight: '72px', padding: '10px 12px', border: '1.5px solid #ddd6fe', borderLeft: '3px solid #8b5cf6', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? '#fdfcff' : '#faf5ff', color: '#1e3a5f'}}
         />
       </div>
     );
   };
 
-  const renderDirectorColumnHeader = () => (sideBySide() ? (
-    <div style={{position: 'absolute', top: '2px', right: 0, width: '408px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Director Comments</div>
+  // Right-column header on each section row, styled like "KPI PERFORMANCE" but violet
+  const directorColHeader = () => (sideBySide() ? (
+    <div style={{position: 'absolute', top: 0, left: 'calc(100% + 16px)', width: '408px', display: 'flex', alignItems: 'center', gap: '8px'}}>
+      <div style={{width: '4px', height: '16px', background: '#8b5cf6', borderRadius: '2px'}} />
+      <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Director Comments</span>
+    </div>
   ) : null);
 
   const renderDirectorOverall = () => {
@@ -608,7 +612,7 @@ export default function AdminDashboard() {
           onChange={(e) => setDfOverall(e.target.value)}
           readOnly={!st.canEdit}
           placeholder={st.canEdit ? 'Overall comment…' : ''}
-          style={{width: '100%', minHeight: '96px', padding: '10px 12px', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? 'white' : '#f8fafc', color: '#1e3a5f'}}
+          style={{width: '100%', minHeight: '96px', padding: '10px 12px', border: '1.5px solid #ddd6fe', borderLeft: '3px solid #8b5cf6', borderRadius: '10px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box', background: st.canEdit ? '#fdfcff' : '#faf5ff', color: '#1e3a5f'}}
         />
         {st.canEdit && (
           <div style={{position: 'sticky', bottom: 0, background: 'white', padding: '12px 0 4px', marginTop: '12px', borderTop: '1px solid #e2e8f0', zIndex: 5}}>
@@ -913,9 +917,10 @@ export default function AdminDashboard() {
         <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
           {/* KPI Issues */}
           <div>
-            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
               <div style={{width: '4px', height: '16px', background: '#7eb8d4', borderRadius: '2px'}} />
               <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance</span>
+{directorColHeader()}
             </div>
             {filledKpis.length > 0 ? (
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
@@ -952,9 +957,10 @@ export default function AdminDashboard() {
 
           {/* Positive Contributions */}
           <div>
-            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
               <div style={{width: '4px', height: '16px', background: '#16a34a', borderRadius: '2px'}} />
               <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Positive Contributions</span>
+{directorColHeader()}
             </div>
             {filledPositive.length > 0 ? (
               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
@@ -1005,9 +1011,10 @@ export default function AdminDashboard() {
       <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
         {/* KPI Performance */}
         <div>
-          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
             <div style={{width: '4px', height: '16px', background: '#7eb8d4', borderRadius: '2px'}} />
             <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>KPI Performance</span>
+{directorColHeader()}
           </div>
           {filledKpis.length > 0 ? (
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
@@ -1040,9 +1047,10 @@ export default function AdminDashboard() {
 
         {/* Positive Contributions */}
         <div>
-          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
             <div style={{width: '4px', height: '16px', background: '#16a34a', borderRadius: '2px'}} />
             <span style={{fontSize: '12px', fontWeight: '800', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px'}}>Positive Contributions</span>
+{directorColHeader()}
           </div>
           {filledPositive.length > 0 ? (
             <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
@@ -1117,9 +1125,10 @@ export default function AdminDashboard() {
           </div>
         )}
         <div>
-          <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
             <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
             <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>KPI Issues</span>
+{directorColHeader()}
           </div>
           {filledKpis.length > 0 ? (
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
@@ -1141,9 +1150,10 @@ export default function AdminDashboard() {
           )}
         </div>
         <div>
-          <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'10px'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', position: 'relative'}}>
             <div style={{width:'4px',height:'16px',background:'#16a34a',borderRadius:'2px'}} />
             <span style={{fontSize:'12px',fontWeight:'800',color:'#334155',textTransform:'uppercase',letterSpacing:'0.5px'}}>Positive Contributions</span>
+{directorColHeader()}
           </div>
           {filledPos.length > 0 ? (
             <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
@@ -2739,7 +2749,6 @@ export default function AdminDashboard() {
 
             <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: '20px', position: 'relative', paddingRight: detailPadRight()}}>
               <h3 style={{fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '16px'}}>Review Details</h3>
-              {renderDirectorColumnHeader()}
               {selectedDetail.form_data ? (
                 (['hr-reviews','finance-reviews','marketing-reviews'].includes(activeMenu) || ['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(selectedDetail.source_table ?? ''))
                   ? renderDeptFormData(selectedDetail.form_data, selectedDetail.source_table)
@@ -2795,7 +2804,6 @@ export default function AdminDashboard() {
             </div>
             <div style={{borderTop:'1px solid #e2e8f0',paddingTop:'20px',marginTop:'4px',position:'relative',paddingRight:detailPadRight()}}>
               <h3 style={{fontSize:'15px',fontWeight:'700',color:'#0f172a',marginBottom:'14px'}}>Review Details</h3>
-              {renderDirectorColumnHeader()}
               {tableDetailRow.form_data
                 ? (['finance_review_submissions','hr_review_submissions','marketing_review_submissions'].includes(tableDetailRow.source_table ?? '')
                     ? renderDeptFormData(tableDetailRow.form_data, tableDetailRow.source_table)
