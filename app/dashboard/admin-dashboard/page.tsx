@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
@@ -2650,16 +2651,18 @@ export default function AdminDashboard() {
                               title={cur ? cur.label : (canRate ? 'Rate' : '')}
                               onClick={(e) => {
                                 const rc = e.currentTarget.getBoundingClientRect();
-                                setRatingPicker({id: row.id, top: rc.bottom + 6, left: Math.max(8, Math.min(rc.left - 140, window.innerWidth - 328))});
+                                const popH = 230;
+                                const above = rc.bottom + 4 + popH > window.innerHeight && rc.top - 4 - popH > 0;
+                                setRatingPicker({id: row.id, top: above ? rc.top - 4 - popH : rc.bottom + 4, left: Math.max(8, Math.min(rc.left + rc.width / 2 - 160, window.innerWidth - 328))});
                               }}
                               style={{border: 'none', background: 'transparent', padding: '2px', cursor: canRate ? 'pointer' : 'default', opacity: cur || canRate ? 1 : 0.35, lineHeight: 0}}
                             >
                               <img src={`/ratings/${cur ? cur.key : 'good'}.png`} alt={cur ? cur.label : 'Good'} width={28} height={28} style={{display: 'block'}} />
                             </button>
-                            {ratingPicker?.id === row.id && canRate && (
+                            {ratingPicker?.id === row.id && canRate && typeof document !== 'undefined' && createPortal(
                               <>
-                                <div onClick={() => setRatingPicker(null)} style={{position: 'fixed', inset: 0, zIndex: 900}} />
-                                <div style={{position: 'fixed', top: ratingPicker.top, left: ratingPicker.left, width: '320px', zIndex: 901, background: 'white', borderRadius: '14px', boxShadow: '0 12px 40px rgba(15,23,42,0.28)', border: '1px solid #e2e8f0', padding: '14px', textAlign: 'center'}}>
+                                <div onClick={() => setRatingPicker(null)} style={{position: 'fixed', inset: 0, zIndex: 2147483000}} />
+                                <div style={{position: 'fixed', top: ratingPicker.top, left: ratingPicker.left, width: '320px', zIndex: 2147483001, background: 'white', borderRadius: '14px', boxShadow: '0 12px 40px rgba(15,23,42,0.28)', border: '1px solid #e2e8f0', padding: '14px', textAlign: 'center'}}>
                                   <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px 6px'}}>
                                     {RATINGS.map(r => (
                                       <button
@@ -2676,7 +2679,8 @@ export default function AdminDashboard() {
                                     <button onClick={() => handleSetRating(row, null)} style={{marginTop: '10px', border: 'none', background: 'transparent', color: '#94a3b8', fontSize: '11px', cursor: 'pointer'}}>Clear rating</button>
                                   )}
                                 </div>
-                              </>
+                              </>,
+                              document.body
                             )}
                           </>
                         );
