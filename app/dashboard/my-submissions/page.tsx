@@ -59,13 +59,15 @@ function activeRating(fd: any): string | null {
 }
 
 function RatingBubble({ ratingKey }: { ratingKey: string }) {
+  // Big speech bubble hanging off the right of the row's buttons; it takes no layout
+  // space, so it may overlap the next rows and stick out past the card.
   return (
-    <div style={{ position: 'absolute', left: '100%', top: '50%', marginLeft: '14px', transform: 'translateY(-50%)', zIndex: 20 }}>
-    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 2s ease-in-out infinite' }}>
-      <span style={{ position: 'absolute', left: '-8px', top: '50%', width: '11px', height: '11px', marginTop: '-6px', background: '#fff', borderLeft: '2.5px solid #231815', borderBottom: '2.5px solid #231815', transform: 'rotate(45deg)' }} />
-      <img src={`/ratings/${ratingKey}.png`} alt="" width={34} height={34} />
-      <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{RATING_LABELS[ratingKey]}</span>
-    </div>
+    <div style={{ position: 'absolute', left: '100%', top: '50%', marginLeft: '18px', transform: 'translateY(-50%)', zIndex: 30, pointerEvents: 'none' }}>
+      <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '12px 22px 12px 12px', background: '#fff', border: '4px solid #231815', borderRadius: '20px', boxShadow: '8px 8px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 2s ease-in-out infinite' }}>
+        <span style={{ position: 'absolute', left: '-14px', top: '50%', width: '18px', height: '18px', marginTop: '-9px', background: '#fff', borderLeft: '4px solid #231815', borderBottom: '4px solid #231815', transform: 'rotate(45deg)' }} />
+        <img src={`/ratings/${ratingKey}.png`} alt="" width={72} height={72} style={{ flexShrink: 0 }} />
+        <span style={{ fontSize: '20px', fontWeight: 600, color: '#1e293b', lineHeight: 1.25, textAlign: 'center', width: '84px' }}>{RATING_LABELS[ratingKey]}</span>
+      </div>
     </div>
   );
 }
