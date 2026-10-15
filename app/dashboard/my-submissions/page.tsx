@@ -290,10 +290,20 @@ export default function MySubmissions() {
   const [loaded, setLoaded] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [detail, setDetail] = useState<DetailTarget | null>(null);
-  // Where the modal sits, in page coordinates: next to the View button that was clicked
+  // Where the modal sits, in page coordinates. When embedded in the dashboard iframe
+  // (which is as tall as its content), anchor it to the top of the part the user is
+  // actually looking at, so the whole modal is in view; otherwise sit by the button.
   const [modalTop, setModalTop] = useState(40);
   const openDetail = (target: DetailTarget, button: HTMLElement) => {
-    setModalTop(Math.max(24, button.getBoundingClientRect().top + window.scrollY - 160));
+    let top = button.getBoundingClientRect().top + window.scrollY - 160;
+    try {
+      const frame = window.frameElement as HTMLElement | null;
+      const scroller = frame?.parentElement;
+      if (frame && scroller) {
+        top = scroller.getBoundingClientRect().top - frame.getBoundingClientRect().top + 16;
+      }
+    } catch { /* cross-origin parent: keep the button-relative position */ }
+    setModalTop(Math.max(24, top));
     setDetail(target);
   };
   const currentPeriod = getCurrentReviewPeriod();
@@ -468,7 +478,7 @@ export default function MySubmissions() {
   const allCurrentSubmitted = forms.length > 0 && forms.every(f => currentRow?.statuses[f.key] === 'submitted');
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', position: 'relative' }}>
+    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: detail ? `max(100vh, ${modalTop + 700}px)` : '100vh', position: 'relative' }}>
 
       {/* Header */}
       {!isEmbedded && (
