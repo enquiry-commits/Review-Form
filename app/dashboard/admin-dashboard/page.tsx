@@ -34,6 +34,17 @@ interface SuggestionRow {
   submitted_at: string | null;
 }
 
+// Director's quick rating, picked from the "Good" column of the review lists
+const RATINGS = [
+  { key: 'great-job', label: 'Great Job' },
+  { key: 'needs-improvement', label: 'Needs Improvement' },
+  { key: 'best-employee', label: 'Best Employee' },
+  { key: 'hardworking', label: 'Hardworking' },
+  { key: 'be-careful', label: 'Be More Careful' },
+  { key: 'teamwork', label: 'Teamwork' },
+  { key: 'problem-solver', label: 'Problem Solver' },
+];
+
 const STATUS_ADMIN_EMAIL = 'vincent@tassure.com';
 
 export default function AdminDashboard() {
@@ -81,6 +92,7 @@ export default function AdminDashboard() {
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isStatusAdmin = user?.email === STATUS_ADMIN_EMAIL;
+  const [ratingPicker, setRatingPicker] = useState<{id: string; top: number; left: number} | null>(null);
   const [editingComment, setEditingComment] = useState<{id: string; value: string} | null>(null);
 
   // Status overview state
@@ -535,7 +547,7 @@ export default function AdminDashboard() {
     const overall = dfOverall.trim();
     const form_data = {
       ...(row.form_data || {}),
-      director_feedback: { items, overall, updated_by: user.email, updated_at: new Date().toISOString() },
+      director_feedback: { ...(row.form_data?.director_feedback || {}), items, overall, updated_by: user.email, updated_at: new Date().toISOString() },
     };
     const { error } = await supabase
       .from(directorTable(row))
@@ -545,6 +557,26 @@ export default function AdminDashboard() {
     if (error) { alert('Save failed: ' + error.message); return; }
     // Keep every view in sync: open modal, Overview cache and the Reviews lists
     const patch = (r: SubmissionRow) => r.id === row.id ? { ...r, form_data, director_comment: overall } : r;
+    setSelectedDetail(d => (d && d.id === row.id ? patch(d) : d));
+    setTableDetailRow(d => (d && d.id === row.id ? patch(d) : d));
+    setTableAllSelf(rs => rs.map(patch));
+    setTableAllLeader(rs => rs.map(patch));
+    fetchAllReviews();
+  };
+
+  // Save the director's quick rating (stored next to the comments in form_data.director_feedback)
+  const handleSetRating = async (row: SubmissionRow, rating: string | null) => {
+    if (!user) return;
+    setRatingPicker(null);
+    const form_data = {
+      ...(row.form_data || {}),
+      director_feedback: { items: {}, overall: '', ...(row.form_data?.director_feedback || {}), rating, updated_by: user.email, updated_at: new Date().toISOString() },
+    };
+    const { error } = await supabase.from(directorTable(row)).update({ form_data }).eq('id', row.id);
+    if (error) { alert('Save failed: ' + error.message); return; }
+    const patch = (r: SubmissionRow) => r.id === row.id ? { ...r, form_data } : r;
+    setSelfReviews(rs => rs.map(patch));
+    setLeaderReviews(rs => rs.map(patch));
     setSelectedDetail(d => (d && d.id === row.id ? patch(d) : d));
     setTableDetailRow(d => (d && d.id === row.id ? patch(d) : d));
     setTableAllSelf(rs => rs.map(patch));
@@ -2505,8 +2537,9 @@ export default function AdminDashboard() {
               <col style={{width: activeMenu === 'self-reviews' ? '17%' : '24%'}} />
               <col style={{width: '10%'}} />
               <col style={{width: '12%'}} />
-              <col style={{width: activeMenu === 'self-reviews' ? '27%' : '20%'}} />
-              <col style={{width: '7%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '22%' : '15%'}} />
+              <col style={{width: '6%'}} />
+              <col style={{width: '6%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
@@ -2516,6 +2549,7 @@ export default function AdminDashboard() {
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>View & Comment</th>
+                <th style={{padding: '12px 14px', textAlign: 'center', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Good</th>
                 <th style={{padding: '12px 14px'}}></th>
               </tr>
             </thead>
@@ -2526,7 +2560,7 @@ export default function AdminDashboard() {
                     onClick={() => setPeriodOpen(o => ({ ...o, [g.period]: !isPeriodOpen(g.period) }))}
                     style={{cursor: 'pointer', background: 'linear-gradient(135deg, #eef3f8, #e6edf4)', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', userSelect: 'none'}}
                   >
-                    <td colSpan={7} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
+                    <td colSpan={8} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
                       <span style={{display: 'inline-block', width: '14px', transition: 'transform 0.2s', transform: isPeriodOpen(g.period) ? 'rotate(90deg)' : 'none'}}>›</span>
                       {g.period === '—' ? 'No period' : formatPeriodDisplay(g.period)}
                       <span style={{marginLeft: '10px', fontSize: '11px', fontWeight: '600', color: '#64748b'}}>
@@ -2604,6 +2638,50 @@ export default function AdminDashboard() {
                         )}
                       </div>
                     </td>
+                    <td style={{padding: '11px 14px', textAlign: 'center'}}>
+                      {row.status === 'submitted' && (() => {
+                        const canRate = !!user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com') && !String(row.id).startsWith('demo-');
+                        const current = row.form_data?.director_feedback?.rating as string | undefined;
+                        const cur = RATINGS.find(r => r.key === current);
+                        return (
+                          <>
+                            <button
+                              disabled={!canRate}
+                              title={cur ? cur.label : (canRate ? 'Rate' : '')}
+                              onClick={(e) => {
+                                const rc = e.currentTarget.getBoundingClientRect();
+                                setRatingPicker({id: row.id, top: rc.bottom + 6, left: Math.max(8, Math.min(rc.left - 140, window.innerWidth - 328))});
+                              }}
+                              style={{border: 'none', background: 'transparent', padding: '2px', cursor: canRate ? 'pointer' : 'default', opacity: cur || canRate ? 1 : 0.35, lineHeight: 0}}
+                            >
+                              <img src={`/ratings/${cur ? cur.key : 'good'}.png`} alt={cur ? cur.label : 'Good'} width={28} height={28} style={{display: 'block'}} />
+                            </button>
+                            {ratingPicker?.id === row.id && canRate && (
+                              <>
+                                <div onClick={() => setRatingPicker(null)} style={{position: 'fixed', inset: 0, zIndex: 900}} />
+                                <div style={{position: 'fixed', top: ratingPicker.top, left: ratingPicker.left, width: '320px', zIndex: 901, background: 'white', borderRadius: '14px', boxShadow: '0 12px 40px rgba(15,23,42,0.28)', border: '1px solid #e2e8f0', padding: '14px', textAlign: 'center'}}>
+                                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px 6px'}}>
+                                    {RATINGS.map(r => (
+                                      <button
+                                        key={r.key}
+                                        onClick={() => handleSetRating(row, r.key)}
+                                        style={{border: current === r.key ? '2px solid #1e3a5f' : '2px solid transparent', borderRadius: '12px', background: current === r.key ? 'rgba(30,58,95,0.06)' : 'transparent', padding: '6px 2px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'}}
+                                      >
+                                        <img src={`/ratings/${r.key}.png`} alt={r.label} width={44} height={44} />
+                                        <span style={{fontSize: '10px', fontWeight: '600', color: '#334155', lineHeight: 1.2}}>{r.label}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                  {current && (
+                                    <button onClick={() => handleSetRating(row, null)} style={{marginTop: '10px', border: 'none', background: 'transparent', color: '#94a3b8', fontSize: '11px', cursor: 'pointer'}}>Clear rating</button>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </td>
                     <td style={{padding: '11px 14px'}}>
                         <button onClick={() => handleDelete(row)} style={{
                           padding: '5px 10px',
@@ -2628,7 +2706,7 @@ export default function AdminDashboard() {
                 </Fragment>
               )) : (
                 <tr>
-                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                  <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
                   </td>
                 </tr>
