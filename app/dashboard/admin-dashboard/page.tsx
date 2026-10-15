@@ -34,6 +34,8 @@ interface SuggestionRow {
   submitted_at: string | null;
 }
 
+const STATUS_ADMIN_EMAIL = 'vincent@tassure.com';
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -72,6 +74,7 @@ export default function AdminDashboard() {
   const [tableDetailRow, setTableDetailRow] = useState<SubmissionRow | null>(null);
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isStatusAdmin = user?.email === STATUS_ADMIN_EMAIL;
   const [editingComment, setEditingComment] = useState<{id: string; value: string} | null>(null);
 
   // Status overview state
@@ -97,7 +100,8 @@ export default function AdminDashboard() {
     setIsEmbedded(window.self !== window.top);
     fetchAllReviews(currentPage);
     fetchSuggestions(currentPage);
-    fetchOverviewData();
+    if (parsedUser.email === STATUS_ADMIN_EMAIL) fetchOverviewData();
+    else setActiveMenu(m => (m === 'status-overview' ? 'self-reviews' : m));
   }, [router, currentPage]);
 
   const fetchTableData = async () => {
@@ -367,6 +371,7 @@ export default function AdminDashboard() {
   const handleActiveMenuChangeRef = useRef<(menu: string) => void>(() => {});
 
   const handleActiveMenuChange = (menu: string) => {
+    if (menu === 'status-overview' && !isStatusAdmin) menu = 'self-reviews';
     setActiveMenu(menu);
     setCurrentPage(0);
     setSearchTerm('');
@@ -1114,7 +1119,8 @@ export default function AdminDashboard() {
           {sidebarCollapsed ? '›' : '‹'}
         </button>
 
-        {/* STATUS OVERVIEW section */}
+        {/* STATUS OVERVIEW section — Vincent only */}
+        {isStatusAdmin && (<>
         <div style={{marginBottom: '20px'}}>
           {!sidebarCollapsed && (
             <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', letterSpacing: '0.4px', marginBottom: '14px', textTransform: 'uppercase'}}>
@@ -1156,6 +1162,7 @@ export default function AdminDashboard() {
 
         {/* Divider */}
         <div style={{borderTop: '1.5px dashed #e2e8f0', margin: '4px 0 20px 0'}} />
+        </>)}
 
         {/* DATA section */}
         <div style={{marginBottom: '20px'}}>
@@ -1166,7 +1173,7 @@ export default function AdminDashboard() {
                 <rect x="5" y="4" width="2.5" height="8" rx="0.5"/>
                 <rect x="9.5" y="1" width="2.5" height="11" rx="0.5"/>
               </svg>
-              Data
+              Reviews
             </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
@@ -1263,7 +1270,7 @@ export default function AdminDashboard() {
                 <line x1="1" y1="4.5" x2="12" y2="4.5"/>
                 <line x1="5" y1="4.5" x2="5" y2="12"/>
               </svg>
-              Table View
+              Overview
             </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
@@ -1348,8 +1355,8 @@ export default function AdminDashboard() {
               : activeMenu === 'finance-reviews'   ? 'Finance & Admin Review Submissions'
               : activeMenu === 'marketing-reviews' ? 'Marketing Review Submissions'
               : activeMenu === 'suggestions'       ? 'Suggestion Box'
-              : activeMenu === 'table-by-year'     ? 'Table View · By Year'
-              : activeMenu === 'table-by-person'   ? 'Table View · By Person'
+              : activeMenu === 'table-by-year'     ? 'Overview · By Year'
+              : activeMenu === 'table-by-person'   ? 'Overview · By Person'
               : 'Status Overview'}
           </h1>
           <p style={{color: '#64748b', fontSize: '14px'}}>
@@ -1890,7 +1897,7 @@ export default function AdminDashboard() {
         })()}
 
         {/* ───── STATUS OVERVIEW ───── */}
-        {activeMenu === 'status-overview' && (() => {
+        {activeMenu === 'status-overview' && isStatusAdmin && (() => {
           const period = getCurrentReviewPeriod();
           const selfMap  = new Map(overviewSelf.map(r  => [r.employee_email, r]));
           const leaderMap = new Map(overviewLeader.map(r => [r.employee_email, r]));

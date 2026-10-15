@@ -88,7 +88,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('self-review');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [adminMenu, setAdminMenu] = useState('status-overview');
+  const [adminMenu, setAdminMenu] = useState('self-reviews');
   const [adminStatusOpen, setAdminStatusOpen] = useState(false);
   const [adminDataOpen, setAdminDataOpen] = useState(false);
   const [adminTableOpen, setAdminTableOpen] = useState(false);
@@ -121,8 +121,9 @@ export default function Dashboard() {
     setActiveTab(tabId);
     if (tabId === 'admin-dashboard') {
       setSidebarCollapsed(false);
-      setAdminMenu('status-overview');
-      adminIframeRef.current?.contentWindow?.postMessage({ type: 'setAdminMenu', menu: 'status-overview' }, '*');
+      const defaultMenu = user?.email === 'vincent@tassure.com' ? 'status-overview' : 'self-reviews';
+      setAdminMenu(defaultMenu);
+      adminIframeRef.current?.contentWindow?.postMessage({ type: 'setAdminMenu', menu: defaultMenu }, '*');
     }
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -297,10 +298,10 @@ export default function Dashboard() {
             );
             return (
               <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                {groupHeader('Status', adminStatusOpen, () => setAdminStatusOpen(v => !v), false)}
-                {adminStatusOpen && subItem('status-overview', 'Status Overview')}
+                {email === 'vincent@tassure.com' && groupHeader('Status', adminStatusOpen, () => setAdminStatusOpen(v => !v), false)}
+                {email === 'vincent@tassure.com' && adminStatusOpen && subItem('status-overview', 'Status Overview')}
 
-                {groupHeader('Data', adminDataOpen, () => setAdminDataOpen(v => !v))}
+                {groupHeader('Reviews', adminDataOpen, () => setAdminDataOpen(v => !v), email === 'vincent@tassure.com')}
                 {adminDataOpen && (
                   <>
                     {subItem('self-reviews', 'Self Reviews')}
@@ -309,7 +310,7 @@ export default function Dashboard() {
                   </>
                 )}
 
-                {groupHeader('Table View', adminTableOpen, () => setAdminTableOpen(v => !v))}
+                {groupHeader('Overview', adminTableOpen, () => setAdminTableOpen(v => !v))}
                 {adminTableOpen && (
                   <>
                     {subItem('table-by-year', 'By Year')}
