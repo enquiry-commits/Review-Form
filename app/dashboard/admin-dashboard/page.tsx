@@ -2506,7 +2506,8 @@ export default function AdminDashboard() {
               <col style={{width: '13%'}} />
               <col style={{width: '9%'}} />
               <col style={{width: '12%'}} />
-              <col style={{width: activeMenu === 'self-reviews' ? '22%' : '15%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '15%' : '10%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '7%' : '5%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
@@ -2517,6 +2518,7 @@ export default function AdminDashboard() {
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Period</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Status</th>
                 <th style={{padding: '12px 14px', textAlign: 'left', fontWeight: '700', fontSize: '10px', color: '#334155', letterSpacing: '0.4px', textTransform: 'uppercase'}}>Action</th>
+                <th style={{padding: '12px 14px'}}></th>
               </tr>
             </thead>
             <tbody>
@@ -2526,7 +2528,7 @@ export default function AdminDashboard() {
                     onClick={() => setPeriodOpen(o => ({ ...o, [g.period]: !isPeriodOpen(g.period) }))}
                     style={{cursor: 'pointer', background: 'linear-gradient(135deg, #eef3f8, #e6edf4)', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', userSelect: 'none'}}
                   >
-                    <td colSpan={7} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
+                    <td colSpan={8} style={{padding: '10px 14px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f'}}>
                       <span style={{display: 'inline-block', width: '14px', transition: 'transform 0.2s', transform: isPeriodOpen(g.period) ? 'rotate(90deg)' : 'none'}}>›</span>
                       {g.period === '—' ? 'No period' : formatPeriodDisplay(g.period)}
                       <span style={{marginLeft: '10px', fontSize: '11px', fontWeight: '600', color: '#64748b'}}>
@@ -2603,6 +2605,9 @@ export default function AdminDashboard() {
                             View Leader Review
                           </button>
                         )}
+                      </div>
+                    </td>
+                    <td style={{padding: '11px 14px'}}>
                         <button onClick={() => handleDelete(row)} style={{
                           padding: '5px 10px',
                           border: 'none',
@@ -2619,7 +2624,6 @@ export default function AdminDashboard() {
                         >
                           Delete
                         </button>
-                      </div>
                     </td>
                   </tr>
                 );
@@ -2627,7 +2631,7 @@ export default function AdminDashboard() {
                 </Fragment>
               )) : (
                 <tr>
-                  <td colSpan={7} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
+                  <td colSpan={8} style={{padding: '40px 18px', textAlign: 'center', color: '#64748b', fontSize: '14px'}}>
                     No submissions yet
                   </td>
                 </tr>
