@@ -60,7 +60,7 @@ function activeRating(fd: any): string | null {
 
 function RatingBubble({ ratingKey }: { ratingKey: string }) {
   return (
-    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '10px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 5s ease-in-out infinite' }}>
+    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '10px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 2s ease-in-out infinite' }}>
       <span style={{ position: 'absolute', left: '-8px', top: '50%', width: '11px', height: '11px', marginTop: '-6px', background: '#fff', borderLeft: '2.5px solid #231815', borderBottom: '2.5px solid #231815', transform: 'rotate(45deg)' }} />
       <img src={`/ratings/${ratingKey}.png`} alt="" width={34} height={34} />
       <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{RATING_LABELS[ratingKey]}</span>

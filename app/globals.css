@@ -22,7 +22,7 @@ body {
 }
 
 @keyframes ratingPop {
-  0%, 84%, 100% { transform: scale(1); }
-  90% { transform: scale(1.22); }
-  95% { transform: scale(0.97); }
+  0%, 65%, 100% { transform: scale(1); }
+  80% { transform: scale(1.2); }
+  90% { transform: scale(0.97); }
 }
