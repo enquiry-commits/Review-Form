@@ -149,8 +149,16 @@ function DirectorNote({ text, label = 'Director Comment' }: { text?: string; lab
   );
 }
 
+// Read-only director comment placed beside its answer card (same top and height)
+function SideNote({ text }: { text?: string }) {
+  if (!text?.trim()) return null;
+  return (
+    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: '#1e3a5f', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>{text}</div>
+  );
+}
+
 // View Details body — visually identical to Admin Dashboard's Self Review detail
-function FormDataView({ form_data, directorComment }: { form_data: any; formKey: string; directorComment?: string }) {
+function FormDataView({ form_data, directorComment, sideBySide }: { form_data: any; formKey: string; directorComment?: string; sideBySide?: boolean }) {
   if (!form_data) return <p style={{ color: '#94a3b8', fontSize: '14px' }}>No form data available.</p>;
 
   const kpis = form_data.kpis || {};
@@ -172,8 +180,11 @@ function FormDataView({ form_data, directorComment }: { form_data: any; formKey:
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingRight: sideBySide ? '356px' : undefined }}>
       <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Review Details</div>
+      {sideBySide && (
+        <div style={{ position: 'absolute', top: '4px', right: 0, width: '340px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Director Comments</div>
+      )}
 
       {/* KPI Performance */}
       <div>
@@ -181,7 +192,7 @@ function FormDataView({ form_data, directorComment }: { form_data: any; formKey:
         {kpiBlocks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {kpiBlocks.map(b => (
-              <div key={b.key} style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
+              <div key={b.key} style={{ background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px', position: 'relative', minHeight: sideBySide ? '80px' : undefined }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '4px' }}>
                   <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{b.meta?.name || humanize(b.key)}</span>
                   {b.count > 0 && (
@@ -200,7 +211,7 @@ function FormDataView({ form_data, directorComment }: { form_data: any; formKey:
                     <FileLinks files={a.files} />
                   </div>
                 ))}
-                <DirectorNote text={fbItems[`kpi:${b.key}`]} />
+                {sideBySide ? <SideNote text={fbItems[`kpi:${b.key}`]} /> : <DirectorNote text={fbItems[`kpi:${b.key}`]} />}
               </div>
             ))}
           </div>
@@ -217,7 +228,7 @@ function FormDataView({ form_data, directorComment }: { form_data: any; formKey:
         {posBlocks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {posBlocks.map(b => (
-              <div key={b.key} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
+              <div key={b.key} style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', position: 'relative', minHeight: sideBySide ? '80px' : undefined }}>
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '4px' }}>{b.meta?.name || humanize(b.key)}</div>
                 {b.meta?.question && (
                   <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 6px 0', lineHeight: '1.5', fontStyle: 'italic' }}>{b.meta.question}</p>
@@ -231,7 +242,7 @@ function FormDataView({ form_data, directorComment }: { form_data: any; formKey:
                     <FileLinks files={a.files} />
                   </div>
                 ))}
-                <DirectorNote text={fbItems[`pos:${b.key}`]} />
+                {sideBySide ? <SideNote text={fbItems[`pos:${b.key}`]} /> : <DirectorNote text={fbItems[`pos:${b.key}`]} />}
               </div>
             ))}
           </div>
@@ -432,6 +443,11 @@ export default function MySubmissions() {
 
     fetchAll();
   }, [router, currentPeriod]);
+
+  // Wide layout (comment beside each answer) only when the director left per-question comments
+  const detailSideBySide = !!detail
+    && Object.values(detail.record.form_data?.director_feedback?.items || {}).some((v: any) => String(v ?? '').trim() !== '')
+    && typeof window !== 'undefined' && window.innerWidth >= 900;
 
   const handleLogout = async () => {
     await logout();
@@ -651,7 +667,7 @@ export default function MySubmissions() {
           onClick={() => setDetail(null)}
         >
           <div
-            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
+            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: detailSideBySide ? '960px' : '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -674,7 +690,7 @@ export default function MySubmissions() {
 
             {/* Modal Body */}
             <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
-              <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} directorComment={detail.record.director_comment} />
+              <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} directorComment={detail.record.director_comment} sideBySide={detailSideBySide} />
             </div>
 
             {/* Modal Footer */}
