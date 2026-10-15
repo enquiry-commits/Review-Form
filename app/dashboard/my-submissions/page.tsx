@@ -600,8 +600,7 @@ export default function MySubmissions() {
                 <colgroup>
                   <col style={{ width: '160px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col style={{ width: '220px' }} />
-                  <col style={{ width: '90px' }} />
+                  <col style={{ width: '340px' }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
@@ -609,17 +608,11 @@ export default function MySubmissions() {
                     {forms.map(f => (
                       <th key={f.key} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
                     ))}
-                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#7eb8d4', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Director Comment</th>
-                    <th style={{ padding: '12px 20px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Action</th>
+                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {historyRows.map((row, idx) => {
-                    // Collect all director comments across forms for this period
-                    const comments = forms
-                      .filter(f => DIRECTOR_COMMENT_FORMS.has(f.key))
-                      .map(f => ({ label: f.label, comment: row.records?.[f.key]?.director_comment || '' }))
-                      .filter(x => x.comment.trim());
                     return (
                     <tr key={row.period} style={{ background: idx % 2 === 0 ? '#ffffff' : '#fafbfc' }}>
                       <td style={{ padding: '14px 28px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', borderBottom: '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
@@ -630,47 +623,20 @@ export default function MySubmissions() {
                           <StatusBadge status={row.statuses[f.key] || 'pending'} />
                         </td>
                       ))}
-                      <td style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' }}>
-                        {comments.length === 0 ? (
-                          <span style={{ color: '#cbd5e1', fontSize: '13px' }}>—</span>
-                        ) : comments.map((c, ci) => (
-                          <div key={ci} style={{ marginBottom: ci < comments.length - 1 ? '8px' : 0 }}>
-                            {comments.length > 1 && (
-                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>{c.label}</div>
-                            )}
-                            <div style={{
-                              background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)',
-                              border: '1px solid #bfdbfe',
-                              borderLeft: '3px solid #7eb8d4',
-                              borderRadius: '6px',
-                              padding: '8px 12px',
-                              fontSize: '13px',
-                              color: '#1e3a5f',
-                              lineHeight: '1.5',
-                              whiteSpace: 'pre-wrap',
-                            }}>
-                              {c.comment}
-                            </div>
-                          </div>
-                        ))}
-                      </td>
-                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'center' }}>
-                        {/* Show View button if any form has a record for this period */}
-                        {forms.some(f => row.records?.[f.key]) && (
-                          <button
-                            onClick={(e) => {
-                              const firstForm = forms.find(f => row.records?.[f.key]);
-                              if (firstForm && row.records?.[firstForm.key]) {
-                                openDetail({ form: firstForm, period: row.period, record: row.records[firstForm.key]! }, e.currentTarget);
-                              }
-                            }}
-                            style={{ padding: '6px 14px', background: 'transparent', color: '#1e3a5f', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.borderColor = '#7eb8d4'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-                          >
-                            View
-                          </button>
-                        )}
+                      <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'left' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {forms.filter(f => row.records?.[f.key]).map(f => (
+                            <button
+                              key={f.key}
+                              onClick={(e) => openDetail({ form: f, period: row.period, record: row.records[f.key]! }, e.currentTarget)}
+                              style={{ padding: '6px 14px', background: 'transparent', color: '#1e3a5f', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.borderColor = '#7eb8d4'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                            >
+                              View {f.label}
+                            </button>
+                          ))}
+                        </div>
                       </td>
                     </tr>
                     );
