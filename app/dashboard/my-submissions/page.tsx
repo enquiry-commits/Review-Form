@@ -608,7 +608,7 @@ export default function MySubmissions() {
                     {forms.map(f => (
                       <th key={f.key} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>{f.label}</th>
                     ))}
-                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>Action</th>
+                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', letterSpacing: '0.8px', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>View</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -629,9 +629,9 @@ export default function MySubmissions() {
                             <button
                               key={f.key}
                               onClick={(e) => openDetail({ form: f, period: row.period, record: row.records[f.key]! }, e.currentTarget)}
-                              style={{ padding: '6px 14px', background: 'transparent', color: '#1e3a5f', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(30,58,95,0.06)'; e.currentTarget.style.borderColor = '#7eb8d4'; }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                              style={{ padding: '5px 10px', background: f.key === 'leader' ? 'rgba(30, 58, 95, 0.12)' : 'rgba(126, 184, 212, 0.15)', color: '#1e3a5f', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.3s' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = f.key === 'leader' ? 'rgba(30, 58, 95, 0.22)' : 'rgba(126, 184, 212, 0.3)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = f.key === 'leader' ? 'rgba(30, 58, 95, 0.12)' : 'rgba(126, 184, 212, 0.15)'; }}
                             >
                               View {f.label}
                             </button>
