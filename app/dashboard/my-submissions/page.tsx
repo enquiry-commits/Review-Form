@@ -250,6 +250,12 @@ export default function MySubmissions() {
   const [loaded, setLoaded] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [detail, setDetail] = useState<DetailTarget | null>(null);
+  // Where the modal sits, in page coordinates: next to the View button that was clicked
+  const [modalTop, setModalTop] = useState(40);
+  const openDetail = (target: DetailTarget, button: HTMLElement) => {
+    setModalTop(Math.max(24, button.getBoundingClientRect().top + window.scrollY - 160));
+    setDetail(target);
+  };
   const currentPeriod = getCurrentReviewPeriod();
 
   const demoFormData = (formKey: string, status: Status) => {
@@ -405,19 +411,6 @@ export default function MySubmissions() {
     fetchAll();
   }, [router, currentPeriod]);
 
-  // When the detail modal opens, scroll to the top so the modal (anchored near
-  // the top) is fully in view. The modal is position:fixed, but when this page
-  // is embedded in an auto-resized iframe, fixed positioning anchors to the
-  // iframe document — so we also ask the parent page to scroll to the top
-  // (same mechanism the Suggestion Box uses).
-  useEffect(() => {
-    if (!detail) return;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (window.top && window.top !== window.self) {
-      window.top.postMessage({ type: 'scrollToTop' }, '*');
-    }
-  }, [detail]);
-
   const handleLogout = async () => {
     await logout();
     router.push('/');
@@ -431,7 +424,7 @@ export default function MySubmissions() {
   const allCurrentSubmitted = forms.length > 0 && forms.every(f => currentRow?.statuses[f.key] === 'submitted');
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)', minHeight: '100vh', position: 'relative' }}>
 
       {/* Header */}
       {!isEmbedded && (
@@ -507,7 +500,7 @@ export default function MySubmissions() {
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {record && (
                       <button
-                        onClick={() => setDetail({ form, period: currentPeriod, record })}
+                        onClick={(e) => openDetail({ form, period: currentPeriod, record }, e.currentTarget)}
                         style={{ padding: '6px 12px', background: 'rgba(30,58,95,0.06)', color: '#1e3a5f', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                       >
                         View Details
@@ -596,10 +589,10 @@ export default function MySubmissions() {
                         {/* Show View button if any form has a record for this period */}
                         {forms.some(f => row.records?.[f.key]) && (
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
                               const firstForm = forms.find(f => row.records?.[f.key]);
                               if (firstForm && row.records?.[firstForm.key]) {
-                                setDetail({ form: firstForm, period: row.period, record: row.records[firstForm.key]! });
+                                openDetail({ form: firstForm, period: row.period, record: row.records[firstForm.key]! }, e.currentTarget);
                               }
                             }}
                             style={{ padding: '6px 14px', background: 'transparent', color: '#1e3a5f', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -632,11 +625,11 @@ export default function MySubmissions() {
       {/* Detail Modal */}
       {detail && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 24px 24px', overflowY: 'auto' }}
+          style={{ position: 'absolute', inset: 0, background: 'rgba(15,23,42,0.5)', zIndex: 9999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: `${modalTop}px 24px 24px` }}
           onClick={() => setDetail(null)}
         >
           <div
-            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
+            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
