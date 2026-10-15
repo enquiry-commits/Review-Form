@@ -1653,7 +1653,7 @@ export default function AdminDashboard() {
                         <tr><td colSpan={3 + months.length*2} style={{padding:'40px',textAlign:'center',color:'#94a3b8'}}>No submissions for {selYear}</td></tr>
                       ) : employees.map((emp, i) => (
                         <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                          onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
+                          onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
                           onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                         >
                           <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
@@ -1732,7 +1732,7 @@ export default function AdminDashboard() {
                       <tbody>
                         {finHrPeople.map((emp, i) => (
                           <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
                             <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
@@ -1816,7 +1816,7 @@ export default function AdminDashboard() {
                       <tbody>
                         {mktPeople.map((emp, i) => (
                           <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.06)'}}
+                            onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
                             <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
