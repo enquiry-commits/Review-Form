@@ -2349,12 +2349,12 @@ export default function AdminDashboard() {
             <colgroup>
               <col style={{width: '13%'}} />
               <col style={{width: '12%'}} />
-              <col style={{width: '9%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '9%' : '16%'}} />
               <col style={{width: '13%'}} />
               <col style={{width: '9%'}} />
               <col style={{width: '12%'}} />
               {activeMenu === 'self-reviews' && <col style={{width: '16%'}} />}
-              <col style={{width: activeMenu === 'self-reviews' ? '16%' : '22%'}} />
+              <col style={{width: activeMenu === 'self-reviews' ? '16%' : '15%'}} />
             </colgroup>
             <thead style={{background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)', borderBottom: '2px solid #e2e8f0'}}>
               <tr>
