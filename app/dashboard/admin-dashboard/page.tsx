@@ -54,6 +54,10 @@ export default function AdminDashboard() {
   const [filterYear, setFilterYear] = useState('');
   const [filterMonth, setFilterMonth] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
+  // Director per-question feedback for the open Self Review modal
+  const [dfItems, setDfItems] = useState<Record<string, string>>({});
+  const [dfOverall, setDfOverall] = useState('');
+  const [dfSaving, setDfSaving] = useState(false);
   // Per-period expand/collapse overrides; unset = default (latest period open, others collapsed)
   const [periodOpen, setPeriodOpen] = useState<Record<string, boolean>>({});
   const [totalSelfReviews, setTotalSelfReviews] = useState(0);
@@ -509,6 +513,98 @@ export default function AdminDashboard() {
       setTableAllSelf([]);
       setTableAllLeader([]);
     }
+  };
+
+  // Load saved director feedback whenever a different submission is opened
+  useEffect(() => {
+    const fb = selectedDetail?.form_data?.director_feedback;
+    setDfItems(fb?.items || {});
+    setDfOverall(selectedDetail?.director_comment || fb?.overall || '');
+  }, [selectedDetail?.id]);
+
+  // Save per-question comments inside form_data.director_feedback and mirror the
+  // overall comment into director_comment (what My Submissions already displays).
+  const handleSaveDirectorFeedback = async () => {
+    if (!selectedDetail || !user) return;
+    setDfSaving(true);
+    const items = Object.fromEntries(Object.entries(dfItems).filter(([, v]) => v.trim()).map(([k, v]) => [k, v.trim()]));
+    const overall = dfOverall.trim();
+    const form_data = {
+      ...(selectedDetail.form_data || {}),
+      director_feedback: { items, overall, updated_by: user.email, updated_at: new Date().toISOString() },
+    };
+    const { error } = await supabase
+      .from('self_review_submissions')
+      .update({ form_data, director_comment: overall })
+      .eq('id', selectedDetail.id);
+    setDfSaving(false);
+    if (error) { alert('Save failed: ' + error.message); return; }
+    setSelectedDetail({ ...selectedDetail, form_data, director_comment: overall });
+    fetchAllReviews();
+  };
+
+  const renderDirectorPanel = () => {
+    const row = selectedDetail;
+    if (!row || activeMenu !== 'self-reviews') return null;
+    if (row.source_table && row.source_table !== 'self_review_submissions') return null;
+    if (row.status !== 'submitted') return null;
+    const canEdit = !!user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
+    const hasSaved = !!(row.director_comment || Object.keys(row.form_data?.director_feedback?.items || {}).length);
+    if (!canEdit && !hasSaved) return null;
+
+    const kpis = Object.entries(row.form_data?.kpis || {}).filter(([, val]: any) => hasContent(val));
+    const positives = Object.entries(row.form_data?.positive_items || {}).filter(([, val]: any) => val?.description?.trim() || val?.files?.length > 0);
+    const questions = [
+      ...kpis.map(([key]) => ({ id: `kpi:${key}`, name: KPI_INFO[key]?.name || key, color: '#7eb8d4' })),
+      ...positives.map(([key]) => ({ id: `pos:${key}`, name: POSITIVE_INFO[key]?.name || key, color: '#16a34a' })),
+    ];
+    const taStyle = {width: '100%', minHeight: '64px', padding: '8px 10px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical' as const, fontFamily: 'inherit', boxSizing: 'border-box' as const, background: canEdit ? 'white' : '#f8fafc'};
+
+    return (
+      <div style={{flex: '1 1 340px', maxWidth: '400px', background: 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'}}>
+        <h3 style={{fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px'}}>Director Comments</h3>
+        <p style={{fontSize: '12px', color: '#94a3b8', margin: '0 0 18px'}}>Comment on each answered question, then add an overall comment. The overall comment is shown to the employee.</p>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
+          {questions.length === 0 && (
+            <div style={{fontSize: '13px', color: '#94a3b8'}}>No answered questions to comment on.</div>
+          )}
+          {questions.map((q, i) => (
+            <div key={q.id}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px'}}>
+                <div style={{width: '3px', height: '14px', background: q.color, borderRadius: '2px', flexShrink: 0}} />
+                <span style={{fontSize: '12px', fontWeight: '700', color: '#334155'}}>{i + 1}. {q.name}</span>
+              </div>
+              <textarea
+                value={dfItems[q.id] || ''}
+                onChange={(e) => setDfItems(prev => ({...prev, [q.id]: e.target.value}))}
+                readOnly={!canEdit}
+                placeholder={canEdit ? 'Comment on this answer…' : '—'}
+                style={taStyle}
+              />
+            </div>
+          ))}
+          <div style={{borderTop: '1px solid #e2e8f0', paddingTop: '14px'}}>
+            <div style={{fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px'}}>Overall Comment</div>
+            <textarea
+              value={dfOverall}
+              onChange={(e) => setDfOverall(e.target.value)}
+              readOnly={!canEdit}
+              placeholder={canEdit ? 'Overall comment…' : '—'}
+              style={{...taStyle, minHeight: '96px'}}
+            />
+          </div>
+          {canEdit && (
+            <button
+              onClick={handleSaveDirectorFeedback}
+              disabled={dfSaving}
+              style={{padding: '11px', border: 'none', borderRadius: '10px', background: 'linear-gradient(135deg, #1e3a5f, #162d4a)', color: 'white', fontWeight: '700', fontSize: '14px', cursor: dfSaving ? 'wait' : 'pointer', opacity: dfSaving ? 0.7 : 1}}
+            >
+              {dfSaving ? 'Saving…' : 'Save Comments'}
+            </button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const handleSaveComment = async (row: SubmissionRow, comment: string) => {
@@ -2542,12 +2638,13 @@ export default function AdminDashboard() {
           padding: '40px 20px 20px',
           overflowY: 'auto'
         }}>
+          <div style={{display: 'flex', gap: '20px', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', width: '100%', maxWidth: '1140px'}}>
           <div style={{
             background: 'white',
             borderRadius: '16px',
             padding: '40px',
+            flex: '1 1 560px',
             maxWidth: '700px',
-            width: '100%',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
           }}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px'}}>
@@ -2620,6 +2717,8 @@ export default function AdminDashboard() {
                 Close
               </button>
             </div>
+          </div>
+          {renderDirectorPanel()}
           </div>
         </div>
       )}

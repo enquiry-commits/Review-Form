@@ -138,12 +138,25 @@ function AnswerText({ text }: { text: string }) {
   );
 }
 
+// Director's note shown under a question (comes from the Admin Dashboard comment panel)
+function DirectorNote({ text, label = 'Director Comment' }: { text?: string; label?: string }) {
+  if (!text?.trim()) return null;
+  return (
+    <div style={{ marginTop: '10px' }}>
+      <div style={{ fontSize: '10px', fontWeight: '700', color: '#7eb8d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</div>
+      <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#1e3a5f', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{text}</div>
+    </div>
+  );
+}
+
 // View Details body — visually identical to Admin Dashboard's Self Review detail
-function FormDataView({ form_data }: { form_data: any; formKey: string }) {
+function FormDataView({ form_data, directorComment }: { form_data: any; formKey: string; directorComment?: string }) {
   if (!form_data) return <p style={{ color: '#94a3b8', fontSize: '14px' }}>No form data available.</p>;
 
   const kpis = form_data.kpis || {};
   const positives = form_data.positive_items || {};
+  const fbItems: Record<string, string> = form_data.director_feedback?.items || {};
+  const overallDirector = (directorComment || form_data.director_feedback?.overall || '').trim();
   const remarks = form_data.overall_remarks?.remarks?.trim();
   const remarksFiles = Array.isArray(form_data.overall_remarks?.files) ? form_data.overall_remarks.files : [];
 
@@ -187,6 +200,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
                     <FileLinks files={a.files} />
                   </div>
                 ))}
+                <DirectorNote text={fbItems[`kpi:${b.key}`]} />
               </div>
             ))}
           </div>
@@ -217,6 +231,7 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
                     <FileLinks files={a.files} />
                   </div>
                 ))}
+                <DirectorNote text={fbItems[`pos:${b.key}`]} />
               </div>
             ))}
           </div>
@@ -235,6 +250,13 @@ function FormDataView({ form_data }: { form_data: any; formKey: string }) {
             {remarks && <AnswerText text={remarks} />}
             <FileLinks files={remarksFiles} />
           </div>
+        </div>
+      )}
+
+      {overallDirector && (
+        <div>
+          <SectionHeader label="Director's Overall Comment" color="#1e3a5f" />
+          <div style={{ background: 'linear-gradient(135deg, #f0f7fb, #e8f4f8)', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#1e3a5f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector}</div>
         </div>
       )}
     </div>
@@ -652,7 +674,7 @@ export default function MySubmissions() {
 
             {/* Modal Body */}
             <div style={{ padding: '24px 28px', overflowY: 'auto', flex: 1 }}>
-              <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} />
+              <FormDataView form_data={detail.record.form_data} formKey={detail.form.key} directorComment={detail.record.director_comment} />
             </div>
 
             {/* Modal Footer */}
