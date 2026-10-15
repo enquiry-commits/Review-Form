@@ -534,7 +534,7 @@ export default function AdminDashboard() {
       director_feedback: { items, overall, updated_by: user.email, updated_at: new Date().toISOString() },
     };
     const { error } = await supabase
-      .from('self_review_submissions')
+      .from(directorTable(selectedDetail))
       .update({ form_data, director_comment: overall })
       .eq('id', selectedDetail.id);
     setDfSaving(false);
@@ -543,21 +543,47 @@ export default function AdminDashboard() {
     fetchAllReviews();
   };
 
+  const DEPT_TABLES = ['hr_review_submissions', 'finance_review_submissions', 'marketing_review_submissions'];
+  const directorTable = (row: SubmissionRow) =>
+    row.source_table || (activeMenu === 'leader-reviews' ? 'leader_review_submissions' : 'self_review_submissions');
+
+  // Answered questions of a submission, in display order, for the comment panel
+  const answeredQuestions = (row: SubmissionRow) => {
+    const fd = row.form_data || {};
+    const kpis = fd.kpis || {};
+    const pos = fd.positive_items || {};
+    const table = directorTable(row);
+    const out: {id: string; name: string; color: string}[] = [];
+    if (DEPT_TABLES.includes(table)) {
+      const isMkt = table === 'marketing_review_submissions';
+      const isFin = table === 'finance_review_submissions';
+      const kOrder = isMkt ? MKT_KPI_IDS : isFin ? FIN_KPI_IDS : HR_KPI_IDS;
+      const pOrder = isMkt ? MKT_POS_IDS : isFin ? FIN_POS_IDS : HR_POS_IDS;
+      const kInfo: Record<string, {name: string}> = isMkt ? MKT_KPI_INFO : isFin ? FIN_KPI_INFO : HR_KPI_INFO;
+      const pInfo: Record<string, {name: string}> = isMkt ? MKT_POS_INFO : isFin ? FIN_POS_INFO : HR_POS_INFO;
+      kOrder.filter(k => kpis[k] && hasContent(kpis[k])).forEach(k => out.push({id: `kpi:${k}`, name: kInfo[k]?.name || k, color: '#7eb8d4'}));
+      pOrder.filter(k => pos[k] && (pos[k]?.description?.trim() || pos[k]?.files?.length > 0)).forEach(k => out.push({id: `pos:${k}`, name: pInfo[k]?.name || k, color: '#16a34a'}));
+    } else if (table === 'leader_review_submissions') {
+      const rowsOf = (v: any): any[] => Array.isArray(v) ? v : Array.isArray(v?.rows) ? v.rows : [];
+      const filled = (v: any) => rowsOf(v).some(r => r?.employee?.trim() || r?.comment?.trim() || r?.files?.length > 0);
+      Object.entries(kpis).filter(([, v]) => filled(v)).forEach(([k, v]: any) => out.push({id: `kpi:${k}`, name: KPI_META[k]?.name || v?.kpi || k, color: '#7eb8d4'}));
+      Object.entries(pos).filter(([, v]) => filled(v)).forEach(([k, v]: any) => out.push({id: `pos:${k}`, name: POS_META[k]?.name || v?.label || k, color: '#16a34a'}));
+    } else {
+      Object.entries(kpis).filter(([, v]: any) => hasContent(v)).forEach(([k]) => out.push({id: `kpi:${k}`, name: KPI_INFO[k]?.name || k, color: '#7eb8d4'}));
+      Object.entries(pos).filter(([, v]: any) => v?.description?.trim() || v?.files?.length > 0).forEach(([k]) => out.push({id: `pos:${k}`, name: POSITIVE_INFO[k]?.name || k, color: '#16a34a'}));
+    }
+    return out;
+  };
+
   const renderDirectorPanel = () => {
     const row = selectedDetail;
-    if (!row || activeMenu !== 'self-reviews') return null;
-    if (row.source_table && row.source_table !== 'self_review_submissions') return null;
+    if (!row || !['self-reviews', 'leader-reviews'].includes(activeMenu)) return null;
     if (row.status !== 'submitted') return null;
     const canEdit = !!user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
     const hasSaved = !!(row.director_comment || Object.keys(row.form_data?.director_feedback?.items || {}).length);
     if (!canEdit && !hasSaved) return null;
 
-    const kpis = Object.entries(row.form_data?.kpis || {}).filter(([, val]: any) => hasContent(val));
-    const positives = Object.entries(row.form_data?.positive_items || {}).filter(([, val]: any) => val?.description?.trim() || val?.files?.length > 0);
-    const questions = [
-      ...kpis.map(([key]) => ({ id: `kpi:${key}`, name: KPI_INFO[key]?.name || key, color: '#7eb8d4' })),
-      ...positives.map(([key]) => ({ id: `pos:${key}`, name: POSITIVE_INFO[key]?.name || key, color: '#16a34a' })),
-    ];
+    const questions = answeredQuestions(row);
     const taStyle = {width: '100%', minHeight: '64px', padding: '8px 10px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', lineHeight: 1.5, resize: 'vertical' as const, fontFamily: 'inherit', boxSizing: 'border-box' as const, background: canEdit ? 'white' : '#f8fafc'};
 
     return (
