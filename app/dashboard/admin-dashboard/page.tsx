@@ -571,7 +571,7 @@ export default function AdminDashboard() {
     setRatingPicker(null);
     const form_data = {
       ...(row.form_data || {}),
-      director_feedback: { items: {}, overall: '', ...(row.form_data?.director_feedback || {}), rating, updated_by: user.email, updated_at: new Date().toISOString() },
+      director_feedback: { items: {}, overall: '', ...(row.form_data?.director_feedback || {}), rating, rating_at: rating ? new Date().toISOString() : null, updated_by: user.email, updated_at: new Date().toISOString() },
     };
     const { error } = await supabase.from(directorTable(row)).update({ form_data }).eq('id', row.id);
     if (error) { alert('Save failed: ' + error.message); return; }

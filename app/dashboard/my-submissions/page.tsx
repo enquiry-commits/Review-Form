@@ -37,6 +37,37 @@ interface DetailTarget {
 
 // Admin groups Self + HR + Finance + Marketing together under "Self Reviews"
 // and adds director comments there; Leader reviews are separate and have none.
+// Director's quick rating — shown to the employee as a speech bubble for 7 days
+const RATING_LABELS: Record<string, string> = {
+  'great-job': 'Great Job',
+  'needs-improvement': 'Needs Improvement',
+  'best-employee': 'Best Employee',
+  'hardworking': 'Hardworking',
+  'be-careful': 'Be More Careful',
+  'teamwork': 'Teamwork',
+  'problem-solver': 'Problem Solver',
+};
+const RATING_VISIBLE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function activeRating(fd: any): string | null {
+  const fb = fd?.director_feedback;
+  const key = fb?.rating;
+  if (!key || !RATING_LABELS[key]) return null;
+  const at = Date.parse(fb.rating_at || fb.updated_at || '');
+  if (!at || Date.now() - at > RATING_VISIBLE_MS) return null;
+  return key;
+}
+
+function RatingBubble({ ratingKey }: { ratingKey: string }) {
+  return (
+    <div className="rating-bubble" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '8px', marginLeft: '10px', padding: '5px 12px 5px 8px', background: '#fff', border: '2.5px solid #231815', borderRadius: '12px', boxShadow: '3px 3px 0 #fdc361', transformOrigin: 'left center', animation: 'ratingPop 5s ease-in-out infinite' }}>
+      <span style={{ position: 'absolute', left: '-8px', top: '50%', width: '11px', height: '11px', marginTop: '-6px', background: '#fff', borderLeft: '2.5px solid #231815', borderBottom: '2.5px solid #231815', transform: 'rotate(45deg)' }} />
+      <img src={`/ratings/${ratingKey}.png`} alt="" width={34} height={34} />
+      <span style={{ fontSize: '12px', fontWeight: 700, color: '#1e293b', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{RATING_LABELS[ratingKey]}</span>
+    </div>
+  );
+}
+
 const DIRECTOR_COMMENT_FORMS = new Set(['self', 'finance', 'hr', 'marketing']);
 
 function getFormsForUser(user: User): FormConfig[] {
@@ -600,7 +631,7 @@ export default function MySubmissions() {
                 <colgroup>
                   <col style={{ width: '160px' }} />
                   {forms.map(f => <col key={f.key} style={{ width: '140px' }} />)}
-                  <col style={{ width: '340px' }} />
+                  <col style={{ width: '520px' }} />
                 </colgroup>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
@@ -624,7 +655,7 @@ export default function MySubmissions() {
                         </td>
                       ))}
                       <td style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                           {forms.filter(f => row.records?.[f.key]).map(f => (
                             <button
                               key={f.key}
@@ -636,6 +667,10 @@ export default function MySubmissions() {
                               View {f.label}
                             </button>
                           ))}
+                          {(() => {
+                            const rk = forms.map(f => activeRating(row.records?.[f.key]?.form_data)).find(Boolean);
+                            return rk ? <RatingBubble ratingKey={rk} /> : null;
+                          })()}
                         </div>
                       </td>
                     </tr>

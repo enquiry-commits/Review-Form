@@ -20,3 +20,9 @@ body {
   color: #1f2937;
   min-height: 100vh;
 }
+
+@keyframes ratingPop {
+  0%, 84%, 100% { transform: scale(1); }
+  90% { transform: scale(1.22); }
+  95% { transform: scale(0.97); }
+}
