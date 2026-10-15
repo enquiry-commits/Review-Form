@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, hasAccess, logout, ALL_USERS, VIEW_AS_EMAILS } from '@/lib/auth';
+import { User, hasAccess, logout, ALL_USERS, VIEW_AS_EMAILS, VIEW_AS_DEPARTMENT_ORDER } from '@/lib/auth';
 
 const ICONS: Record<string, ReactElement> = {
   'self-review': (
@@ -245,10 +245,14 @@ export default function Dashboard() {
                   title="View as / 切换用户"
                   style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', fontWeight: '600', color: '#1e3a5f', cursor: 'pointer', maxWidth: '180px' }}
                 >
-                  {ALL_USERS.map(u => (
-                    <option key={u.email} value={u.email}>
-                      {u.email === realUser.email ? `${u.name} (me)` : `${u.name} · ${u.department ?? u.role}`}
-                    </option>
+                  {VIEW_AS_DEPARTMENT_ORDER.map(dept => (
+                    <optgroup key={dept} label={dept}>
+                      {ALL_USERS.filter(u => u.department === dept).map(u => (
+                        <option key={u.email} value={u.email}>
+                          {u.email === realUser.email ? `${u.name} (me)` : u.name}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </label>

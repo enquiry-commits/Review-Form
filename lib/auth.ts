@@ -70,7 +70,10 @@ export const ALL_USERS: User[] = Object.entries(USERS_DATABASE).map(([email, dat
 }));
 
 // Accounts allowed to preview the app as another person
-export const VIEW_AS_EMAILS: string[] = ['vincent@tassure.com'];
+export const VIEW_AS_EMAILS: string[] = ['vincent@tassure.com', ...DIRECTOR_EMAILS];
+
+// Department order for the "View as" picker
+export const VIEW_AS_DEPARTMENT_ORDER = ['Management', 'Corporate Secretarial', 'Accounting', 'Tax', 'Internal'];
 
 // 验证登录
 export async function authenticate(email: string, password: string): Promise<User | null> {
