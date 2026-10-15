@@ -98,11 +98,14 @@ export default function AdminDashboard() {
     }
     setUser(parsedUser);
     setIsEmbedded(window.self !== window.top);
-    fetchAllReviews(currentPage);
-    fetchSuggestions(currentPage);
+    fetchAllReviews();
+    fetchSuggestions(0);
     if (parsedUser.email === STATUS_ADMIN_EMAIL) fetchOverviewData();
     else setActiveMenu(m => (m === 'status-overview' ? 'self-reviews' : m));
-  }, [router, currentPage]);
+  }, [router]);
+
+  // Filters/search narrow the full list, so jump back to the first page when they change
+  useEffect(() => { setCurrentPage(0); }, [searchTerm, filterDept, filterStatus, filterYear, filterMonth]);
 
   const fetchTableData = async () => {
     if (tableDataLoaded) return;
@@ -418,18 +421,29 @@ export default function AdminDashboard() {
     source_table: sourceTable,
   });
 
-  const fetchAllReviews = async (page: number = 0) => {
+  // Supabase caps a single response at 1000 rows, so page through the whole table
+  const fetchEveryRow = async (table: string) => {
+    const rows: any[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase.from(table).select('*').order('id').range(from, from + 999);
+      if (error || !data) break;
+      rows.push(...data);
+      if (data.length < 1000) break;
+    }
+    return { data: rows };
+  };
+
+  // Load every self/leader review once; filtering and pagination happen client-side
+  const fetchAllReviews = async (_page: number = 0) => {
     try {
-      const start = page * pageSize;
-      const end = start + pageSize - 1;
 
       const [selfCountRes, selfDataRes, leaderCountRes, leaderDataRes,
              hrCountRes, finCountRes, mktCountRes,
              hrInternalRes, finInternalRes, mktInternalRes, estherFinanceRes] = await Promise.all([
         supabase.from('self_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('self_review_submissions').select('*').range(start, end),
+        fetchEveryRow('self_review_submissions'),
         supabase.from('leader_review_submissions').select('id', { count: 'exact', head: true }),
-        supabase.from('leader_review_submissions').select('*').range(start, end),
+        fetchEveryRow('leader_review_submissions'),
         supabase.from('hr_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('finance_review_submissions').select('id', { count: 'exact', head: true }),
         supabase.from('marketing_review_submissions').select('id', { count: 'exact', head: true }),
@@ -660,6 +674,7 @@ export default function AdminDashboard() {
     return tb - ta;
   });
 
+  const pagedData = filteredData.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
   const KPI_INFO: Record<string, {name: string; question: string}> = {
     client_complaints: { name: 'Client Complaints / Issues 客户抱怨／异常', question: 'Were there any client complaints, issues or controllable churn? / 有没有客户抱怨、异常和可控流失？' },
@@ -2337,7 +2352,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 ? filteredData.map((row, idx) => {
+              {filteredData.length > 0 ? pagedData.map((row, idx) => {
                 const statusColor = getStatusColor(row.status === 'submitted' ? 'Completed' : 'Draft');
                 const submittedDate = row.submitted_at ? new Date(row.submitted_at).toLocaleString() : '-';
                 const canEditComment = user && (DIRECTOR_EMAILS.includes(user.email) || user.email === 'vincent@tassure.com');
@@ -2345,7 +2360,7 @@ export default function AdminDashboard() {
                 return (
                   <tr
                     key={row.id}
-                    style={{borderBottom: idx < filteredData.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
+                    style={{borderBottom: idx < pagedData.length - 1 ? '1px solid #e2e8f0' : 'none', transition: 'all 0.3s'}}
                     onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(126, 184, 212, 0.06)'}}
                     onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent'}}
                   >
@@ -2481,9 +2496,8 @@ export default function AdminDashboard() {
         {/* Pagination */}
         {(() => {
           const totalCount =
-            activeMenu === 'self-reviews'   ? totalSelfReviews :
-            activeMenu === 'leader-reviews' ? totalLeaderReviews : 0;
-          const totalPages = Math.ceil(totalCount / pageSize);
+            activeMenu === 'self-reviews' || activeMenu === 'leader-reviews' ? filteredData.length : 0;
+          const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
           const hasPrev = currentPage > 0;
           const hasNext = currentPage < totalPages - 1;
 
