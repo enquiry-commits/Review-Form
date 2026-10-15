@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, hasAccess, logout, ALL_USERS, VIEW_AS_EMAILS, VIEW_AS_DEPARTMENT_ORDER } from '@/lib/auth';
+import { User, hasAccess, logout, ALL_USERS, VIEW_AS_EMAILS, VIEW_AS_DEPARTMENT_ORDER, DIRECTOR_EMAILS } from '@/lib/auth';
 
 const ICONS: Record<string, ReactElement> = {
   'self-review': (
@@ -63,8 +63,12 @@ const ICONS: Record<string, ReactElement> = {
   ),
 };
 
+// Directors land on the Admin Dashboard (where they review and comment)
 const defaultTabFor = (email: string) =>
-  email === 'esther@tassure.com' ? 'hr-review' : email === 'chelsea@tassure.com' ? 'finance-review' : 'self-review';
+  DIRECTOR_EMAILS.includes(email) ? 'admin-dashboard'
+  : email === 'esther@tassure.com' ? 'hr-review'
+  : email === 'chelsea@tassure.com' ? 'finance-review'
+  : 'self-review';
 
 function IframePanel({ src, defaultHeight = 1200 }: { src: string; defaultHeight?: number }) {
   return (
@@ -96,7 +100,7 @@ export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [adminMenu, setAdminMenu] = useState('self-reviews');
   const [adminStatusOpen, setAdminStatusOpen] = useState(false);
-  const [adminDataOpen, setAdminDataOpen] = useState(false);
+  const [adminDataOpen, setAdminDataOpen] = useState(true);
   const [adminTableOpen, setAdminTableOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const adminIframeRef = useRef<HTMLIFrameElement>(null);
