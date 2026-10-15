@@ -570,8 +570,8 @@ export default function AdminDashboard() {
   };
   const isWideModal = () => typeof window !== 'undefined' && window.innerWidth >= 1100;
   const sideBySide = () => !!directorState() && isWideModal();
-  const modalCardMaxWidth = () => (sideBySide() ? '1120px' : '700px');
-  const detailPadRight = () => (sideBySide() ? '356px' : undefined);
+  const modalCardMaxWidth = () => (sideBySide() ? '1344px' : '700px');
+  const detailPadRight = () => (sideBySide() ? '424px' : undefined);
   const cardPos = (): CSSProperties => (directorState() ? { position: 'relative', ...(isWideModal() ? { minHeight: '96px' } : {}) } : {});
 
   const commentBox = (id: string) => {
@@ -581,7 +581,7 @@ export default function AdminDashboard() {
     if (!st.canEdit && !value.trim()) return null;
     const wide = isWideModal();
     return (
-      <div style={wide ? {position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', display: 'flex'} : {marginTop: '10px'}}>
+      <div style={wide ? {position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '408px', display: 'flex'} : {marginTop: '10px'}}>
         <textarea
           value={value}
           onChange={(e) => setDfItems(prev => ({...prev, [id]: e.target.value}))}
@@ -594,7 +594,7 @@ export default function AdminDashboard() {
   };
 
   const renderDirectorColumnHeader = () => (sideBySide() ? (
-    <div style={{position: 'absolute', top: '2px', right: 0, width: '340px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Director Comments</div>
+    <div style={{position: 'absolute', top: '2px', right: 0, width: '408px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px'}}>Director Comments</div>
   ) : null);
 
   const renderDirectorOverall = () => {
@@ -2681,7 +2681,7 @@ export default function AdminDashboard() {
           padding: '40px 20px 20px',
           overflowY: 'auto'
         }}>
-          <div style={{display: 'flex', gap: '20px', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', width: '100%', maxWidth: '1140px'}}>
+          <div style={{display: 'flex', gap: '20px', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', width: '100%', maxWidth:'1368px'}}>
           <div style={{
             background: 'white',
             borderRadius: '16px',
@@ -2770,7 +2770,7 @@ export default function AdminDashboard() {
       {/* Table Detail Modal */}
       {tableDetailRow && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'40px 20px 20px',overflowY:'auto'}}>
-          <div style={{display:'flex',gap:'20px',alignItems:'flex-start',justifyContent:'center',flexWrap:'wrap',width:'100%',maxWidth:'1140px'}}>
+          <div style={{display:'flex',gap:'20px',alignItems:'flex-start',justifyContent:'center',flexWrap:'wrap',width:'100%',maxWidth:'1368px'}}>
           <div style={{background:'white',borderRadius:'16px',padding:'40px',flex:'1 1 560px',maxWidth:modalCardMaxWidth(),boxShadow:'0 20px 60px rgba(0,0,0,0.3)'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'24px'}}>
               <h2 style={{fontSize:'22px',fontWeight:'800',color:'#0f172a',margin:0}}>{tableDetailRow.employee_name}</h2>

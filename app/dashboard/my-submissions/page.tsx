@@ -154,7 +154,7 @@ function DirectorNote({ text, label = 'Director Comment' }: { text?: string; lab
 function SideNote({ text }: { text?: string }) {
   const has = !!text?.trim();
   return (
-    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '340px', background: has ? 'white' : '#f8fafc', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: has ? '#1e3a5f' : '#94a3b8', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>
+    <div style={{ position: 'absolute', top: 0, bottom: 0, left: 'calc(100% + 16px)', width: '408px', background: has ? 'white' : '#f8fafc', border: '1.5px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '10px 12px', fontSize: '13px', color: has ? '#1e3a5f' : '#94a3b8', lineHeight: 1.5, whiteSpace: 'pre-wrap', overflow: 'auto', boxSizing: 'border-box' }}>
       {has ? text : 'No comment yet / 暂无评论'}
     </div>
   );
@@ -183,10 +183,10 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingRight: sideBySide ? '356px' : undefined }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingRight: sideBySide ? '424px' : undefined }}>
       <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>Review Details</div>
       {sideBySide && (
-        <div style={{ position: 'absolute', top: '4px', right: 0, width: '340px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Director Comments</div>
+        <div style={{ position: 'absolute', top: '4px', right: 0, width: '408px', fontSize: '12px', fontWeight: '800', color: '#1e3a5f', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Director Comments</div>
       )}
 
       {/* KPI Performance */}
@@ -268,7 +268,7 @@ function FormDataView({ form_data, directorComment, sideBySide }: { form_data: a
       )}
 
       {(overallDirector || sideBySide) && (
-        <div style={sideBySide ? { marginRight: '-356px' } : undefined}>
+        <div style={sideBySide ? { marginRight: '-424px' } : undefined}>
           <SectionHeader label="Director's Overall Comment" color="#1e3a5f" />
           <div style={{ background: overallDirector ? 'linear-gradient(135deg, #f0f7fb, #e8f4f8)' : '#f8fafc', border: '1px solid #bfdbfe', borderLeft: '3px solid #7eb8d4', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: overallDirector ? '#1e3a5f' : '#94a3b8', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{overallDirector || 'No comment yet / 暂无评论'}</div>
         </div>
@@ -669,7 +669,7 @@ export default function MySubmissions() {
           onClick={() => setDetail(null)}
         >
           <div
-            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: detailSideBySide ? '960px' : '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
+            style={{ background: '#ffffff', borderRadius: '20px', width: '100%', maxWidth: detailSideBySide ? '1152px' : '580px', maxHeight: '640px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
