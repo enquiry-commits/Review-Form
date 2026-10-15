@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, ReactElement } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, hasAccess, logout } from '@/lib/auth';
+import { User, hasAccess, logout, ALL_USERS, VIEW_AS_EMAILS } from '@/lib/auth';
 
 const ICONS: Record<string, ReactElement> = {
   'self-review': (
@@ -63,6 +63,9 @@ const ICONS: Record<string, ReactElement> = {
   ),
 };
 
+const defaultTabFor = (email: string) =>
+  email === 'esther@tassure.com' ? 'hr-review' : email === 'chelsea@tassure.com' ? 'finance-review' : 'self-review';
+
 function IframePanel({ src, defaultHeight = 1200 }: { src: string; defaultHeight?: number }) {
   return (
     <iframe
@@ -85,6 +88,9 @@ function IframePanel({ src, defaultHeight = 1200 }: { src: string; defaultHeight
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  // The signed-in person, when 'user' currently holds someone else (View as)
+  const [realUser, setRealUser] = useState<User | null>(null);
+  const [viewKey, setViewKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('self-review');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -100,8 +106,9 @@ export default function Dashboard() {
     if (!userData) { router.push('/'); return; }
     const parsedUser = JSON.parse(userData);
     setUser(parsedUser);
-    if (parsedUser.email === 'esther@tassure.com') setActiveTab('hr-review');
-    else if (parsedUser.email === 'chelsea@tassure.com') setActiveTab('finance-review');
+    const realRaw = localStorage.getItem('realUser');
+    setRealUser(realRaw ? JSON.parse(realRaw) : parsedUser);
+    setActiveTab(defaultTabFor(parsedUser.email));
     setLoading(false);
   }, [router]);
 
@@ -116,6 +123,20 @@ export default function Dashboard() {
   }, []);
 
   const handleLogout = async () => { await logout(); router.push('/'); };
+
+  // View as: the other pages read the person from localStorage 'user', so swap
+  // it there and remount the panels; the real account is kept in 'realUser'.
+  const handleViewAs = (email: string) => {
+    if (!realUser || !VIEW_AS_EMAILS.includes(realUser.email)) return;
+    const target = ALL_USERS.find(u => u.email === email) ?? realUser;
+    if (target.email === realUser.email) localStorage.removeItem('realUser');
+    else localStorage.setItem('realUser', JSON.stringify(realUser));
+    localStorage.setItem('user', JSON.stringify(target));
+    setUser(target);
+    setActiveTab(defaultTabFor(target.email));
+    setViewKey(k => k + 1);
+    contentRef.current?.scrollTo({ top: 0 });
+  };
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
@@ -201,27 +222,55 @@ export default function Dashboard() {
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          maxWidth: '1600px', margin: '0 auto', padding: '0 32px', height: '70px',
+          padding: '0 24px', height: '72px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/tassure-logo.png" alt="Tassure" style={{ height: '45px', width: 'auto' }} />
+            <img src="/tassure-logo.png" alt="Tassure" style={{ height: '52px', width: 'auto' }} />
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e3a5f' }}>Tassure Review System</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>
-              Welcome back, <span style={{ fontWeight: '700', color: '#1e3a5f' }}>{user.name}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ textAlign: 'right', lineHeight: 1.25 }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e3a5f' }}>{(realUser ?? user).name}</div>
+              <div style={{ fontSize: '11px', color: '#64748b' }}>{(realUser ?? user).email}</div>
             </div>
+            {realUser && VIEW_AS_EMAILS.includes(realUser.email) && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#1e3a5f', cursor: 'pointer' }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 5.5h11M10.5 3l2.5 2.5-2.5 2.5"/>
+                  <path d="M14 10.5H3M5.5 8L3 10.5 5.5 13"/>
+                </svg>
+                <select
+                  value={user.email}
+                  onChange={(e) => handleViewAs(e.target.value)}
+                  title="View as / 切换用户"
+                  style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', fontWeight: '600', color: '#1e3a5f', cursor: 'pointer', maxWidth: '180px' }}
+                >
+                  {ALL_USERS.map(u => (
+                    <option key={u.email} value={u.email}>
+                      {u.email === realUser.email ? `${u.name} (me)` : `${u.name} · ${u.department ?? u.role}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <button
               onClick={handleLogout}
-              style={{ padding: '8px 16px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(30, 58, 95, 0.04)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              style={{ height: '40px', padding: '0 18px', fontSize: '14px', fontWeight: '600', color: '#1e3a5f', background: 'white', border: '1.5px solid #e2e8f0', cursor: 'pointer', borderRadius: '10px', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
             >
               Logout
             </button>
           </div>
         </div>
       </div>
+
+      {realUser && user.email !== realUser.email && (
+        <div style={{ flexShrink: 0, background: '#fef3c7', borderBottom: '1px solid #fbbf24', color: '#92400e', fontSize: '13px', fontWeight: '600', padding: '8px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <span>Viewing as {user.name} ({user.email}) — 正在以此用户身份查看</span>
+          <button onClick={() => handleViewAs(realUser.email)} style={{ padding: '4px 12px', background: '#92400e', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Back to me</button>
+        </div>
+      )}
 
       {/* Body */}
       <div style={{
@@ -325,6 +374,7 @@ export default function Dashboard() {
         {/* Content */}
         <div
           ref={contentRef}
+          key={viewKey}
           style={{ overflowY: 'auto', padding: '32px', background: 'linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%)' }}
         >
           {activeTab === 'self-review'      && <IframePanel src="/dashboard/self-review" />}

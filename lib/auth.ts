@@ -60,6 +60,18 @@ export const ALL_REVIEWABLE_USERS: User[] = Object.entries(USERS_DATABASE)
     department: data.department,
   }));
 
+// Everyone in the system (admins included), for the "View as" picker
+export const ALL_USERS: User[] = Object.entries(USERS_DATABASE).map(([email, data]) => ({
+  id: email,
+  email,
+  name: data.name,
+  role: data.role as UserRole,
+  department: data.department,
+}));
+
+// Accounts allowed to preview the app as another person
+export const VIEW_AS_EMAILS: string[] = ['vincent@tassure.com'];
+
 // 验证登录
 export async function authenticate(email: string, password: string): Promise<User | null> {
   // 简单的密码验证（后续改为 Supabase auth）
@@ -135,7 +147,10 @@ export async function resolveSessionUser(): Promise<{ user: User | null; reason?
 // user object so the user is not silently re-authenticated.
 export async function logout(): Promise<void> {
   try { await supabase.auth.signOut(); } catch { /* ignore */ }
-  if (typeof window !== 'undefined') localStorage.removeItem('user');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('user');
+    localStorage.removeItem('realUser');
+  }
 }
 
 // 权限检查

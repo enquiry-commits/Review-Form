@@ -19,6 +19,7 @@ export default function LoginPage() {
       if (!active) return
       if (user) {
         localStorage.setItem('user', JSON.stringify(user))
+        localStorage.removeItem('realUser')
         router.push('/dashboard')
         return
       }
