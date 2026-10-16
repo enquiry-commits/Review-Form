@@ -1636,9 +1636,9 @@ export default function AdminDashboard() {
               return (
                 <span
                   onClick={() => { setTableDetailRow(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }}
-                  style={{display:'inline-block',padding:'4px 12px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',background: ok ? '#dcfce7' : '#fef9c3',color: ok ? '#15803d' : '#92400e',border: ok ? '1px solid #86efac' : '1px solid #fde68a'}}
+                  style={{display:'inline-flex',alignItems:'center',gap:'5px',padding:'6px 12px',borderRadius:'8px',fontSize:'11px',fontWeight:'700',cursor:'pointer',background: ok ? '#d1fae5' : '#fef3c7',color: ok ? '#065f46' : '#92400e'}}
                   title={row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : ''}
-                >{ok ? '✓ Submitted' : '○ Draft'}</span>
+                >{ok ? '✓ Submitted' : '⏱ Draft'}</span>
               );
             };
             return (
@@ -1703,7 +1703,7 @@ export default function AdminDashboard() {
                               </tr>
                               {rOpen && (
                                 <>
-                                  <tr style={{background:'#f8fafc'}}>
+                                  <tr style={{background:'white'}}>
                                     <td></td>
                                     <th style={{...subTh,color:'#94a3b8'}}>Month</th>
                                     <th style={{...subTh,color:'#b45309'}}>Director Rating</th>
@@ -1715,7 +1715,7 @@ export default function AdminDashboard() {
                                     const rows = cols.map(c => c.applies(emp.email) ? c.find(emp.email, period) : undefined);
                                     const ratingKeys = [...new Set(rows.map(r => r?.form_data?.director_feedback?.rating as string | undefined).filter(Boolean))] as string[];
                                     return (
-                                      <tr key={m} style={{background:'#f8fafc',borderTop:'1px solid #e8eef3'}}>
+                                      <tr key={m} style={{background:'white',borderTop:'1px solid #e8eef3'}}>
                                         <td></td>
                                         <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
                                         <td style={{padding:'6px 16px'}}>
@@ -1847,9 +1847,9 @@ export default function AdminDashboard() {
                           return (
                             <span
                               onClick={() => { setTableDetailRow(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }}
-                              style={{display:'inline-block',padding:'4px 12px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',background: ok ? '#dcfce7' : '#fef9c3',color: ok ? '#15803d' : '#92400e',border: ok ? '1px solid #86efac' : '1px solid #fde68a'}}
+                              style={{display:'inline-flex',alignItems:'center',gap:'5px',padding:'6px 12px',borderRadius:'8px',fontSize:'11px',fontWeight:'700',cursor:'pointer',background: ok ? '#d1fae5' : '#fef3c7',color: ok ? '#065f46' : '#92400e'}}
                               title={row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : ''}
-                            >{ok ? '✓ Submitted' : '○ Draft'}</span>
+                            >{ok ? '✓ Submitted' : '⏱ Draft'}</span>
                           );
                         };
                         return (
@@ -1874,7 +1874,7 @@ export default function AdminDashboard() {
                             {rOpen && (
                               <>
                                 {/* Month rows share the table's own columns, so they line up with the headers above */}
-                                <tr style={{background:'#f8fafc'}}>
+                                <tr style={{background:'white'}}>
                                   <td></td>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>Month</th>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#b45309'}}>Director Rating</th>
@@ -1887,7 +1887,7 @@ export default function AdminDashboard() {
                                   const leaderRow = leaderRows.find(r => r.review_period===period);
                                   const ratingKeys = [...new Set([selfRow, leaderRow].map(r => r?.form_data?.director_feedback?.rating as string | undefined).filter(Boolean))] as string[];
                                   return (
-                                    <tr key={m} style={{background:'#f8fafc',borderTop:'1px solid #e8eef3'}}>
+                                    <tr key={m} style={{background:'white',borderTop:'1px solid #e8eef3'}}>
                                       <td></td>
                                       <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
                                       <td style={{padding:'6px 16px'}}>
