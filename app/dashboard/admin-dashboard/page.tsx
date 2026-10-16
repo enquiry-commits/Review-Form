@@ -1727,26 +1727,26 @@ export default function AdminDashboard() {
                           <Fragment key={emp.email}>
                             <tr
                               onClick={() => setPersonRowOpen(o => ({...o, [rKey]: !rOpen}))}
-                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',borderTop: rOpen ? '2px solid #4f9cc4' : 'none',background: rOpen ? '#d6e9f5' : 'white'}}
-                              onMouseEnter={(e)=>{e.currentTarget.style.background = rOpen ? '#cbe2f1' : '#eef5f9'}}
-                              onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? '#d6e9f5' : 'white'}}
+                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',borderTop: rOpen ? '1px solid #e2e8f0' : 'none',background: rOpen ? 'linear-gradient(135deg, #eef3f8, #e6edf4)' : 'white'}}
+                              onMouseEnter={(e)=>{e.currentTarget.style.background = rOpen ? 'linear-gradient(135deg, #e6eef6, #dde7f1)' : '#eef5f9'}}
+                              onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? 'linear-gradient(135deg, #eef3f8, #e6edf4)' : 'white'}}
                             >
-                              <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px',boxShadow: rOpen ? 'inset 4px 0 0 #4f9cc4' : 'none'}}>
+                              <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px'}}>
                                 <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
                               </td>
                               <td style={{padding:'12px 16px'}}>
-                                <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
+                                <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}><span style={{color:'#1e3a5f',fontWeight:'800'}}>{emp.name}</span>{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
                                 <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
                               </td>
-                              <td style={{padding:'12px 16px',color:'#475569',fontSize:'12px'}}>{emp.dept}</td>
-                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color:'#334155'}}>{selfDone} / {months.length} submitted</td>
-                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color:'#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                              <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>{emp.dept}</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>{selfDone} / {months.length} submitted</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
                             </tr>
                             {rOpen && (
                               <>
                                 {/* Month rows share the table's own columns, so they line up with the headers above */}
                                 <tr style={{background:'#f8fafc'}}>
-                                  <td style={{boxShadow:'inset 4px 0 0 #4f9cc4'}}></td>
+                                  <td></td>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>Month</th>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#b45309'}}>Director Rating</th>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#3b82f6'}}>📝 Self</th>
@@ -1759,7 +1759,7 @@ export default function AdminDashboard() {
                                   const ratingKeys = [...new Set([selfRow, leaderRow].map(r => r?.form_data?.director_feedback?.rating as string | undefined).filter(Boolean))] as string[];
                                   return (
                                     <tr key={m} style={{background:'#f8fafc',borderTop:'1px solid #e8eef3'}}>
-                                      <td style={{boxShadow:'inset 4px 0 0 #4f9cc4'}}></td>
+                                      <td></td>
                                       <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
                                       <td style={{padding:'6px 16px'}}>
                                         {ratingKeys.length === 0 ? <span style={{color:'#cbd5e1'}}>—</span> : (
