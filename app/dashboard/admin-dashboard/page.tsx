@@ -1743,33 +1743,44 @@ export default function AdminDashboard() {
                               <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color:'#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
                             </tr>
                             {rOpen && (
-                              <tr>
-                                <td colSpan={5} style={{padding:'0 0 0 44px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0'}}>
-                                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
-                                    <thead>
-                                      <tr>
-                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#94a3b8',letterSpacing:'0.4px',textTransform:'uppercase',width:'30%'}}>Month</th>
-                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#3b82f6',letterSpacing:'0.4px',textTransform:'uppercase',width:'35%'}}>📝 Self</th>
-                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#16a34a',letterSpacing:'0.4px',textTransform:'uppercase'}}>👔 Leader</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {[...months].reverse().map(m => {
-                                        const period = `${selYear}-${m}`;
-                                        const selfRow = selfRows.find(r => r.review_period===period);
-                                        const leaderRow = leaderRows.find(r => r.review_period===period);
-                                        return (
-                                          <tr key={m} style={{borderTop:'1px solid #e8eef3'}}>
-                                            <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
-                                            <td style={{padding:'8px 16px'}}>{pill(selfRow)}</td>
-                                            <td style={{padding:'8px 16px'}}>{emp.isLeader ? pill(leaderRow) : <span style={{color:'#cbd5e1'}}>—</span>}</td>
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
-                                </td>
-                              </tr>
+                              <>
+                                {/* Month rows share the table's own columns, so they line up with the headers above */}
+                                <tr style={{background:'#f8fafc'}}>
+                                  <td style={{boxShadow:'inset 4px 0 0 #4f9cc4'}}></td>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>Month</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#b45309'}}>Director Rating</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#3b82f6'}}>📝 Self</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#16a34a'}}>👔 Leader</th>
+                                </tr>
+                                {[...months].reverse().map(m => {
+                                  const period = `${selYear}-${m}`;
+                                  const selfRow = selfRows.find(r => r.review_period===period);
+                                  const leaderRow = leaderRows.find(r => r.review_period===period);
+                                  const ratingKeys = [...new Set([selfRow, leaderRow].map(r => r?.form_data?.director_feedback?.rating as string | undefined).filter(Boolean))] as string[];
+                                  return (
+                                    <tr key={m} style={{background:'#f8fafc',borderTop:'1px solid #e8eef3'}}>
+                                      <td style={{boxShadow:'inset 4px 0 0 #4f9cc4'}}></td>
+                                      <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
+                                      <td style={{padding:'6px 16px'}}>
+                                        {ratingKeys.length === 0 ? <span style={{color:'#cbd5e1'}}>—</span> : (
+                                          <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+                                            {ratingKeys.map(k => {
+                                              const r = RATINGS.find(x => x.key === k);
+                                              return r ? (
+                                                <span key={k} style={{display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'11px',fontWeight:'600',color:'#334155'}} title={r.label}>
+                                                  <img src={`/ratings/${r.key}.png`} alt={r.label} width={26} height={26} />{r.label}
+                                                </span>
+                                              ) : null;
+                                            })}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td style={{padding:'8px 16px'}}>{pill(selfRow)}</td>
+                                      <td style={{padding:'8px 16px'}}>{emp.isLeader ? pill(leaderRow) : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </>
                             )}
                           </Fragment>
                         );
