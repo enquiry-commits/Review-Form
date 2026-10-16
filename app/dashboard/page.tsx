@@ -250,9 +250,9 @@ export default function Dashboard() {
                   style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', fontWeight: '600', color: '#1e3a5f', cursor: 'pointer', maxWidth: '180px' }}
                 >
                   {VIEW_AS_DEPARTMENT_ORDER.map(dept => (
-                    <optgroup key={dept} label={dept}>
+                    <optgroup key={dept} label={dept} style={{ background: '#e5e7eb', color: '#374151', fontWeight: 700 }}>
                       {ALL_USERS.filter(u => u.department === dept).map(u => (
-                        <option key={u.email} value={u.email}>
+                        <option key={u.email} value={u.email} style={{ background: '#ffffff', color: '#1e3a5f', fontWeight: 400 }}>
                           {u.email === realUser.email ? `${u.name} (me)` : u.name}
                         </option>
                       ))}
