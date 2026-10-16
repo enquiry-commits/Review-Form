@@ -1645,12 +1645,12 @@ export default function AdminDashboard() {
               <div key={gkey} style={{marginTop:'16px',background:'white',borderRadius:'16px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
                 <div
                   onClick={() => setDeptOpen(o => ({...o, [gkey]: !open}))}
-                  style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',borderBottom: open ? '1px solid #e2e8f0' : 'none',cursor:'pointer',userSelect:'none'}}
+                  style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #1e3a5f, #162d4a)',borderBottom: 'none',cursor:'pointer',userSelect:'none'}}
                 >
-                  <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: open ? 'rotate(90deg)' : 'none'}}>›</span>
+                  <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#ffffff',transition:'transform 0.2s',transform: open ? 'rotate(90deg)' : 'none'}}>›</span>
                   <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
-                  <span style={{fontSize:'13px',fontWeight:'700',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{title}</span>
-                  <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{people.length} {people.length === 1 ? 'person' : 'people'}</span>
+                  <span style={{fontSize:'13px',fontWeight:'700',color:'#ffffff',textTransform:'uppercase',letterSpacing:'0.5px'}}>{title}</span>
+                  <span style={{fontSize:'11px',color:'#b8cde0',fontWeight:'600'}}>{people.length} {people.length === 1 ? 'person' : 'people'}</span>
                 </div>
                 {open && (
                   <div style={{background:'white'}}>
@@ -1807,12 +1807,12 @@ export default function AdminDashboard() {
               <div key={g.dept} style={{marginBottom:'16px',background:'white',borderRadius:'16px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
               <div
                 onClick={() => setDeptOpen(o => ({...o, [g.dept]: !isDeptOpen(g.dept, gi)}))}
-                style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',borderBottom: isDeptOpen(g.dept, gi) ? '1px solid #e2e8f0' : 'none',cursor:'pointer',userSelect:'none'}}
+                style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #1e3a5f, #162d4a)',borderBottom: 'none',cursor:'pointer',userSelect:'none'}}
               >
-                <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: isDeptOpen(g.dept, gi) ? 'rotate(90deg)' : 'none'}}>›</span>
+                <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#ffffff',transition:'transform 0.2s',transform: isDeptOpen(g.dept, gi) ? 'rotate(90deg)' : 'none'}}>›</span>
                 <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
-                <span style={{fontSize:'13px',fontWeight:'700',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
-                <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
+                <span style={{fontSize:'13px',fontWeight:'700',color:'#ffffff',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
+                <span style={{fontSize:'11px',color:'#b8cde0',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
               </div>
               {isDeptOpen(g.dept, gi) && (
               <div style={{background:'white'}}>
