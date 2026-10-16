@@ -361,8 +361,8 @@ export default function Dashboard() {
                 {groupHeader('Reviews', adminDataOpen, () => setAdminDataOpen(v => !v), email === 'vincent@tassure.com')}
                 {adminDataOpen && (
                   <>
-                    {subItem('self-reviews', 'Self Reviews')}
-                    {subItem('leader-reviews', 'Leader Reviews')}
+                    {subItem('self-reviews', 'Review & Comment')}
+                    {/* Leader Reviews hidden for now: {subItem('leader-reviews', 'Leader Reviews')} */}
                     {subItem('suggestions', 'Suggestion Box')}
                   </>
                 )}

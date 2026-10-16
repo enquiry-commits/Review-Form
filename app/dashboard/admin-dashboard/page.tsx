@@ -1382,7 +1382,7 @@ export default function AdminDashboard() {
             </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['self-reviews', 'leader-reviews'] as const).map(item => {
+            {(['self-reviews'] as const).map(item => {
               const icon = item === 'self-reviews' ? (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="1.5" width="10" height="13" rx="1.5"/>
@@ -1397,7 +1397,7 @@ export default function AdminDashboard() {
                   <polyline points="10,8.5 11.5,10.5 14,7.5"/>
                 </svg>
               );
-              const label = item === 'self-reviews' ? 'Self Reviews' : 'Leader Reviews';
+              const label = item === 'self-reviews' ? 'Review & Comment' : 'Leader Reviews';
               return (
                 <div
                   key={item}
