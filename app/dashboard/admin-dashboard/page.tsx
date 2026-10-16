@@ -96,6 +96,7 @@ export default function AdminDashboard() {
   // Collapsible sections on the Overview pages
   const [deptOpen, setDeptOpen] = useState<Record<string, boolean>>({});
   const isDeptOpen = (dept: string, idx: number) => deptOpen[dept] ?? idx === 0;
+  const [personRowOpen, setPersonRowOpen] = useState<Record<string, boolean>>({});
   const [personCardOpen, setPersonCardOpen] = useState(true);
   const [personPeriodOpen, setPersonPeriodOpen] = useState<Record<string, boolean>>({});
   const [ratingPicker, setRatingPicker] = useState<{id: string; top: number; left: number} | null>(null);
@@ -1686,65 +1687,95 @@ export default function AdminDashboard() {
               </div>
               {isDeptOpen(g.dept, gi) && (
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
-                <div style={{overflowX:'auto',width:'100%'}}>
-                  <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
+                  <table style={{borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed',width:'100%'}}>
                     <colgroup>
-                      <col style={{width:'40px'}} />
-                      <col style={{width:'150px'}} />
-                      <col style={{width:'110px'}} />
-                      {months.map(m => [
-                        <col key={`${m}-a`} style={{width:'80px'}} />,
-                        <col key={`${m}-b`} style={{width:'80px'}} />,
-                      ])}
+                      <col style={{width:'44px'}} />
+                      <col style={{width:'34%'}} />
+                      <col style={{width:'22%'}} />
+                      <col style={{width:'20%'}} />
+                      <col style={{width:'20%'}} />
                     </colgroup>
-                    {/* Header row 1: frozen columns + month group headers */}
-                    <thead>
-                      <tr style={{background:'#f8fafc'}}>
-                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                        <th rowSpan={2} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
-                        {months.map(m => (
-                          <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
-                            {fullMonthNames[parseInt(m)]}
-                          </th>
-                        ))}
-                      </tr>
-                      {/* Header row 2: Self / Leader sub-columns */}
-                      <tr style={{background:'#f8fafc'}}>
-                        {months.map(m => (
-                          [
-                            <th key={`${m}-s`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#3b82f6',fontSize:'11px',background:'rgba(219,234,254,0.3)',width:'72px'}}>📝 Self</th>,
-                            <th key={`${m}-l`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#16a34a',fontSize:'11px',background:'rgba(220,252,231,0.3)',width:'72px'}}>👔 Leader</th>
-                          ]
-                        ))}
+                    <thead style={{background:'linear-gradient(135deg, #f8fafc, #f1f5f9)',borderBottom:'2px solid #e2e8f0'}}>
+                      <tr>
+                        <th style={{padding:'11px 16px',textAlign:'left',fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase'}}></th>
+                        <th style={{padding:'11px 16px',textAlign:'left',fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase'}}>Employee</th>
+                        <th style={{padding:'11px 16px',textAlign:'left',fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase'}}>Department</th>
+                        <th style={{padding:'11px 16px',textAlign:'left',fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase'}}>Self Review</th>
+                        <th style={{padding:'11px 16px',textAlign:'left',fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase'}}>Leader Review</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {g.people.map((emp, i) => (
-                        <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                          onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
-                          onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
-                        >
-                          <td style={{border:'1px solid #e2e8f0',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
-                          <td style={{border:'1px solid #e2e8f0',padding:'10px 12px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
-                            <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
-                            <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
-                          </td>
-                          <td style={{border:'1px solid #e2e8f0',padding:'10px 12px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>{emp.dept}</td>
-                          {months.map(m => {
-                            const period = `${selYear}-${m}`;
-                            const selfRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='self_review_submissions');
-                            const leaderRow = tableAllLeader.find(r => r.employee_email===emp.email && r.review_period===period);
-                            return [
-                              cellStyle(selfRow, ()=>{ setTableDetailRow(selfRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); }),
-                              cellStyle(leaderRow, ()=>{ setTableDetailRow(leaderRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); })
-                            ];
-                          })}
-                        </tr>
-                      ))}
+                      {g.people.map((emp, i) => {
+                        const rKey = `${selYear}:${emp.email}`;
+                        const rOpen = !!personRowOpen[rKey];
+                        const selfRows = tableAllSelf.filter(r => r.employee_email===emp.email && r.review_period?.startsWith(selYear) && r.source_table==='self_review_submissions');
+                        const leaderRows = tableAllLeader.filter(r => r.employee_email===emp.email && r.review_period?.startsWith(selYear));
+                        const selfDone = selfRows.filter(r => r.status==='submitted').length;
+                        const leaderDone = leaderRows.filter(r => r.status==='submitted').length;
+                        const pill = (row: SubmissionRow | undefined) => {
+                          if (!row) return <span style={{color:'#cbd5e1',fontSize:'13px'}}>—</span>;
+                          const ok = row.status === 'submitted';
+                          return (
+                            <span
+                              onClick={() => { setTableDetailRow(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }}
+                              style={{display:'inline-block',padding:'4px 12px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',background: ok ? '#dcfce7' : '#fef9c3',color: ok ? '#15803d' : '#92400e',border: ok ? '1px solid #86efac' : '1px solid #fde68a'}}
+                              title={row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : ''}
+                            >{ok ? '✓ Submitted' : '○ Draft'}</span>
+                          );
+                        };
+                        return (
+                          <Fragment key={emp.email}>
+                            <tr
+                              onClick={() => setPersonRowOpen(o => ({...o, [rKey]: !rOpen}))}
+                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',background: rOpen ? '#f4f8fb' : 'white'}}
+                              onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
+                              onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? '#f4f8fb' : 'white'}}
+                            >
+                              <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px'}}>
+                                <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
+                              </td>
+                              <td style={{padding:'12px 16px'}}>
+                                <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
+                                <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
+                              </td>
+                              <td style={{padding:'12px 16px',color:'#475569',fontSize:'12px'}}>{emp.dept}</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color:'#334155'}}>{selfDone} / {months.length} submitted</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color:'#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                            </tr>
+                            {rOpen && (
+                              <tr>
+                                <td colSpan={5} style={{padding:'0 0 0 44px',background:'#f8fafc',borderBottom:'1px solid #e2e8f0'}}>
+                                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:'12px'}}>
+                                    <thead>
+                                      <tr>
+                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#94a3b8',letterSpacing:'0.4px',textTransform:'uppercase',width:'30%'}}>Month</th>
+                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#3b82f6',letterSpacing:'0.4px',textTransform:'uppercase',width:'35%'}}>📝 Self</th>
+                                        <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',color:'#16a34a',letterSpacing:'0.4px',textTransform:'uppercase'}}>👔 Leader</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {[...months].reverse().map(m => {
+                                        const period = `${selYear}-${m}`;
+                                        const selfRow = selfRows.find(r => r.review_period===period);
+                                        const leaderRow = leaderRows.find(r => r.review_period===period);
+                                        return (
+                                          <tr key={m} style={{borderTop:'1px solid #e8eef3'}}>
+                                            <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
+                                            <td style={{padding:'8px 16px'}}>{pill(selfRow)}</td>
+                                            <td style={{padding:'8px 16px'}}>{emp.isLeader ? pill(leaderRow) : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
-                </div>{/* end overflowX */}
               </div>
               )}
               </div>
@@ -1755,7 +1786,7 @@ export default function AdminDashboard() {
                 <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
                 <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
                 <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
-                <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a cell to view details</span>
+                <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a person to expand their months, click a status to view details</span>
               </div>
 
               {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
