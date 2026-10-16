@@ -265,14 +265,14 @@ export default function Dashboard() {
                         if (people.length === 0) return null;
                         return (
                           <div key={dept}>
-                            <div style={{ margin: '8px 0 4px', padding: '6px 10px', borderRadius: '8px', background: '#f1f5f9', color: '#64748b', fontSize: '10px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{dept}</div>
+                            <div style={{ margin: '8px 0 4px', padding: '8px 12px', borderRadius: '8px', background: '#d9eaf5', color: '#1e3a5f', fontSize: '14px', fontWeight: '800', letterSpacing: '0.4px', textTransform: 'uppercase' }}>{dept}</div>
                             {people.map(u => {
                               const selected = u.email === user.email;
                               return (
                                 <button
                                   key={u.email}
                                   onClick={() => { setViewAsOpen(false); handleViewAs(u.email); }}
-                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 12px', border: 'none', borderRadius: '8px', background: selected ? 'rgba(126,184,212,0.2)' : 'transparent', color: '#1e3a5f', fontSize: '13px', fontWeight: selected ? '700' : '500', fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' }}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 12px', border: 'none', borderRadius: '8px', background: selected ? '#e5e7eb' : 'transparent', color: '#1e3a5f', fontSize: '13px', fontWeight: selected ? '700' : '500', fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' }}
                                   onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = '#f1f5f9'; }}
                                   onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent'; }}
                                 >
