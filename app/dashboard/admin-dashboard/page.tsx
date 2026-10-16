@@ -1649,7 +1649,7 @@ export default function AdminDashboard() {
                 >
                   <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: open ? 'rotate(90deg)' : 'none'}}>›</span>
                   <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
-                  <span style={{fontSize:'13px',fontWeight:'800',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{title}</span>
+                  <span style={{fontSize:'13px',fontWeight:'700',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{title}</span>
                   <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{people.length} {people.length === 1 ? 'person' : 'people'}</span>
                 </div>
                 {open && (
@@ -1690,8 +1690,8 @@ export default function AdminDashboard() {
                                   <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
                                 </td>
                                 <td style={{padding:'12px 16px'}}>
-                                  <div style={{fontWeight:'800',color:'#1e3a5f',fontSize:'13px'}}>{emp.name}</div>
-                                  <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
+                                  <div style={{fontWeight:'600',color:'#1e293b',fontSize:'13px'}}>{emp.name}</div>
+                                  <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px',fontWeight:'400'}}>{emp.email}</div>
                                 </td>
                                 <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>Internal</td>
                                 {totals.map((t, ti) => (
@@ -1706,8 +1706,8 @@ export default function AdminDashboard() {
                                   <tr style={{background:'white'}}>
                                     <td></td>
                                     <th style={{...subTh,color:'#94a3b8'}}>Month</th>
-                                    <th style={{...subTh,color:'#b45309'}}>Director Rating</th>
-                                    {cols.map(c => <th key={c.label} style={{...subTh,color:'#3b82f6'}}>{c.label}</th>)}
+                                    <th style={{...subTh,color:'#94a3b8'}}>Director Rating</th>
+                                    {cols.map(c => <th key={c.label} style={{...subTh,color:'#94a3b8'}}>{c.label}</th>)}
                                     {cols.length < 2 && <th style={subTh}></th>}
                                   </tr>
                                   {[...months].reverse().map(m => {
@@ -1717,7 +1717,7 @@ export default function AdminDashboard() {
                                     return (
                                       <tr key={m} style={{background:'white',borderTop:'1px solid #e8eef3'}}>
                                         <td></td>
-                                        <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
+                                        <td style={{padding:'8px 16px',fontWeight:'500',color:'#334155',fontSize:'13px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
                                         <td style={{padding:'6px 16px'}}>
                                           {ratingKeys.length === 0 ? <span style={{color:'#cbd5e1'}}>—</span> : (
                                             <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
@@ -1811,7 +1811,7 @@ export default function AdminDashboard() {
               >
                 <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: isDeptOpen(g.dept, gi) ? 'rotate(90deg)' : 'none'}}>›</span>
                 <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
-                <span style={{fontSize:'13px',fontWeight:'800',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
+                <span style={{fontSize:'13px',fontWeight:'700',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
                 <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
               </div>
               {isDeptOpen(g.dept, gi) && (
@@ -1864,8 +1864,8 @@ export default function AdminDashboard() {
                                 <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
                               </td>
                               <td style={{padding:'12px 16px'}}>
-                                <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}><span style={{color:'#1e3a5f',fontWeight:'800'}}>{emp.name}</span>{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
-                                <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
+                                <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}><span style={{color:'#1e293b',fontWeight:'600'}}>{emp.name}</span>{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
+                                <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px',fontWeight:'400'}}>{emp.email}</div>
                               </td>
                               <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>{emp.dept}</td>
                               <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>{selfDone} / {months.length} submitted</td>
@@ -1877,9 +1877,9 @@ export default function AdminDashboard() {
                                 <tr style={{background:'white'}}>
                                   <td></td>
                                   <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>Month</th>
-                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#b45309'}}>Director Rating</th>
-                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#3b82f6'}}>📝 Self</th>
-                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#16a34a'}}>👔 Leader</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>Director Rating</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>📝 Self</th>
+                                  <th style={{padding:'9px 16px',textAlign:'left',fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase',color:'#94a3b8'}}>👔 Leader</th>
                                 </tr>
                                 {[...months].reverse().map(m => {
                                   const period = `${selYear}-${m}`;
@@ -1889,7 +1889,7 @@ export default function AdminDashboard() {
                                   return (
                                     <tr key={m} style={{background:'white',borderTop:'1px solid #e8eef3'}}>
                                       <td></td>
-                                      <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
+                                      <td style={{padding:'8px 16px',fontWeight:'500',color:'#334155',fontSize:'13px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
                                       <td style={{padding:'6px 16px'}}>
                                         {ratingKeys.length === 0 ? <span style={{color:'#cbd5e1'}}>—</span> : (
                                           <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
