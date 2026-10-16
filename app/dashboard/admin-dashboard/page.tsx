@@ -1727,11 +1727,11 @@ export default function AdminDashboard() {
                           <Fragment key={emp.email}>
                             <tr
                               onClick={() => setPersonRowOpen(o => ({...o, [rKey]: !rOpen}))}
-                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',background: rOpen ? '#f4f8fb' : 'white'}}
-                              onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
-                              onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? '#f4f8fb' : 'white'}}
+                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',background: rOpen ? '#d6e9f5' : 'white'}}
+                              onMouseEnter={(e)=>{e.currentTarget.style.background = rOpen ? '#cbe2f1' : '#eef5f9'}}
+                              onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? '#d6e9f5' : 'white'}}
                             >
-                              <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px'}}>
+                              <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px',boxShadow: rOpen ? 'inset 4px 0 0 #4f9cc4' : 'none'}}>
                                 <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
                               </td>
                               <td style={{padding:'12px 16px'}}>
