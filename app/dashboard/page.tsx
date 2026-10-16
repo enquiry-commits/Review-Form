@@ -114,6 +114,8 @@ export default function Dashboard() {
     const realRaw = localStorage.getItem('realUser');
     setRealUser(realRaw ? JSON.parse(realRaw) : parsedUser);
     setActiveTab(defaultTabFor(parsedUser.email));
+    // Deep link from the feedback notification email: /dashboard?tab=my-submissions
+    if (new URLSearchParams(window.location.search).get('tab') === 'my-submissions' && parsedUser.role !== 'admin') setActiveTab('my-submissions');
     setLoading(false);
   }, [router]);
 
