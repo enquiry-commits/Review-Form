@@ -102,6 +102,7 @@ export default function Dashboard() {
   const [adminStatusOpen, setAdminStatusOpen] = useState(false);
   const [adminDataOpen, setAdminDataOpen] = useState(true);
   const [adminTableOpen, setAdminTableOpen] = useState(false);
+  const [viewAsOpen, setViewAsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const adminIframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -238,28 +239,55 @@ export default function Dashboard() {
               <div style={{ fontSize: '11px', color: '#64748b' }}>{(realUser ?? user).email}</div>
             </div>
             {realUser && VIEW_AS_EMAILS.includes(realUser.email) && (
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#1e3a5f', cursor: 'pointer' }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 5.5h11M10.5 3l2.5 2.5-2.5 2.5"/>
-                  <path d="M14 10.5H3M5.5 8L3 10.5 5.5 13"/>
-                </svg>
-                <select
-                  value={user.email}
-                  onChange={(e) => handleViewAs(e.target.value)}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setViewAsOpen(o => !o)}
                   title="View as / 切换用户"
-                  style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', fontWeight: '600', color: '#1e3a5f', cursor: 'pointer', maxWidth: '180px' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px', height: '40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#1e3a5f', cursor: 'pointer', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit' }}
                 >
-                  {VIEW_AS_DEPARTMENT_ORDER.map(dept => (
-                    <optgroup key={dept} label={dept} style={{ background: '#e5e7eb', color: '#374151', fontWeight: 700 }}>
-                      {ALL_USERS.filter(u => u.department === dept).map(u => (
-                        <option key={u.email} value={u.email} style={{ background: '#ffffff', color: '#1e3a5f', fontWeight: 400 }}>
-                          {u.email === realUser.email ? `${u.name} (me)` : u.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </label>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 5.5h11M10.5 3l2.5 2.5-2.5 2.5"/>
+                    <path d="M14 10.5H3M5.5 8L3 10.5 5.5 13"/>
+                  </svg>
+                  <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user.name}{user.email === realUser.email ? ' (me)' : ''}
+                  </span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.2s', transform: viewAsOpen ? 'rotate(180deg)' : 'none' }}>
+                    <path d="M2.5 4.5L6 8l3.5-3.5"/>
+                  </svg>
+                </button>
+                {viewAsOpen && (
+                  <>
+                    <div onClick={() => setViewAsOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 1000 }} />
+                    <div style={{ position: 'absolute', top: '46px', right: 0, width: '248px', maxHeight: 'min(520px, 75vh)', overflowY: 'auto', zIndex: 1001, background: 'white', border: '1px solid #e2e8f0', borderRadius: '14px', boxShadow: '0 12px 40px rgba(15,23,42,0.18)', padding: '6px 6px 8px' }}>
+                      {VIEW_AS_DEPARTMENT_ORDER.map(dept => {
+                        const people = ALL_USERS.filter(u => u.department === dept);
+                        if (people.length === 0) return null;
+                        return (
+                          <div key={dept}>
+                            <div style={{ margin: '8px 0 4px', padding: '6px 10px', borderRadius: '8px', background: '#f1f5f9', color: '#64748b', fontSize: '10px', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{dept}</div>
+                            {people.map(u => {
+                              const selected = u.email === user.email;
+                              return (
+                                <button
+                                  key={u.email}
+                                  onClick={() => { setViewAsOpen(false); handleViewAs(u.email); }}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 12px', border: 'none', borderRadius: '8px', background: selected ? 'rgba(126,184,212,0.2)' : 'transparent', color: '#1e3a5f', fontSize: '13px', fontWeight: selected ? '700' : '500', fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' }}
+                                  onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = '#f1f5f9'; }}
+                                  onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                  <span>{u.name}{u.email === realUser.email && <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: '500', color: '#94a3b8' }}>(me)</span>}</span>
+                                  {selected && <span style={{ color: '#1e3a5f', fontWeight: '800' }}>✓</span>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
             <button
               onClick={handleLogout}
