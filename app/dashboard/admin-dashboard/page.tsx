@@ -1727,7 +1727,7 @@ export default function AdminDashboard() {
                           <Fragment key={emp.email}>
                             <tr
                               onClick={() => setPersonRowOpen(o => ({...o, [rKey]: !rOpen}))}
-                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',background: rOpen ? '#d6e9f5' : 'white'}}
+                              style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',borderTop: rOpen ? '2px solid #4f9cc4' : 'none',background: rOpen ? '#d6e9f5' : 'white'}}
                               onMouseEnter={(e)=>{e.currentTarget.style.background = rOpen ? '#cbe2f1' : '#eef5f9'}}
                               onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? '#d6e9f5' : 'white'}}
                             >
@@ -1780,6 +1780,8 @@ export default function AdminDashboard() {
                                     </tr>
                                   );
                                 })}
+                                {/* gap that closes this person's block, so several open ones stay visually apart */}
+                                <tr><td colSpan={5} style={{height:'18px',padding:0,background:'#eef2f7',borderTop:'1px solid #dbe3ec',borderBottom:'1px solid #dbe3ec'}} /></tr>
                               </>
                             )}
                           </Fragment>
