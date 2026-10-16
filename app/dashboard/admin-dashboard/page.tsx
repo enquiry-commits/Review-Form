@@ -1693,9 +1693,9 @@ export default function AdminDashboard() {
                                   <div style={{fontWeight:'600',color:'#1e293b',fontSize:'13px'}}>{emp.name}</div>
                                   <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px',fontWeight:'400'}}>{emp.email}</div>
                                 </td>
-                                <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>Internal</td>
+                                <td style={{padding:'12px 16px',color: rOpen ? '#1e293b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>Internal</td>
                                 {totals.map((t, ti) => (
-                                  <td key={ti} style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>
+                                  <td key={ti} style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#1e293b' : '#334155'}}>
                                     {t === null ? <span style={{color:'#cbd5e1'}}>—</span> : `${t} / ${months.length} submitted`}
                                   </td>
                                 ))}
@@ -1867,9 +1867,9 @@ export default function AdminDashboard() {
                                 <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}><span style={{color:'#1e293b',fontWeight:'600'}}>{emp.name}</span>{emp.isLeader && <span style={{marginLeft:'8px',fontSize:'10px',fontWeight:'700',color:'#16a34a',background:'rgba(220,252,231,0.8)',padding:'2px 8px',borderRadius:'10px'}}>Leader</span>}</div>
                                 <div style={{fontSize:'11px',color:'#94a3b8',marginTop:'2px',fontWeight:'400'}}>{emp.email}</div>
                               </td>
-                              <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>{emp.dept}</td>
-                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>{selfDone} / {months.length} submitted</td>
-                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                              <td style={{padding:'12px 16px',color: rOpen ? '#1e293b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>{emp.dept}</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#1e293b' : '#334155'}}>{selfDone} / {months.length} submitted</td>
+                              <td style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#1e293b' : '#334155'}}>{emp.isLeader ? `${leaderDone} / ${months.length} submitted` : <span style={{color:'#cbd5e1'}}>—</span>}</td>
                             </tr>
                             {rOpen && (
                               <>
