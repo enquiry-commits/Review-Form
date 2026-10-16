@@ -1642,10 +1642,10 @@ export default function AdminDashboard() {
               );
             };
             return (
-              <div key={gkey} style={{marginTop:'16px'}}>
+              <div key={gkey} style={{marginTop:'16px',background:'white',borderRadius:'16px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
                 <div
                   onClick={() => setDeptOpen(o => ({...o, [gkey]: !open}))}
-                  style={{display:'flex',alignItems:'center',gap:'8px',margin: open ? '0 0 10px 0' : 0,padding:'11px 16px',borderRadius:'12px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',border:'1px solid #e2e8f0',cursor:'pointer',userSelect:'none'}}
+                  style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',borderBottom: open ? '1px solid #e2e8f0' : 'none',cursor:'pointer',userSelect:'none'}}
                 >
                   <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: open ? 'rotate(90deg)' : 'none'}}>›</span>
                   <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
@@ -1653,7 +1653,7 @@ export default function AdminDashboard() {
                   <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{people.length} {people.length === 1 ? 'person' : 'people'}</span>
                 </div>
                 {open && (
-                  <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
+                  <div style={{background:'white'}}>
                     <table style={{borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed',width:'100%'}}>
                       <colgroup>
                         <col style={{width:'44px'}} />
@@ -1804,10 +1804,10 @@ export default function AdminDashboard() {
                 <div style={{padding:'40px',textAlign:'center',color:'#94a3b8',background:'white',borderRadius:'12px',border:'1px solid #e2e8f0'}}>No submissions for {selYear}</div>
               )}
               {deptGroups.map((g, gi) => (
-              <div key={g.dept} style={{marginBottom:'16px'}}>
+              <div key={g.dept} style={{marginBottom:'16px',background:'white',borderRadius:'16px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
               <div
                 onClick={() => setDeptOpen(o => ({...o, [g.dept]: !isDeptOpen(g.dept, gi)}))}
-                style={{display:'flex',alignItems:'center',gap:'8px',margin: isDeptOpen(g.dept, gi) ? '0 0 10px 0' : 0,padding:'11px 16px',borderRadius:'12px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',border:'1px solid #e2e8f0',cursor:'pointer',userSelect:'none'}}
+                style={{display:'flex',alignItems:'center',gap:'8px',padding:'12px 18px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',borderBottom: isDeptOpen(g.dept, gi) ? '1px solid #e2e8f0' : 'none',cursor:'pointer',userSelect:'none'}}
               >
                 <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: isDeptOpen(g.dept, gi) ? 'rotate(90deg)' : 'none'}}>›</span>
                 <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
@@ -1815,7 +1815,7 @@ export default function AdminDashboard() {
                 <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
               </div>
               {isDeptOpen(g.dept, gi) && (
-              <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
+              <div style={{background:'white'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed',width:'100%'}}>
                     <colgroup>
                       <col style={{width:'44px'}} />
