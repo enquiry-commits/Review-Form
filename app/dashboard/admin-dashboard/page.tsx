@@ -93,6 +93,11 @@ export default function AdminDashboard() {
   const [tableDemoMode, setTableDemoMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isStatusAdmin = user?.email === STATUS_ADMIN_EMAIL;
+  // Collapsible sections on the Overview pages
+  const [deptOpen, setDeptOpen] = useState<Record<string, boolean>>({});
+  const isDeptOpen = (dept: string, idx: number) => deptOpen[dept] ?? idx === 0;
+  const [personCardOpen, setPersonCardOpen] = useState(true);
+  const [personPeriodOpen, setPersonPeriodOpen] = useState<Record<string, boolean>>({});
   const [ratingPicker, setRatingPicker] = useState<{id: string; top: number; left: number} | null>(null);
   const [editingComment, setEditingComment] = useState<{id: string; value: string} | null>(null);
 
@@ -1668,13 +1673,18 @@ export default function AdminDashboard() {
               {deptGroups.length === 0 && (
                 <div style={{padding:'40px',textAlign:'center',color:'#94a3b8',background:'white',borderRadius:'12px',border:'1px solid #e2e8f0'}}>No submissions for {selYear}</div>
               )}
-              {deptGroups.map(g => (
-              <div key={g.dept} style={{marginBottom:'24px'}}>
-              <div style={{display:'flex',alignItems:'center',gap:'8px',margin:'0 0 10px 2px'}}>
+              {deptGroups.map((g, gi) => (
+              <div key={g.dept} style={{marginBottom:'16px'}}>
+              <div
+                onClick={() => setDeptOpen(o => ({...o, [g.dept]: !isDeptOpen(g.dept, gi)}))}
+                style={{display:'flex',alignItems:'center',gap:'8px',margin: isDeptOpen(g.dept, gi) ? '0 0 10px 0' : 0,padding:'11px 16px',borderRadius:'12px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',border:'1px solid #e2e8f0',cursor:'pointer',userSelect:'none'}}
+              >
+                <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: isDeptOpen(g.dept, gi) ? 'rotate(90deg)' : 'none'}}>›</span>
                 <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
                 <span style={{fontSize:'13px',fontWeight:'800',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{g.dept}</span>
                 <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{g.people.length} {g.people.length === 1 ? 'person' : 'people'}</span>
               </div>
+              {isDeptOpen(g.dept, gi) && (
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
                 <div style={{overflowX:'auto',width:'100%'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
@@ -1736,6 +1746,7 @@ export default function AdminDashboard() {
                   </table>
                 </div>{/* end overflowX */}
               </div>
+              )}
               </div>
               ))}
 
@@ -2018,7 +2029,11 @@ export default function AdminDashboard() {
               <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
                 {/* Person info bar */}
                 {person && (
-                  <div style={{padding:'12px 20px',background:'white',borderBottom:'1px solid #f1f5f9',display:'flex',alignItems:'center',gap:'16px'}}>
+                  <div
+                    onClick={() => setPersonCardOpen(o => !o)}
+                    style={{padding:'12px 20px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',borderBottom: personCardOpen ? '1px solid #e2e8f0' : 'none',display:'flex',alignItems:'center',gap:'16px',cursor:'pointer',userSelect:'none'}}
+                  >
+                    <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: personCardOpen ? 'rotate(90deg)' : 'none'}}>›</span>
                     <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'linear-gradient(135deg,#1e3a5f,#162d4a)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',fontWeight:'800',color:'white',flexShrink:0}}>
                       {person.name.charAt(0).toUpperCase()}
                     </div>
@@ -2055,6 +2070,7 @@ export default function AdminDashboard() {
                 )}
 
                 {/* Spreadsheet */}
+                {personCardOpen && (
                 <div style={{overflowX:'auto'}}>
                   <table style={{borderCollapse:'collapse',fontSize:'12px',width:'100%'}}>
                     <thead>
@@ -2080,8 +2096,26 @@ export default function AdminDashboard() {
                       ) : periods.map((period, i) => {
                         const selfRow = personSelf.find(r=>r.review_period===period && !isInternal);
                         const leaderRow = personLeader.find(r=>r.review_period===period);
+                        const pKey = `${selEmail}:${period}`;
+                        const pOpen = personPeriodOpen[pKey] ?? i === 0;
+                        const cells: (SubmissionRow | undefined)[] = isInternal
+                          ? internalSrcs.map(src => getInternalPool(src).find(r=>r.review_period===period && r.source_table===src))
+                          : [selfRow, ...(person?.isLeader ? [leaderRow] : [])];
+                        const doneCount = cells.filter(c => c?.status === 'submitted').length;
                         return (
-                          <tr key={period} style={{background: i%2===0?'white':'#fafafa'}}
+                          <Fragment key={period}>
+                          <tr
+                            onClick={() => setPersonPeriodOpen(o => ({...o, [pKey]: !pOpen}))}
+                            style={{cursor:'pointer',userSelect:'none',background:'linear-gradient(135deg, #f4f7fb, #edf2f7)'}}
+                          >
+                            <td colSpan={totalCols} style={{border:'1px solid #e2e8f0',padding:'9px 14px',fontSize:'12px',fontWeight:'800',color:'#1e3a5f'}}>
+                              <span style={{display:'inline-block',width:'14px',transition:'transform 0.2s',transform: pOpen ? 'rotate(90deg)' : 'none'}}>›</span>
+                              {formatPeriodDisplay(period)}
+                              <span style={{marginLeft:'10px',fontSize:'11px',fontWeight:'600',color:'#64748b'}}>{doneCount} submitted / {cells.length} total</span>
+                            </td>
+                          </tr>
+                          {pOpen && (
+                          <tr style={{background: i%2===0?'white':'#fafafa'}}
                             onMouseEnter={(e)=>{e.currentTarget.style.background='rgba(126,184,212,0.05)'}}
                             onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
                           >
@@ -2092,6 +2126,8 @@ export default function AdminDashboard() {
                               : <>{statusCell(selfRow)}{person?.isLeader && statusCell(leaderRow)}</>
                             }
                           </tr>
+                          )}
+                          </Fragment>
                         );
                       })}
                     </tbody>
@@ -2109,6 +2145,7 @@ export default function AdminDashboard() {
                     </tfoot>
                   </table>
                 </div>
+                )}
               </div>
             </div>
           );
