@@ -1624,6 +1624,135 @@ export default function AdminDashboard() {
           const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
           const fullMonthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
 
+          // Internal people (Finance/HR, Marketing): same collapsible list as the departments above
+          type InternalCol = { label: string; applies: (email: string) => boolean; find: (email: string, period: string) => SubmissionRow | undefined };
+          const renderInternalGroup = (gkey: string, title: string, people: {email: string; name: string}[], cols: InternalCol[]) => {
+            const open = isDeptOpen(gkey, 99);
+            const thS = {padding:'11px 16px',textAlign:'left' as const,fontWeight:'700',fontSize:'10px',color:'#334155',letterSpacing:'0.4px',textTransform:'uppercase' as const};
+            const subTh = {padding:'9px 16px',textAlign:'left' as const,fontSize:'10px',fontWeight:'700',letterSpacing:'0.4px',textTransform:'uppercase' as const};
+            const pill = (row: SubmissionRow | undefined) => {
+              if (!row) return <span style={{color:'#cbd5e1',fontSize:'13px'}}>—</span>;
+              const ok = row.status === 'submitted';
+              return (
+                <span
+                  onClick={() => { setTableDetailRow(row); window.parent.postMessage({type:'scrollToTop'}, '*'); }}
+                  style={{display:'inline-block',padding:'4px 12px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',background: ok ? '#dcfce7' : '#fef9c3',color: ok ? '#15803d' : '#92400e',border: ok ? '1px solid #86efac' : '1px solid #fde68a'}}
+                  title={row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : ''}
+                >{ok ? '✓ Submitted' : '○ Draft'}</span>
+              );
+            };
+            return (
+              <div key={gkey} style={{marginTop:'16px'}}>
+                <div
+                  onClick={() => setDeptOpen(o => ({...o, [gkey]: !open}))}
+                  style={{display:'flex',alignItems:'center',gap:'8px',margin: open ? '0 0 10px 0' : 0,padding:'11px 16px',borderRadius:'12px',background:'linear-gradient(135deg, #eef3f8, #e6edf4)',border:'1px solid #e2e8f0',cursor:'pointer',userSelect:'none'}}
+                >
+                  <span style={{display:'inline-block',width:'14px',fontSize:'14px',fontWeight:'800',color:'#1e3a5f',transition:'transform 0.2s',transform: open ? 'rotate(90deg)' : 'none'}}>›</span>
+                  <div style={{width:'4px',height:'16px',background:'#7eb8d4',borderRadius:'2px'}} />
+                  <span style={{fontSize:'13px',fontWeight:'800',color:'#1e3a5f',textTransform:'uppercase',letterSpacing:'0.5px'}}>{title}</span>
+                  <span style={{fontSize:'11px',color:'#94a3b8',fontWeight:'600'}}>{people.length} {people.length === 1 ? 'person' : 'people'}</span>
+                </div>
+                {open && (
+                  <div style={{background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',border:'1px solid #e2e8f0',overflow:'hidden'}}>
+                    <table style={{borderCollapse:'collapse',fontSize:'13px',tableLayout:'fixed',width:'100%'}}>
+                      <colgroup>
+                        <col style={{width:'44px'}} />
+                        <col style={{width:'34%'}} />
+                        <col style={{width:'22%'}} />
+                        <col style={{width:'20%'}} />
+                        <col style={{width:'20%'}} />
+                      </colgroup>
+                      <thead style={{background:'linear-gradient(135deg, #f8fafc, #f1f5f9)',borderBottom:'2px solid #e2e8f0'}}>
+                        <tr>
+                          <th style={thS}></th>
+                          <th style={thS}>Employee</th>
+                          <th style={thS}>Department</th>
+                          {cols.map(c => <th key={c.label} style={thS}>{c.label}</th>)}
+                          {cols.length < 2 && <th style={thS}></th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {people.map(emp => {
+                          const rKey = `${selYear}:${gkey}:${emp.email}`;
+                          const rOpen = !!personRowOpen[rKey];
+                          const totals = cols.map(c => c.applies(emp.email)
+                            ? months.filter(m => c.find(emp.email, `${selYear}-${m}`)?.status === 'submitted').length
+                            : null);
+                          return (
+                            <Fragment key={emp.email}>
+                              <tr
+                                onClick={() => setPersonRowOpen(o => ({...o, [rKey]: !rOpen}))}
+                                style={{cursor:'pointer',userSelect:'none',borderBottom:'1px solid #e2e8f0',borderTop: rOpen ? '1px solid #e2e8f0' : 'none',background: rOpen ? 'linear-gradient(135deg, #eef3f8, #e6edf4)' : 'white'}}
+                                onMouseEnter={(e)=>{e.currentTarget.style.background = rOpen ? 'linear-gradient(135deg, #e6eef6, #dde7f1)' : '#eef5f9'}}
+                                onMouseLeave={(e)=>{e.currentTarget.style.background = rOpen ? 'linear-gradient(135deg, #eef3f8, #e6edf4)' : 'white'}}
+                              >
+                                <td style={{padding:'12px 8px 12px 16px',color:'#1e3a5f',fontWeight:'800',fontSize:'14px'}}>
+                                  <span style={{display:'inline-block',transition:'transform 0.2s',transform: rOpen ? 'rotate(90deg)' : 'none'}}>›</span>
+                                </td>
+                                <td style={{padding:'12px 16px'}}>
+                                  <div style={{fontWeight:'800',color:'#1e3a5f',fontSize:'13px'}}>{emp.name}</div>
+                                  <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
+                                </td>
+                                <td style={{padding:'12px 16px',color: rOpen ? '#64748b' : '#475569',fontSize:'12px',fontWeight: rOpen ? '600' : '400'}}>Internal</td>
+                                {totals.map((t, ti) => (
+                                  <td key={ti} style={{padding:'12px 16px',fontSize:'12px',fontWeight:'600',color: rOpen ? '#64748b' : '#334155'}}>
+                                    {t === null ? <span style={{color:'#cbd5e1'}}>—</span> : `${t} / ${months.length} submitted`}
+                                  </td>
+                                ))}
+                                {cols.length < 2 && <td />}
+                              </tr>
+                              {rOpen && (
+                                <>
+                                  <tr style={{background:'#f8fafc'}}>
+                                    <td></td>
+                                    <th style={{...subTh,color:'#94a3b8'}}>Month</th>
+                                    <th style={{...subTh,color:'#b45309'}}>Director Rating</th>
+                                    {cols.map(c => <th key={c.label} style={{...subTh,color:'#3b82f6'}}>{c.label}</th>)}
+                                    {cols.length < 2 && <th style={subTh}></th>}
+                                  </tr>
+                                  {[...months].reverse().map(m => {
+                                    const period = `${selYear}-${m}`;
+                                    const rows = cols.map(c => c.applies(emp.email) ? c.find(emp.email, period) : undefined);
+                                    const ratingKeys = [...new Set(rows.map(r => r?.form_data?.director_feedback?.rating as string | undefined).filter(Boolean))] as string[];
+                                    return (
+                                      <tr key={m} style={{background:'#f8fafc',borderTop:'1px solid #e8eef3'}}>
+                                        <td></td>
+                                        <td style={{padding:'8px 16px',fontWeight:'700',color:'#1e3a5f',fontSize:'12px'}}>{fullMonthNames[parseInt(m)]} {selYear}</td>
+                                        <td style={{padding:'6px 16px'}}>
+                                          {ratingKeys.length === 0 ? <span style={{color:'#cbd5e1'}}>—</span> : (
+                                            <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+                                              {ratingKeys.map(k => {
+                                                const r = RATINGS.find(x => x.key === k);
+                                                return r ? (
+                                                  <span key={k} style={{display:'inline-flex',alignItems:'center',gap:'6px',fontSize:'11px',fontWeight:'600',color:'#334155'}} title={r.label}>
+                                                    <img src={`/ratings/${r.key}.png`} alt={r.label} width={26} height={26} />{r.label}
+                                                  </span>
+                                                ) : null;
+                                              })}
+                                            </div>
+                                          )}
+                                        </td>
+                                        {cols.map((c, ci) => (
+                                          <td key={c.label} style={{padding:'8px 16px'}}>{c.applies(emp.email) ? pill(rows[ci]) : <span style={{color:'#cbd5e1'}}>—</span>}</td>
+                                        ))}
+                                        {cols.length < 2 && <td />}
+                                      </tr>
+                                    );
+                                  })}
+                                  <tr><td colSpan={5} style={{height:'18px',padding:0,background:'#eef2f7',borderTop:'1px solid #dbe3ec',borderBottom:'1px solid #dbe3ec'}} /></tr>
+                                </>
+                              )}
+                            </Fragment>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          };
+
           const cellStyle = (row: SubmissionRow | undefined, onClick: ()=>void) => {
             const submitted = row?.status === 'submitted';
             const draft = row?.status === 'draft';
@@ -1802,166 +1931,17 @@ export default function AdminDashboard() {
                 <span style={{marginLeft:'8px',fontStyle:'italic'}}>Click a person to expand their months, click a status to view details</span>
               </div>
 
-              {/* ── Table 2: Internal Finance + HR (Esther & Chelsea) ── */}
-              {finHrPeople.length > 0 && (
-                <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto',width:'100%'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
-                      <colgroup>
-                        <col style={{width:'40px'}} />
-                        <col style={{width:'150px'}} />
-                        <col style={{width:'110px'}} />
-                        {months.map(m => [
-                          <col key={`${m}-fin`} style={{width:'80px'}} />,
-                          <col key={`${m}-hr`} style={{width:'80px'}} />,
-                        ])}
-                      </colgroup>
-                      <thead>
-                        <tr style={{background:'#f8fafc'}}>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
-                          <th colSpan={months.length * 2} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
-                            Internal · Finance &amp; HR <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{finHrPeople.length} members</span>
-                          </th>
-                        </tr>
-                        <tr style={{background:'#f8fafc'}}>
-                          {months.map(m => (
-                            <th key={m} colSpan={2} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
-                              {fullMonthNames[parseInt(m)]}
-                            </th>
-                          ))}
-                        </tr>
-                        <tr style={{background:'#f8fafc'}}>
-                          {months.map(m => [
-                            <th key={`${m}-fin`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#7eb8d4',fontSize:'11px',background:'rgba(126,184,212,0.1)',width:'72px'}}>💰 Finance</th>,
-                            <th key={`${m}-hr`}  style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#7eb8d4',fontSize:'11px',background:'rgba(126,184,212,0.06)',width:'72px'}}>🏢 HR</th>,
-                          ])}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {finHrPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
-                            onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
-                          >
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
-                              <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
-                              <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
-                            </td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
-                            {months.map(m => {
-                              const period = `${selYear}-${m}`;
-                              const finPool = emp.email === 'esther@tassure.com' ? tableAllLeader : tableAllSelf;
-                              const finRow = finPool.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='finance_review_submissions');
-                              const hrRow  = emp.email === 'esther@tassure.com'
-                                ? tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='hr_review_submissions')
-                                : undefined;
-                              const borderStyle = i < finHrPeople.length-1 ? '1px solid #e2e8f0' : 'none';
-                              return [
-                                <td key={`${period}-fin`} onClick={finRow ? ()=>{ setTableDetailRow(finRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:finRow?.status==='submitted'?'rgba(220,252,231,0.5)':finRow?.status==='draft'?'rgba(254,249,195,0.5)':'transparent',cursor: finRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(finRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:finRow?.status==='submitted'?'#15803d':finRow?.status==='draft'?'#92400e':'#cbd5e1'}}>{finRow?.status==='submitted'?'✓':finRow?.status==='draft'?'○':'—'}</span></td>,
-                                emp.email === 'esther@tassure.com'
-                                  ? <td key={`${period}-hr`} onClick={hrRow ? ()=>{ setTableDetailRow(hrRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:hrRow?.status==='submitted'?'rgba(220,252,231,0.5)':hrRow?.status==='draft'?'rgba(254,249,195,0.5)':'transparent',cursor: hrRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(hrRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:hrRow?.status==='submitted'?'#15803d':hrRow?.status==='draft'?'#92400e':'#cbd5e1'}}>{hrRow?.status==='submitted'?'✓':hrRow?.status==='draft'?'○':'—'}</span></td>
-                                  : <td key={`${period}-hr-na`} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'8px 10px',textAlign:'center',background:'#fafafa'}}>
-                                      <span style={{color:'#cbd5e1',fontSize:'12px'}}>—</span>
-                                    </td>,
-                              ];
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan={3 + months.length*2} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
-                            <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
-                              <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
-                              <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
-                              <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
-                              <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted / N/A</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>{/* end overflowX */}
-                </div>
-              )}
+              {finHrPeople.length > 0 && renderInternalGroup('Internal · Finance & HR', 'Internal · Finance & HR', finHrPeople, [
+                { label: '💰 Finance', applies: () => true,
+                  find: (email, period) => (email === 'esther@tassure.com' ? tableAllLeader : tableAllSelf).find(r => r.employee_email===email && r.review_period===period && r.source_table==='finance_review_submissions') },
+                { label: '🏢 HR', applies: (email) => email === 'esther@tassure.com',
+                  find: (email, period) => tableAllSelf.find(r => r.employee_email===email && r.review_period===period && r.source_table==='hr_review_submissions') },
+              ])}
 
-              {/* ── Table 3: Internal Marketing (Vincent) ── */}
-              {mktPeople.length > 0 && (
-                <div style={{marginTop:'24px',background:'white',borderRadius:'12px',boxShadow:'0 4px 24px rgba(0,0,0,0.08)',overflow:'hidden',border:'1px solid #e2e8f0'}}>
-                  <div style={{overflowX:'auto',width:'100%'}}>
-                    <table style={{borderCollapse:'collapse',fontSize:'12px',tableLayout:'fixed',width:`${300 + months.length * 160}px`}}>
-                      <colgroup>
-                        <col style={{width:'40px'}} />
-                        <col style={{width:'150px'}} />
-                        <col style={{width:'110px'}} />
-                        {months.map(m => (
-                          <col key={`${m}-mkt`} style={{width:'160px'}} />
-                        ))}
-                      </colgroup>
-                      <thead>
-                        <tr style={{background:'#f8fafc'}}>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 14px',textAlign:'center',fontWeight:'700',color:'#94a3b8',width:'40px',background:'#f1f5f9'}}>#</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'40px',zIndex:2}}>Employee</th>
-                          <th rowSpan={3} style={{border:'1px solid #e2e8f0',padding:'10px 12px',textAlign:'left',fontWeight:'700',color:'#334155',background:'#f8fafc',position:'sticky',left:'190px',zIndex:2}}>Department</th>
-                          <th colSpan={months.length} style={{border:'1px solid #e2e8f0',padding:'8px 16px',textAlign:'left',fontWeight:'800',color:'#1e3a5f',background:'linear-gradient(135deg,#f8fafc,#f1f5f9)',fontSize:'13px'}}>
-                            Internal · Marketing <span style={{fontWeight:'400',fontSize:'11px',color:'#94a3b8',marginLeft:'6px'}}>{mktPeople.length} member{mktPeople.length!==1?'s':''}</span>
-                          </th>
-                        </tr>
-                        <tr style={{background:'#f8fafc'}}>
-                          {months.map(m => (
-                            <th key={m} style={{border:'1px solid #e2e8f0',padding:'8px 10px',textAlign:'center',fontWeight:'700',color:'#1e3a5f',background:'rgba(126,184,212,0.12)',letterSpacing:'0.3px'}}>
-                              {fullMonthNames[parseInt(m)]}
-                            </th>
-                          ))}
-                        </tr>
-                        <tr style={{background:'#f8fafc'}}>
-                          {months.map(m => (
-                            <th key={`${m}-mkt`} style={{border:'1px solid #e2e8f0',padding:'6px 8px',textAlign:'center',fontWeight:'600',color:'#7eb8d4',fontSize:'11px',background:'rgba(126,184,212,0.1)',width:'72px'}}>📣 Marketing</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {mktPeople.map((emp, i) => (
-                          <tr key={emp.email} style={{background: i%2===0?'white':'#fafafa'}}
-                            onMouseEnter={(e)=>{e.currentTarget.style.background='#eef5f9'}}
-                            onMouseLeave={(e)=>{e.currentTarget.style.background=i%2===0?'white':'#fafafa'}}
-                          >
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px',textAlign:'center',color:'#94a3b8',fontWeight:'600',background:'#f9fafb'}}>{i+1}</td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 12px',position:'sticky',left:'40px',background:'inherit',zIndex:1}}>
-                              <div style={{fontWeight:'700',color:'#0f172a',fontSize:'13px'}}>{emp.name}</div>
-                              <div style={{fontSize:'10px',color:'#94a3b8',marginTop:'1px'}}>{emp.email}</div>
-                            </td>
-                            <td style={{border:'1px solid #e2e8f0',borderBottom: i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none',padding:'10px 14px',color:'#475569',position:'sticky',left:'190px',background:'inherit',zIndex:1,fontSize:'12px'}}>Internal</td>
-                            {months.map(m => {
-                              const period = `${selYear}-${m}`;
-                              const mktRow = tableAllSelf.find(r => r.employee_email===emp.email && r.review_period===period && r.source_table==='marketing_review_submissions');
-                              const borderStyle = i < mktPeople.length-1 ? '1px solid #e2e8f0' : 'none';
-                              return (
-                                <td key={`${period}-mkt`} onClick={mktRow ? ()=>{ setTableDetailRow(mktRow!); window.parent.postMessage({type:'scrollToTop'}, '*'); } : undefined} style={{border:'1px solid #e2e8f0',borderBottom: borderStyle,padding:'10px 14px',textAlign:'center',background:mktRow?.status==='submitted'?'rgba(220,252,231,0.5)':mktRow?.status==='draft'?'rgba(254,249,195,0.5)':'white',cursor: mktRow ? 'pointer' : 'default',transition:'background 0.15s'}} onMouseEnter={(e)=>{ if(mktRow) e.currentTarget.style.opacity='0.7'; }} onMouseLeave={(e)=>{ e.currentTarget.style.opacity='1'; }}><span style={{fontWeight:'700',fontSize:'12px',color:mktRow?.status==='submitted'?'#15803d':'#92400e'}}>{mktRow?.status==='submitted'?'✓':mktRow?.status==='draft'?'○':'—'}</span></td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan={3 + months.length} style={{padding:'10px 16px',background:'#f8fafc',borderTop:'2px solid #e2e8f0'}}>
-                            <div style={{display:'flex',gap:'20px',fontSize:'11px',color:'#64748b',alignItems:'center'}}>
-                              <span style={{fontWeight:'700',color:'#334155'}}>Legend:</span>
-                              <span><span style={{color:'#15803d',fontWeight:'800'}}>✓</span> Submitted</span>
-                              <span><span style={{color:'#92400e',fontWeight:'800'}}>○</span> Draft</span>
-                              <span><span style={{color:'#cbd5e1'}}>—</span> Not submitted</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>{/* end overflowX */}
-                </div>
-              )}
+              {mktPeople.length > 0 && renderInternalGroup('Internal · Marketing', 'Internal · Marketing', mktPeople, [
+                { label: '📣 Marketing', applies: () => true,
+                  find: (email, period) => tableAllSelf.find(r => r.employee_email===email && r.review_period===period && r.source_table==='marketing_review_submissions') },
+              ])}
             </div>
           );
         })()}
