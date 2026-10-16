@@ -46,6 +46,9 @@ const RATINGS = [
   { key: 'problem-solver', label: 'Problem Solver' },
 ];
 
+// Demo Preview is switched off for everyone; flip to true to bring the buttons back
+const SHOW_DEMO = false;
+
 const STATUS_ADMIN_EMAIL = 'vincent@tassure.com';
 
 export default function AdminDashboard() {
@@ -1776,9 +1779,9 @@ export default function AdminDashboard() {
           if (years.length === 0) return (
             <div style={{textAlign:'center',padding:'60px'}}>
               <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
-              <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
+              {SHOW_DEMO && <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
                 👁 Preview with Demo Data (18 employees × 12 months)
-              </button>
+              </button>}
             </div>
           );
 
@@ -1795,7 +1798,7 @@ export default function AdminDashboard() {
                 </div>
                 {tableDemoMode
                   ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
-                  : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
+                  : SHOW_DEMO && <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
                 }
               </div>
 
@@ -2018,9 +2021,9 @@ export default function AdminDashboard() {
           if (people.length === 0) return (
             <div style={{textAlign:'center',padding:'60px'}}>
               <div style={{color:'#94a3b8',fontSize:'14px',marginBottom:'20px'}}>No data yet</div>
-              <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
+              {SHOW_DEMO && <button onClick={loadDemoData} style={{padding:'10px 24px',background:'linear-gradient(135deg,#7eb8d4,#1e3a5f)',color:'white',border:'none',borderRadius:'10px',fontWeight:'700',fontSize:'13px',cursor:'pointer'}}>
                 👁 Preview with Demo Data (18 employees × 12 months)
-              </button>
+              </button>}
             </div>
           );
 
@@ -2046,7 +2049,7 @@ export default function AdminDashboard() {
                 </div>
                 {tableDemoMode
                   ? <button onClick={clearDemoData} style={{padding:'6px 16px',background:'rgba(239,68,68,0.1)',color:'#dc2626',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>✕ Exit Demo</button>
-                  : <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
+                  : SHOW_DEMO && <button onClick={loadDemoData} style={{padding:'6px 16px',background:'rgba(126,184,212,0.15)',color:'#1e3a5f',border:'none',borderRadius:'8px',fontWeight:'700',fontSize:'12px',cursor:'pointer'}}>👁 Demo Preview</button>
                 }
               </div>
               {/* Spreadsheet card */}
@@ -2565,7 +2568,7 @@ export default function AdminDashboard() {
 
           {tableDemoMode
             ? <button onClick={clearDemoData} style={{padding:'10px 16px',border:'none',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'rgba(239,68,68,0.1)',color:'#dc2626',whiteSpace:'nowrap'}}>✕ Exit Demo</button>
-            : <button onClick={loadDemoData} style={{padding:'10px 16px',border:'1.5px dashed #7eb8d4',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'rgba(126,184,212,0.08)',color:'#1e3a5f',whiteSpace:'nowrap'}}>👁 Demo Preview</button>
+            : SHOW_DEMO && <button onClick={loadDemoData} style={{padding:'10px 16px',border:'1.5px dashed #7eb8d4',borderRadius:'10px',fontSize:'13px',fontWeight:'700',cursor:'pointer',background:'rgba(126,184,212,0.08)',color:'#1e3a5f',whiteSpace:'nowrap'}}>👁 Demo Preview</button>
           }
 
           <button onClick={handleExportAll} style={{

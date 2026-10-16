@@ -72,6 +72,9 @@ function RatingBubble({ ratingKey }: { ratingKey: string }) {
   );
 }
 
+// Demo Preview is switched off for everyone; flip to true to bring the button back
+const SHOW_DEMO = false;
+
 const DIRECTOR_COMMENT_FORMS = new Set(['self', 'finance', 'hr', 'marketing']);
 
 function getFormsForUser(user: User): FormConfig[] {
@@ -563,7 +566,7 @@ export default function MySubmissions() {
           </div>
           {isDemoMode
             ? <button onClick={() => setIsDemoMode(false)} style={{ padding: '8px 16px', background: 'rgba(239,68,68,0.1)', color: '#dc2626', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>✕ Exit Demo</button>
-            : <button onClick={() => setIsDemoMode(true)} style={{ padding: '8px 16px', background: 'rgba(126,184,212,0.08)', color: '#1e3a5f', border: '1.5px dashed #7eb8d4', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>👁 Demo Preview</button>
+            : SHOW_DEMO && <button onClick={() => setIsDemoMode(true)} style={{ padding: '8px 16px', background: 'rgba(126,184,212,0.08)', color: '#1e3a5f', border: '1.5px dashed #7eb8d4', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', flexShrink: 0 }}>👁 Demo Preview</button>
           }
         </div>
 
