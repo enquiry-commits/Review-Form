@@ -1479,7 +1479,7 @@ export default function AdminDashboard() {
             </div>
           )}
           <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-            {(['table-by-year', 'table-by-person'] as const).map(item => {
+            {(['table-by-year'] as const).map(item => {
               const icon = item === 'table-by-year' ? (
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="3" width="12" height="11" rx="1.5"/>

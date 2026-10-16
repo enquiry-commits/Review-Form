@@ -371,7 +371,7 @@ export default function Dashboard() {
                 {adminTableOpen && (
                   <>
                     {subItem('table-by-year', 'By Year')}
-                    {subItem('table-by-person', 'By Person')}
+                    {/* By Person hidden for now: {subItem('table-by-person', 'By Person')} */}
                   </>
                 )}
               </div>
