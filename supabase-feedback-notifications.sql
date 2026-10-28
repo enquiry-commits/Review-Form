@@ -119,24 +119,34 @@ begin
 end $$;
 
 -- Claim due rows (idempotent, safe with overlapping runs) ---------------------
-create or replace function public.claim_due_feedback_notifications(p_limit int default 20)
+-- Per person: a row is due only when NONE of that person's pending rows changed
+-- in the last 6 hours, so Self + Leader Review feedback go out in one e-mail.
+create or replace function public.claim_due_feedback_notifications(p_limit int default 50)
 returns table(source_table text, submission_id text, recipient_email text,
               claimed_hash text, comment_count int, has_rating boolean)
 language sql
 security definer
 set search_path = public
 as $$
-  with due as (
-    select f.source_table, f.submission_id
-      from public.feedback_notifications f
+  with pending as (
+    select f.* from public.feedback_notifications f
      where f.has_content
        and f.content_hash is distinct from f.notified_hash
-       and f.last_change_at <= now() - interval '6 hours'
        and f.attempts < 5
+  ),
+  busy as (
+    select p.recipient_email from pending p
+     where p.last_change_at > now() - interval '6 hours'
+  ),
+  due as (
+    select f.source_table, f.submission_id
+      from public.feedback_notifications f
+      join pending p on p.source_table = f.source_table and p.submission_id = f.submission_id
+     where f.recipient_email not in (select recipient_email from busy)
        and (f.status <> 'sending' or f.claimed_at < now() - interval '15 minutes')
-     order by f.last_change_at
+     order by f.recipient_email, f.last_change_at
      limit p_limit
-     for update skip locked
+     for update of f skip locked
   )
   update public.feedback_notifications f
      set status = 'sending', claimed_at = now(), claimed_hash = f.content_hash
