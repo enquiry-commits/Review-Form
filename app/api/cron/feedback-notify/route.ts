@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendMail } from '@/lib/notify/mailer'
+import { buildHolidayReminderEmail, holidayYears } from '@/lib/notify/sgHolidays'
 import { NO_EMAIL, buildReminderEmail, reminderDueToday, reminderPlanFor, reminderRecipients, todayIn } from '@/lib/notify/monthlyReminder'
 
 export const runtime = 'nodejs'
@@ -172,6 +173,25 @@ export async function GET(request: NextRequest) {
         } catch (e: any) {
           await db.from('monthly_review_reminders').delete().eq('period', key)
           reminder = { period: key, error: e?.message }
+        }
+      }
+    }
+  }
+
+  // Holiday list check: from 1 July, if next year's Singapore holidays are missing,
+  // e-mail Vincent once a month (logged as 'holidays-YYYY:YYYY-MM').
+  const today = todayIn(tz)
+  const nextYear = today.getUTCFullYear() + 1
+  if (today.getUTCMonth() >= 6 && !holidayYears().has(nextYear)) {
+    const hkey = `holidays-${nextYear}:${today.toISOString().slice(0, 7)}`
+    const { data: hdone } = await db.from('monthly_review_reminders').select('period').eq('period', hkey).maybeSingle()
+    if (!hdone) {
+      const { error: hlogErr } = await db.from('monthly_review_reminders').insert({ period: hkey, recipients: 1 })
+      if (!hlogErr) {
+        try {
+          await sendMail({ to: 'vincent@tassure.com', ...buildHolidayReminderEmail(nextYear) })
+        } catch {
+          await db.from('monthly_review_reminders').delete().eq('period', hkey)
         }
       }
     }
