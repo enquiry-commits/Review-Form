@@ -4,7 +4,7 @@ export type MailMessage = { to: string; subject: string; html: string; text: str
 
 // Google Workspace SMTP with an App Password. Swap this one file to change provider.
 export async function sendMail(msg: MailMessage) {
-  const user = process.env.SMTP_USER
+  const user = process.env.SMTP_USER || 'vincent@tassure.com'
   const pass = process.env.SMTP_PASS
   if (!user || !pass) throw new Error('SMTP_USER / SMTP_PASS not configured')
 
