@@ -9,6 +9,10 @@
 -- Removing a comment or a rating, or picking an emoji and then removing it
 -- again, sends nothing. Includes the per-person 6-hour quiet period
 -- (Self + Leader Review in one e-mail).
+--
+-- Start date: notifications only count Director changes made from
+-- 30 Oct 2026 00:00 Singapore time (= 2026-10-29 16:00 UTC). Anything saved
+-- before that becomes the baseline and is never e-mailed.
 -- ============================================================================
 
 alter table public.feedback_notifications
@@ -73,15 +77,20 @@ begin
     return new;
   end if;
 
+  -- Before the start date every change is baseline (already "notified")
   insert into public.feedback_notifications as f
     (source_table, submission_id, recipient_email, content_hash, content, has_content,
-     comment_count, has_rating, last_change_at)
+     comment_count, has_rating, last_change_at, notified_hash, notified_content)
   values
     (tg_table_name, new.id::text, lower(new.employee_email), s.content_hash, c, s.has_content,
-     s.comment_count, s.has_rating, now())
+     s.comment_count, s.has_rating, now(),
+     case when now() < timestamptz '2026-10-29 16:00:00+00' then s.content_hash end,
+     case when now() < timestamptz '2026-10-29 16:00:00+00' then c end)
   on conflict (source_table, submission_id) do update
     set content_hash    = excluded.content_hash,
         content         = excluded.content,
+        notified_hash    = case when now() < timestamptz '2026-10-29 16:00:00+00' then excluded.content_hash else f.notified_hash end,
+        notified_content = case when now() < timestamptz '2026-10-29 16:00:00+00' then excluded.content else f.notified_content end,
         has_content     = excluded.has_content,
         comment_count   = excluded.comment_count,
         has_rating      = excluded.has_rating,
@@ -107,10 +116,11 @@ begin
   end loop;
 end $$;
 
+-- Everything saved so far (before 30 Oct 2026) is baseline: nothing of it is e-mailed
 update public.feedback_notifications
-   set notified_content = content
- where notified_content is null
-   and notified_hash is not distinct from content_hash;
+   set notified_content = content,
+       notified_hash    = content_hash,
+       status = 'idle', attempts = 0, last_error = null;
 
 -- Claim: per person, due when they have new content and nothing changed for 6h -
 create or replace function public.claim_due_feedback_notifications(p_limit int default 50)
