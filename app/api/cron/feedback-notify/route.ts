@@ -66,6 +66,22 @@ export async function GET(request: NextRequest) {
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  // ?test=1 sends one sample e-mail per form type to the override (or sender) address — no DB access
+  if (request.nextUrl.searchParams.get('test') === '1') {
+    const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
+    const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
+    const link = `${appUrl}/dashboard?tab=my-submissions`
+    const samples = [
+      buildEmail('Self Review', 'October 2026', 3, true, link),
+      buildEmail('Leader Review', 'October 2026', 2, false, link),
+    ]
+    try {
+      for (const m of samples) await sendMail({ to, ...m, subject: `[TEST] ${m.subject}` })
+      return NextResponse.json({ test: true, sent: samples.length, to })
+    } catch (e: any) {
+      return NextResponse.json({ test: true, error: e?.message }, { status: 500 })
+    }
+  }
   if (process.env.NOTIFY_ENABLED !== 'true') {
     return NextResponse.json({ skipped: 'NOTIFY_ENABLED is not true' })
   }
