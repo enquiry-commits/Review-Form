@@ -40,7 +40,7 @@ function buildEmail(items: FeedbackItem[], link: string) {
     return p.join(' and ')
   }
   const forms = [...new Set(items.map(i => i.form))]
-  const subject = `[Tassure Review] Your ${forms.join(' & ')} has new Director comments`
+  const subject = `【Tassure Review】 Your ${forms.join(' & ')} has new Director comments`
   const line = (it: FeedbackItem) => `${it.form}${it.period ? ` (${it.period})` : ''}${detail(it) ? ` — ${detail(it)}` : ''}`
   const text =
 `Hi,
