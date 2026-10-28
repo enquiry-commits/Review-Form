@@ -2,6 +2,10 @@
 // Sent on the Monday of the week (Mon–Sun) that holds the month's last day;
 // the deadline is the Friday of that same week, even when it falls next month.
 // e.g. Sep 2026: 30 Sep is a Wednesday -> send Mon 28 Sep, deadline Fri 2 Oct.
+// Singapore public holidays: a holiday deadline moves back to the previous working
+// day, a holiday send date moves forward to the next working day.
+
+import { SG_PUBLIC_HOLIDAYS } from './sgHolidays'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -14,6 +18,7 @@ export type ReminderPlan = {
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10)
+const isHoliday = (d: Date) => SG_PUBLIC_HOLIDAYS.has(iso(d))
 
 // Today's calendar date in the given time zone, as a UTC-midnight Date
 export function todayIn(tz: string) {
@@ -24,8 +29,11 @@ export function todayIn(tz: string) {
 export function reminderPlanFor(year: number, monthIndex: number): ReminderPlan {
   const lastDay = new Date(Date.UTC(year, monthIndex + 1, 0))
   const sinceMonday = (lastDay.getUTCDay() + 6) % 7
-  const send = new Date(lastDay); send.setUTCDate(lastDay.getUTCDate() - sinceMonday)
-  const deadline = new Date(send); deadline.setUTCDate(send.getUTCDate() + 4)
+  const monday = new Date(lastDay); monday.setUTCDate(lastDay.getUTCDate() - sinceMonday)
+  const deadline = new Date(monday); deadline.setUTCDate(monday.getUTCDate() + 4)
+  while (isHoliday(deadline) && deadline > monday) deadline.setUTCDate(deadline.getUTCDate() - 1)
+  const send = new Date(monday)
+  while (isHoliday(send) && send < deadline) send.setUTCDate(send.getUTCDate() + 1)
   return {
     period: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
     monthLabel: `${MONTHS[monthIndex]} ${year}`,
