@@ -31,56 +31,33 @@ function periodLabel(period?: string) {
 
 type FeedbackItem = { form: string; period: string; commentCount: number; hasRating: boolean }
 
-// One e-mail per person: every form of theirs with new Director feedback is listed in it
+// One e-mail per person: every form of theirs with new Director comments is listed in it
 function buildEmail(items: FeedbackItem[], link: string) {
-  const detailEn = (it: FeedbackItem) => {
+  const detail = (it: FeedbackItem) => {
     const p: string[] = []
     if (it.commentCount > 0) p.push(`${it.commentCount} comment${it.commentCount > 1 ? 's' : ''}`)
     if (it.hasRating) p.push('a rating')
     return p.join(' and ')
   }
-  const detailZh = (it: FeedbackItem) => {
-    const p: string[] = []
-    if (it.commentCount > 0) p.push(`${it.commentCount} 条评语`)
-    if (it.hasRating) p.push('评价表情')
-    return p.join('、')
-  }
   const forms = [...new Set(items.map(i => i.form))]
-  const formsEn = forms.join(' & ')
-  const formsZh = forms.join('、')
-  const subject = `Your ${formsEn} has new Director feedback / 你的 ${formsZh} 有新的主管反馈`
-  const lineEn = (it: FeedbackItem) => `${it.form}${it.period ? ` (${it.period})` : ''}${detailEn(it) ? ` — ${detailEn(it)}` : ''}`
-  const lineZh = (it: FeedbackItem) => `${it.form}${it.period ? `（${it.period}）` : ''}${detailZh(it) ? ` — ${detailZh(it)}` : ''}`
+  const subject = `Your ${forms.join(' & ')} has new Director comments`
+  const line = (it: FeedbackItem) => `${it.form}${it.period ? ` (${it.period})` : ''}${detail(it) ? ` — ${detail(it)}` : ''}`
   const text =
 `Hi,
 
-A Director has left feedback on:
-${items.map(i => `- ${lineEn(i)}`).join('\n')}
+A Director has left comments on:
+${items.map(i => `- ${line(i)}`).join('\n')}
 
-Please log in to view it: ${link}
-
-你好，
-
-主管已对以下表单留下反馈：
-${items.map(i => `- ${lineZh(i)}`).join('\n')}
-
-请登录系统查看：${link}
+Please log in to view them: ${link}
 
 — Tassure Review`
-  const li = (t: string) => `<li style="margin:2px 0">${t}</li>`
-  const bold = (it: FeedbackItem, line: string) => line.replace(it.form, `<b>${it.form}</b>`)
   const html =
 `<div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;color:#1e293b;line-height:1.6">
 <p>Hi,</p>
-<p>A Director has left feedback on:</p>
-<ul style="padding-left:20px;margin:0 0 12px">${items.map(i => li(bold(i, lineEn(i)))).join('')}</ul>
-<p><a href="${link}" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">View feedback / 查看反馈</a></p>
-<hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0">
-<p>你好，</p>
-<p>主管已对以下表单留下反馈：</p>
-<ul style="padding-left:20px;margin:0 0 12px">${items.map(i => li(bold(i, lineZh(i)))).join('')}</ul>
-<p>请点击上方按钮登录查看。</p>
-<p style="color:#94a3b8;font-size:12px">— Tassure Review</p>
+<p>A Director has left comments on:</p>
+<ul style="padding-left:20px;margin:0 0 16px">${items.map(i => `<li style="margin:2px 0">${line(i).replace(i.form, `<b>${i.form}</b>`)}</li>`).join('')}</ul>
+<p><a href="${link}" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">View comments</a></p>
+<p style="color:#94a3b8;font-size:12px;margin-top:24px">— Tassure Review</p>
 </div>`
   return { subject, text, html }
 }
