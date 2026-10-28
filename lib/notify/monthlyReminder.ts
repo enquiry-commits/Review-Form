@@ -8,6 +8,7 @@
 import { SG_PUBLIC_HOLIDAYS } from './sgHolidays'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 const SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 export type ReminderPlan = {
@@ -15,6 +16,7 @@ export type ReminderPlan = {
   monthLabel: string    // 'September 2026'
   sendDate: string      // '2026-09-28'
   deadlineLabel: string // '2 Oct 2026'
+  deadlineDay: string   // 'Friday'
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10)
@@ -39,6 +41,7 @@ export function reminderPlanFor(year: number, monthIndex: number): ReminderPlan 
     monthLabel: `${MONTHS[monthIndex]} ${year}`,
     sendDate: iso(send),
     deadlineLabel: `${deadline.getUTCDate()} ${SHORT[deadline.getUTCMonth()]} ${deadline.getUTCFullYear()}`,
+    deadlineDay: DAYS[deadline.getUTCDay()],
   }
 }
 
@@ -50,39 +53,53 @@ export function reminderDueToday(today: Date): ReminderPlan | null {
 
 export function buildReminderEmail(plan: ReminderPlan, link: string) {
   const subject = `【TASSURE】${plan.monthLabel} Employee Review Form Submission`
+  const due = `${plan.deadlineDay}, ${plan.deadlineLabel}`
   const text =
 `Dear All,
 
-Please complete your Employee Review Form for ${plan.monthLabel} by clicking the link below:
-👉 Monthly Review Form: ${link}
+It's time to complete your Employee Review Form for ${plan.monthLabel}.
 
-Kindly take note of the following:
-1. Please log in using your company email account (name@tassure.com).
-2. You may upload images or files as supporting documents.
-3. Please submit the form by ${plan.deadlineLabel}.
+Deadline: ${due}
 
-Please note that once the form is submitted, no further changes can be made. Kindly review all details carefully before clicking Submit.
+👉 Fill in my Review Form: ${link}
 
-Should you encounter any technical issues, please feel free to let me know.
+Before you start:
+1. Log in with your company Google account (name@tassure.com).
+2. You can upload images or files as supporting documents.
+3. Your draft is saved automatically, so you can come back and continue any time before you submit.
 
---
-Vincent Seow`
+Important: once the form is submitted, it can no longer be changed. Please check everything carefully before clicking Submit.
+
+If you have any technical issues, just reply to this e-mail or let me know.
+
+Thank you!
+
+Best regards,
+Vincent Seow
+Tassure Review System`
   const html =
-`<div style="font-family:Arial,Helvetica,sans-serif;color:#1e293b;line-height:1.6;font-size:14px">
+`<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;color:#1e293b;line-height:1.6;font-size:14px">
+<div style="font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#64748b;padding-bottom:10px;border-bottom:2px solid #1e3a5f;margin-bottom:18px">Tassure Review System</div>
 <p>Dear All,</p>
-<p>Please complete your <b>Employee Review Form</b> for <b>${plan.monthLabel}</b> by clicking the link below:</p>
-<p>👉 <a href="${link}" style="color:#1a56db">Monthly Review Form</a></p>
-<p>______________________</p>
-<p>Kindly take note of the following:</p>
-<ol style="margin-top:0">
-<li>Please log in using your company email account: <b>name@tassure.com</b>.</li>
-<li>You may upload images or files as supporting documents.</li>
-<li>Please submit the form by <b>${plan.deadlineLabel}</b>.</li>
+<p>It's time to complete your <b>Employee Review Form</b> for <b>${plan.monthLabel}</b>.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0;border-collapse:collapse"><tr>
+<td style="background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:12px 18px">
+<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#92400e">Submission deadline</div>
+<div style="font-size:18px;font-weight:700;color:#78350f;margin-top:2px">${due}</div>
+</td></tr></table>
+<p style="margin:22px 0"><a href="${link}" style="display:inline-block;padding:12px 26px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px">👉 Fill in my Review Form</a></p>
+<p style="margin-bottom:6px;font-weight:700">Before you start:</p>
+<ol style="margin-top:0;padding-left:20px">
+<li>Log in with your company Google account (<b>name@tassure.com</b>).</li>
+<li>You can upload images or files as supporting documents.</li>
+<li>Your draft is saved automatically, so you can come back and continue any time before you submit.</li>
 </ol>
-<p>______________________</p>
-<p style="color:#dc2626">Please note that once the form is submitted, no further changes can be made. Kindly review all details carefully before clicking <b>Submit</b>.</p>
-<p>Should you encounter any technical issues, please feel free to let me know.</p>
-<p>--<br>Vincent Seow</p>
+<div style="background:#fef2f2;border-left:4px solid #dc2626;padding:10px 14px;margin:18px 0;color:#991b1b;border-radius:4px">
+<b>Important:</b> once the form is submitted, it can no longer be changed. Please check everything carefully before clicking <b>Submit</b>.
+</div>
+<p>If you have any technical issues, just reply to this e-mail or let me know.</p>
+<p>Thank you!</p>
+<p style="margin-top:24px;border-top:1px solid #e2e8f0;padding-top:12px">Best regards,<br><b>Vincent Seow</b><br><span style="color:#94a3b8;font-size:12px">Tassure Review System</span></p>
 </div>`
   return { subject, text, html }
 }
