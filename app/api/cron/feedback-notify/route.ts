@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
   if (request.nextUrl.searchParams.get('test') === 'reminder') {
     const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
     const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
-    const today = todayIn(process.env.NOTIFY_TZ || 'Asia/Kuala_Lumpur')
+    const today = todayIn(process.env.NOTIFY_TZ || 'Asia/Singapore')
     const plan = reminderPlanFor(today.getUTCFullYear(), today.getUTCMonth())
     try {
       const m = buildReminderEmail(plan, appUrl)
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ skipped: 'NOTIFY_ENABLED is not true' })
   }
 
-  const tz = process.env.NOTIFY_TZ || 'Asia/Kuala_Lumpur'
+  const tz = process.env.NOTIFY_TZ || 'Asia/Singapore'
   const hour = localHour(tz)
   if (hour < SEND_FROM_HOUR || hour >= SEND_TO_HOUR) {
     return NextResponse.json({ skipped: `outside send window (${hour}h ${tz})` })
