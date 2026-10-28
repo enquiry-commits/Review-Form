@@ -108,6 +108,65 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ test: true, error: e?.message }, { status: 500 })
     }
   }
+  const sp = request.nextUrl.searchParams
+  if (sp.get('status') === '1' || sp.get('send') === 'reminder') {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) return NextResponse.json({ error: 'Supabase service config missing' }, { status: 500 })
+    const db = createClient(url, key, { auth: { persistSession: false } })
+    const tz = process.env.NOTIFY_TZ || 'Asia/Singapore'
+    const today = todayIn(tz)
+    const plan = reminderPlanFor(today.getUTCFullYear(), today.getUTCMonth())
+
+    // ?status=1 — read-only health check of the notification setup
+    if (sp.get('status') === '1') {
+      const reminders = await db.from('monthly_review_reminders').select('period, sent_at, recipients').order('sent_at', { ascending: false }).limit(5)
+      const all = await db.from('feedback_notifications').select('source_table, recipient_email, status, attempts, last_error, last_change_at, notified_at, content_hash, notified_hash, has_content')
+      const rows = (all.data || []) as any[]
+      const pending = rows.filter(r => r.has_content && r.content_hash !== r.notified_hash)
+      const claim = await db.rpc('claim_due_feedback_notifications', { p_limit: 0 })
+      return NextResponse.json({
+        env: {
+          NOTIFY_ENABLED: process.env.NOTIFY_ENABLED || null,
+          NOTIFY_OVERRIDE_TO: process.env.NOTIFY_OVERRIDE_TO || null,
+          REMINDER_ENABLED: process.env.REMINDER_ENABLED || null,
+          SMTP_USER: process.env.SMTP_USER || '(default vincent@tassure.com)',
+          SMTP_PASS: process.env.SMTP_PASS ? 'set' : null,
+          APP_URL: process.env.APP_URL || null,
+        },
+        reminderTable: reminders.error ? `missing: ${reminders.error.message}` : 'ok',
+        remindersSent: reminders.data || [],
+        thisMonthPlan: plan,
+        claimFunction: claim.error ? `error: ${claim.error.message}` : 'ok',
+        feedbackNotifications: {
+          tracked: rows.length,
+          pending: pending.map(r => ({ table: r.source_table, to: r.recipient_email, last_change_at: r.last_change_at, attempts: r.attempts, last_error: r.last_error })),
+          lastSent: rows.filter(r => r.notified_at).sort((x, y) => String(y.notified_at).localeCompare(String(x.notified_at))).slice(0, 5)
+            .map(r => ({ table: r.source_table, to: r.recipient_email, notified_at: r.notified_at })),
+          failed: rows.filter(r => r.last_error).map(r => ({ table: r.source_table, to: r.recipient_email, attempts: r.attempts, last_error: r.last_error })),
+        },
+      })
+    }
+
+    // ?send=reminder&period=YYYY-MM — send this month's reminder to all staff now, once.
+    // Only run when Vincent asks; period must match the current month as a safety check.
+    if (sp.get('period') !== plan.period) {
+      return NextResponse.json({ error: `period must be ${plan.period}` }, { status: 400 })
+    }
+    const sender = (process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()
+    const recipients = ALL_USERS.map(u => u.email).filter(e => e !== sender)
+    const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: plan.period, recipients: recipients.length })
+    if (logErr) return NextResponse.json({ error: `not sent: ${logErr.message}` }, { status: 409 })
+    try {
+      const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
+      await sendMail({ to: recipients, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
+      return NextResponse.json({ sent: recipients.length, period: plan.period, deadline: `${plan.deadlineDay}, ${plan.deadlineLabel}` })
+    } catch (e: any) {
+      await db.from('monthly_review_reminders').delete().eq('period', plan.period)
+      return NextResponse.json({ error: e?.message }, { status: 500 })
+    }
+  }
+
   if (process.env.NOTIFY_ENABLED !== 'true') {
     return NextResponse.json({ skipped: 'NOTIFY_ENABLED is not true' })
   }
@@ -127,10 +186,11 @@ export async function GET(request: NextRequest) {
   const link = `${appUrl}/dashboard?tab=my-submissions`
   const override = process.env.NOTIFY_OVERRIDE_TO || ''
 
-  // Monthly submission reminder: on its send Monday, once (logged in monthly_review_reminders)
+  // Monthly submission reminder: on its send Monday, once (logged in monthly_review_reminders).
+  // Off until REMINDER_ENABLED=true; until then it is only sent by hand (?send=reminder).
   let reminder: any = null
   const plan = reminderDueToday(todayIn(tz))
-  if (plan) {
+  if (plan && process.env.REMINDER_ENABLED === 'true') {
     const key = override ? `${plan.period}:test` : plan.period
     const { data: done } = await db.from('monthly_review_reminders').select('period').eq('period', key).maybeSingle()
     if (!done) {
