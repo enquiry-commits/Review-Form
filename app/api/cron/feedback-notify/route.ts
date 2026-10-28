@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendMail } from '@/lib/notify/mailer'
+import { ALL_USERS } from '@/lib/auth'
+import { buildReminderEmail, reminderDueToday, reminderPlanFor, todayIn } from '@/lib/notify/monthlyReminder'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -73,6 +75,20 @@ export async function GET(request: NextRequest) {
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  // ?test=reminder sends this month's submission reminder to the override (or sender) address only
+  if (request.nextUrl.searchParams.get('test') === 'reminder') {
+    const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
+    const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
+    const today = todayIn(process.env.NOTIFY_TZ || 'Asia/Kuala_Lumpur')
+    const plan = reminderPlanFor(today.getUTCFullYear(), today.getUTCMonth())
+    try {
+      const m = buildReminderEmail(plan, appUrl)
+      await sendMail({ to, ...m, subject: `[TEST] ${m.subject}`, fromName: 'Vincent Seow' })
+      return NextResponse.json({ test: 'reminder', to, plan })
+    } catch (e: any) {
+      return NextResponse.json({ test: 'reminder', error: e?.message }, { status: 500 })
+    }
+  }
   // ?test=1 sends one sample e-mail per form type to the override (or sender) address — no DB access
   if (request.nextUrl.searchParams.get('test') === '1') {
     const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
@@ -110,6 +126,30 @@ export async function GET(request: NextRequest) {
   const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
   const link = `${appUrl}/dashboard?tab=my-submissions`
   const override = process.env.NOTIFY_OVERRIDE_TO || ''
+
+  // Monthly submission reminder: on its send Monday, once (logged in monthly_review_reminders)
+  let reminder: any = null
+  const plan = reminderDueToday(todayIn(tz))
+  if (plan) {
+    const key = override ? `${plan.period}:test` : plan.period
+    const { data: done } = await db.from('monthly_review_reminders').select('period').eq('period', key).maybeSingle()
+    if (!done) {
+      const sender = (process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()
+      const recipients = override ? [override] : ALL_USERS.map(u => u.email).filter(e => e !== sender)
+      const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: key, recipients: recipients.length })
+      if (logErr) {
+        reminder = { period: key, error: logErr.message }
+      } else {
+        try {
+          await sendMail({ to: recipients, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
+          reminder = { period: key, sent: recipients.length }
+        } catch (e: any) {
+          await db.from('monthly_review_reminders').delete().eq('period', key)
+          reminder = { period: key, error: e?.message }
+        }
+      }
+    }
+  }
 
   const { data: claimed, error } = await db.rpc('claim_due_feedback_notifications', { p_limit: 50 })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -152,5 +192,5 @@ export async function GET(request: NextRequest) {
       results.push({ recipient, to, forms, ok: false, error: e?.message })
     }
   }
-  return NextResponse.json({ sent: results.filter(r => r.ok).length, failed: results.filter(r => !r.ok).length, results })
+  return NextResponse.json({ reminder, sent: results.filter(r => r.ok).length, failed: results.filter(r => !r.ok).length, results })
 }

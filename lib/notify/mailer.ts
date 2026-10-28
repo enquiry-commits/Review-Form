@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-export type MailMessage = { to: string; subject: string; html: string; text: string }
+export type MailMessage = { to: string | string[]; subject: string; html: string; text: string; fromName?: string }
 
 // Google Workspace SMTP with an App Password. Swap this one file to change provider.
 export async function sendMail(msg: MailMessage) {
@@ -15,7 +15,7 @@ export async function sendMail(msg: MailMessage) {
     auth: { user, pass },
   })
   await transport.sendMail({
-    from: `"Tassure Review System" <${user}>`,
+    from: `"${msg.fromName || 'Tassure Review System'}" <${user}>`,
     to: msg.to,
     subject: msg.subject,
     html: msg.html,
