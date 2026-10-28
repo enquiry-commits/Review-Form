@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendMail } from '@/lib/notify/mailer'
-import { ALL_USERS } from '@/lib/auth'
-import { buildReminderEmail, reminderDueToday, reminderPlanFor, todayIn } from '@/lib/notify/monthlyReminder'
+import { NO_EMAIL, buildReminderEmail, reminderDueToday, reminderPlanFor, reminderRecipients, todayIn } from '@/lib/notify/monthlyReminder'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -138,6 +137,8 @@ export async function GET(request: NextRequest) {
         remindersSent: reminders.data || [],
         thisMonthPlan: plan,
         claimFunction: claim.error ? `error: ${claim.error.message}` : 'ok',
+        v2Sql: (await db.rpc('mark_feedback_notified', { p_table: '-', p_id: '-' })).error ? 'missing' : 'ok',
+        reminderRecipients: reminderRecipients((process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()),
         feedbackNotifications: {
           tracked: rows.length,
           pending: pending.map(r => ({ table: r.source_table, to: r.recipient_email, last_change_at: r.last_change_at, attempts: r.attempts, last_error: r.last_error })),
@@ -154,13 +155,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: `period must be ${plan.period}` }, { status: 400 })
     }
     const sender = (process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()
-    const recipients = ALL_USERS.map(u => u.email).filter(e => e !== sender)
-    const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: plan.period, recipients: recipients.length })
+    const { to: recipients, cc } = reminderRecipients(sender)
+    const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: plan.period, recipients: recipients.length + cc.length })
     if (logErr) return NextResponse.json({ error: `not sent: ${logErr.message}` }, { status: 409 })
     try {
       const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
-      await sendMail({ to: recipients, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
-      return NextResponse.json({ sent: recipients.length, period: plan.period, deadline: `${plan.deadlineDay}, ${plan.deadlineLabel}` })
+      await sendMail({ to: recipients, cc, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
+      return NextResponse.json({ to: recipients, cc, period: plan.period, deadline: `${plan.deadlineDay}, ${plan.deadlineLabel}` })
     } catch (e: any) {
       await db.from('monthly_review_reminders').delete().eq('period', plan.period)
       return NextResponse.json({ error: e?.message }, { status: 500 })
@@ -195,13 +196,15 @@ export async function GET(request: NextRequest) {
     const { data: done } = await db.from('monthly_review_reminders').select('period').eq('period', key).maybeSingle()
     if (!done) {
       const sender = (process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()
-      const recipients = override ? [override] : ALL_USERS.map(u => u.email).filter(e => e !== sender)
-      const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: key, recipients: recipients.length })
+      const list = reminderRecipients(sender)
+      const recipients = override ? [override] : list.to
+      const cc = override ? [] : list.cc
+      const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: key, recipients: recipients.length + cc.length })
       if (logErr) {
         reminder = { period: key, error: logErr.message }
       } else {
         try {
-          await sendMail({ to: recipients, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
+          await sendMail({ to: recipients, cc, ...buildReminderEmail(plan, appUrl), fromName: 'Vincent Seow' })
           reminder = { period: key, sent: recipients.length }
         } catch (e: any) {
           await db.from('monthly_review_reminders').delete().eq('period', key)
@@ -225,6 +228,10 @@ export async function GET(request: NextRequest) {
 
   const results: { recipient: string; to: string; forms: string[]; ok: boolean; error?: string }[] = []
   for (const [recipient, rows] of byRecipient) {
+    if (NO_EMAIL.has(recipient)) {
+      for (const c of rows) await db.rpc('mark_feedback_notified', { p_table: c.source_table, p_id: c.submission_id })
+      continue
+    }
     const to = override || recipient
     rows.sort((x, y) => order.indexOf(x.source_table) - order.indexOf(y.source_table))
     const forms = rows.map(r => FORM_LABELS[r.source_table] || 'Review')

@@ -6,6 +6,22 @@
 // day, a holiday send date moves forward to the next working day.
 
 import { SG_PUBLIC_HOLIDAYS } from './sgHolidays'
+import { ALL_USERS, DIRECTOR_EMAILS } from '../auth'
+
+// People who no longer receive any review e-mail (monthly reminder or comment notification)
+export const NO_EMAIL = new Set<string>([
+  'minquan@tassure.com', // from the October 2026 cycle
+])
+
+// Monthly reminder: To = everyone who fills in a review, CC = management + Esther.
+export const REMINDER_CC = [...DIRECTOR_EMAILS, 'esther@tassure.com']
+
+export function reminderRecipients(sender: string) {
+  const cc = REMINDER_CC.filter(e => !NO_EMAIL.has(e))
+  const to = ALL_USERS.map(u => u.email)
+    .filter(e => e !== sender && !cc.includes(e) && !NO_EMAIL.has(e))
+  return { to, cc }
+}
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
