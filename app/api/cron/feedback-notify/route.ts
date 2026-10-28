@@ -74,39 +74,6 @@ export async function GET(request: NextRequest) {
   if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  // ?test=reminder sends this month's submission reminder to the override (or sender) address only
-  if (request.nextUrl.searchParams.get('test') === 'reminder') {
-    const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
-    const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
-    const today = todayIn(process.env.NOTIFY_TZ || 'Asia/Singapore')
-    const plan = reminderPlanFor(today.getUTCFullYear(), today.getUTCMonth())
-    try {
-      const m = buildReminderEmail(plan, appUrl)
-      await sendMail({ to, ...m, subject: `[TEST] ${m.subject}`, fromName: 'Vincent Seow' })
-      return NextResponse.json({ test: 'reminder', to, plan })
-    } catch (e: any) {
-      return NextResponse.json({ test: 'reminder', error: e?.message }, { status: 500 })
-    }
-  }
-  // ?test=1 sends one sample e-mail per form type to the override (or sender) address — no DB access
-  if (request.nextUrl.searchParams.get('test') === '1') {
-    const to = process.env.NOTIFY_OVERRIDE_TO || process.env.SMTP_USER || 'vincent@tassure.com'
-    const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
-    const link = `${appUrl}/dashboard?tab=my-submissions`
-    const samples = [
-      buildEmail([
-        { form: 'Self Review', period: 'October 2026', commentCount: 3, hasRating: true },
-        { form: 'Leader Review', period: 'October 2026', commentCount: 2, hasRating: false },
-      ], link),
-      buildEmail([{ form: 'Self Review', period: 'October 2026', commentCount: 3, hasRating: true }], link),
-    ]
-    try {
-      for (const m of samples) await sendMail({ to, ...m, subject: `[TEST] ${m.subject}` })
-      return NextResponse.json({ test: true, sent: samples.length, to })
-    } catch (e: any) {
-      return NextResponse.json({ test: true, error: e?.message }, { status: 500 })
-    }
-  }
   const sp = request.nextUrl.searchParams
   if (sp.get('status') === '1' || sp.get('send') === 'reminder') {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -127,8 +94,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         env: {
           NOTIFY_ENABLED: process.env.NOTIFY_ENABLED || null,
-          NOTIFY_OVERRIDE_TO: process.env.NOTIFY_OVERRIDE_TO || null,
-          REMINDER_ENABLED: process.env.REMINDER_ENABLED || null,
           SMTP_USER: process.env.SMTP_USER || '(default vincent@tassure.com)',
           SMTP_PASS: process.env.SMTP_PASS ? 'set' : null,
           APP_URL: process.env.APP_URL || null,
@@ -185,20 +150,18 @@ export async function GET(request: NextRequest) {
 
   const appUrl = (process.env.APP_URL || request.nextUrl.origin).replace(/\/$/, '')
   const link = `${appUrl}/dashboard?tab=my-submissions`
-  const override = process.env.NOTIFY_OVERRIDE_TO || ''
 
   // Monthly submission reminder: on its send Monday, once (logged in monthly_review_reminders).
-  // Off until REMINDER_ENABLED=true; until then it is only sent by hand (?send=reminder).
   let reminder: any = null
   const plan = reminderDueToday(todayIn(tz))
-  if (plan && process.env.REMINDER_ENABLED === 'true') {
-    const key = override ? `${plan.period}:test` : plan.period
+  if (plan) {
+    const key = plan.period
     const { data: done } = await db.from('monthly_review_reminders').select('period').eq('period', key).maybeSingle()
     if (!done) {
       const sender = (process.env.SMTP_USER || 'vincent@tassure.com').toLowerCase()
       const list = reminderRecipients(sender)
-      const recipients = override ? [override] : list.to
-      const cc = override ? [] : list.cc
+      const recipients = list.to
+      const cc = list.cc
       const { error: logErr } = await db.from('monthly_review_reminders').insert({ period: key, recipients: recipients.length + cc.length })
       if (logErr) {
         reminder = { period: key, error: logErr.message }
@@ -232,7 +195,7 @@ export async function GET(request: NextRequest) {
       for (const c of rows) await db.rpc('mark_feedback_notified', { p_table: c.source_table, p_id: c.submission_id })
       continue
     }
-    const to = override || recipient
+    const to = recipient
     rows.sort((x, y) => order.indexOf(x.source_table) - order.indexOf(y.source_table))
     const forms = rows.map(r => FORM_LABELS[r.source_table] || 'Review')
     try {
