@@ -40,24 +40,30 @@ function buildEmail(items: FeedbackItem[], link: string) {
     return p.join(' and ')
   }
   const forms = [...new Set(items.map(i => i.form))]
-  const subject = `Your ${forms.join(' & ')} has new Director comments`
+  const subject = `[Tassure Review] Your ${forms.join(' & ')} has new Director comments`
   const line = (it: FeedbackItem) => `${it.form}${it.period ? ` (${it.period})` : ''}${detail(it) ? ` — ${detail(it)}` : ''}`
   const text =
 `Hi,
 
+This is a notification from the Tassure Review System.
+
 A Director has left comments on:
 ${items.map(i => `- ${line(i)}`).join('\n')}
 
-Please log in to view them: ${link}
+Please click the link below to log in and read them:
+👉 ${link}
 
-— Tassure Review`
+— Tassure Review System
+This is an automated message. Please do not reply to this e-mail.`
   const html =
 `<div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;color:#1e293b;line-height:1.6">
+<div style="font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#64748b;padding-bottom:10px;border-bottom:2px solid #1e3a5f;margin-bottom:16px">Tassure Review System</div>
 <p>Hi,</p>
 <p>A Director has left comments on:</p>
 <ul style="padding-left:20px;margin:0 0 16px">${items.map(i => `<li style="margin:2px 0">${line(i).replace(i.form, `<b>${i.form}</b>`)}</li>`).join('')}</ul>
-<p><a href="${link}" style="display:inline-block;padding:10px 20px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">View comments</a></p>
-<p style="color:#94a3b8;font-size:12px;margin-top:24px">— Tassure Review</p>
+<p style="margin-bottom:8px">Please click the button below to log in and read them:</p>
+<p><a href="${link}" style="display:inline-block;padding:11px 22px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:8px;font-weight:600">👉 View comments</a></p>
+<p style="color:#94a3b8;font-size:12px;margin-top:24px;border-top:1px solid #e2e8f0;padding-top:12px">— Tassure Review System<br>This is an automated message. Please do not reply to this e-mail.</p>
 </div>`
   return { subject, text, html }
 }

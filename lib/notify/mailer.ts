@@ -15,7 +15,7 @@ export async function sendMail(msg: MailMessage) {
     auth: { user, pass },
   })
   await transport.sendMail({
-    from: `"Tassure Review" <${user}>`,
+    from: `"Tassure Review System" <${user}>`,
     to: msg.to,
     subject: msg.subject,
     html: msg.html,
