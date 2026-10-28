@@ -236,9 +236,13 @@ export async function GET(request: NextRequest) {
       }
       await sendMail({ to, ...buildEmail(items, link) })
       for (const c of rows) {
-        await db.from('feedback_notifications')
-          .update({ notified_hash: c.claimed_hash, notified_at: new Date().toISOString(), status: 'idle', attempts: 0, last_error: null })
-          .eq('source_table', c.source_table).eq('submission_id', c.submission_id)
+        // v2 SQL: the claimed content becomes the new baseline; fall back to the hash-only update before v2 is run
+        const { error: markErr } = await db.rpc('mark_feedback_notified', { p_table: c.source_table, p_id: c.submission_id })
+        if (markErr) {
+          await db.from('feedback_notifications')
+            .update({ notified_hash: c.claimed_hash, notified_at: new Date().toISOString(), status: 'idle', attempts: 0, last_error: null })
+            .eq('source_table', c.source_table).eq('submission_id', c.submission_id)
+        }
       }
       results.push({ recipient, to, forms, ok: true })
     } catch (e: any) {
